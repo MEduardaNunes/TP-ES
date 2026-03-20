@@ -1,17 +1,17 @@
 # Trabalho Prático de Engenharia de Software
 
 ## Membros e papéis
-Beatriz Camilly Gulart Pereira: fullstack
-Maria Eduarda Nunes e Carvalho de Vasconcelos Costa: fullstack
+- Beatriz Camilly Gulart Pereira: fullstack
+- Maria Eduarda Nunes e Carvalho de Vasconcelos Costa: fullstack
 
 ## Objetivo do sistema
 O objetivo do sistema é criar um calendário onde o aluno possa acessar todas as aulas, os trabalhos e as provas de suas turmas, que são atualizadas em tempo real pelos professores de cada matéria.
 
 ## Tecnologias
-Linguagem: python
-Framework: django
-Banco de dados: sqlite
-Agentes de IA:
+- Linguagem: python
+- Framework: django
+- Banco de dados: sqlite
+- Agentes de IA:
 
 ## Histórias de usuário
 1. Como usuário do sistema, eu gostaria de me cadastrar/editar/visualizar/deletar meu usuário no sistema como professor ou aluno
