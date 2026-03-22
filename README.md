@@ -7,7 +7,7 @@
 - Alessandro Mesa Teppa: fullstack
 
 ## Objetivo do sistema
-O objetivo do sistema é criar um calendário onde o aluno possa acessar todas as aulas, os trabalhos e as provas de suas turmas, que são atualizadas em tempo real pelos professores de cada matéria.
+O objetivo do sistema é criar um calendário que permita a organização de atividades acadêmicas, profissionais e pessoais. Para isso, ele possibilitará a criação de grupos (como turmas, equipes ou outros), com diferentes níveis de permissão entre administradores e participantes. O sistema oferecerá gerenciamento de eventos (aulas, reuniões, tarefas, provas, etc.), bem como acompanhamento de progresso, priorização de atividades e organização visual por cores, o que facilitará a identificação e o planejamento das atividades ao longo do tempo.
 
 ## Tecnologias
 - Linguagem: python
