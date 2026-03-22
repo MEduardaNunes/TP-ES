@@ -3,6 +3,7 @@
 ## Membros e papéis
 - Beatriz Camilly Gulart Pereira: fullstack
 - Maria Eduarda Nunes e Carvalho de Vasconcelos Costa: fullstack
+- Isabela Fernandes Guerra de Morais: fullstack
 
 ## Objetivo do sistema
 O objetivo do sistema é criar um calendário onde o aluno possa acessar todas as aulas, os trabalhos e as provas de suas turmas, que são atualizadas em tempo real pelos professores de cada matéria.
