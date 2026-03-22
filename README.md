@@ -13,7 +13,7 @@ O objetivo do sistema é criar um calendário que permita a organização de ati
 - Linguagem: python
 - Framework: django
 - Banco de dados: sqlite
-- Agentes de IA:
+- Agentes de IA: GitHub Copilot e Codex
 
 ## Histórias de usuário
 1. Como usuário do sistema, eu gostaria de me cadastrar/editar/visualizar/deletar meu usuário no sistema como professor ou aluno
