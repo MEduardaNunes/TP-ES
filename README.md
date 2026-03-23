@@ -22,8 +22,9 @@ O objetivo do sistema é criar um calendário que permita a organização de ati
 4. Como administrador, eu gostaria de cadastrar/visualizar/deletar participantes de uma agenda
 5. Como participante, eu gostaria de visualizar minhas agendas e seus eventos
 6. Como participante, eu gostaria de dar check em eventos já realizados/estudados, como provas, listas e trabalhos
-7. Como participante, eu gostaria de filtrar meus eventos de acordo com: a agenda, se é aula/trabalho/prova, e se tem check ou não
-8. Como participante, eu gostaria de conseguir organizar meus estudos para disciplinas, entregas de trabalho e provas em matrizes de prioridade (urgente e importante/ urgente / importante / não urgente e nem importante)
-9. Como usuário, para me motivar gostaria de personalizar a interface do sistema para ser mais de acordo com minha personalidade (poder alterar paleta de cores e adicionar meus próprios ícones)
-10. Como usuário, eu quero que as listas de atividades tenham um campo de notas, para que eu possa registrar links, ideias ou informações necessárias para a execução da tarefa.
-11. Como usuário, eu quero que, ao focar em uma disciplina, os itens internos ganhem cores específicas (ex: Prova = Vermelho, Lista = Laranja, Trabalho = Cinza, Estudo = Preto), para diferenciar as prioridades acadêmicas visualmente.
+7. Como participante, eu gostaria de criar filtros para os meus eventos, como agenda, tipo (aula, trabalho, prova, reunião, etc.) e status (com check ou sem check)
+8. Como participante, eu gostaria de filtrar meus eventos com base nos filtros definidos, para visualizar apenas as atividades relevantes
+9. Como participante, eu gostaria de conseguir organizar meus estudos para disciplinas, entregas de trabalho e provas em matrizes de prioridade (urgente e importante/ urgente / importante / não urgente e nem importante)
+10. Como usuário, para me motivar gostaria de personalizar a interface do sistema para ser mais de acordo com minha personalidade (poder alterar paleta de cores e adicionar meus próprios ícones)
+11. Como usuário, eu quero que as listas de atividades tenham um campo de notas, para que eu possa registrar links, ideias ou informações necessárias para a execução da tarefa.
+12. Como usuário, eu quero que, ao focar em uma disciplina, os itens internos ganhem cores específicas (ex: Prova = Vermelho, Lista = Laranja, Trabalho = Cinza, Estudo = Preto), para diferenciar as prioridades acadêmicas visualmente.
