@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planify - Espaço do Usuário</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <h1>Espaço do Usuário</h1>
+        <p>Aqui você vê e edita seus dados de conta. As ações ainda são mockadas por enquanto.</p>
+      </header>
+      <div class="user-grid">
+        <section class="user-card">
+          <h2>Dados da Conta</h2>
+          <dl class="user-info">
+            <dt>Nome</dt>
+            <dd>Duda Silva</dd>
+            <dt>Senha</dt>
+            <dd>••••••••</dd>
+          </dl>
+        </section>
+        <section class="user-card">
+          <h2>Editar informações</h2>
+          <form method="post" action="#">
+            <label for="user-name">Nome</label>
+            <input type="text" id="user-name" name="name" value="Duda Silva" />
+            <label for="user-password">Nova senha</label>
+            <input type="password" id="user-password" name="password" placeholder="Nova senha" />
+            <label for="user-password-confirm">Confirmar nova senha</label>
+            <input type="password" id="user-password-confirm" name="password_confirm" placeholder="Confirme sua senha" required />
+            <button type="submit">Salvar alterações</button>
+          </form>
+        </section>
+        <section class="user-card user-actions">
+          <a class="button button--secondary button--small" href="/calendar/">Voltar</a>
+          <button type="button" class="button button--danger">Excluir usuário</button>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

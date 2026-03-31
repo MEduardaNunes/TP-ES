@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from planify.views import home
+from planify.views import home, calendar, user_space
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
+    path('calendar/', calendar),
+    path('user/', user_space),
 ]
