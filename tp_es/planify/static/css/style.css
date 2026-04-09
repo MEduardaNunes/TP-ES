@@ -346,47 +346,41 @@ button.button--secondary:hover {
   line-height: 1.6;
 }
 
-.message-popup {
-  position: fixed;
-  top: 22px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-14px);
-  z-index: 1000;
-  min-width: 280px;
-  max-width: calc(100% - 40px);
-  padding: 16px 22px;
-  border-radius: 18px;
-  color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-align: center;
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.message-popup--visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  pointer-events: auto;
-}
-
-.message-popup--hidden {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-14px);
-}
-
-.message-popup--success {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-}
-
-.message-popup--error {
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-}
-
 @media (min-width: 720px) {
   .forms-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 6px;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  transition: opacity 0.5s ease;
+}
+
+.toast.success {
+  background: #5fff64;
+}
+
+.toast.error {
+  background: #ff5144;
+}
+
+.toast.warning {
+  background: hsl(36, 91%, 58%);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
   }
 }

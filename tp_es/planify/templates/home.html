@@ -9,35 +9,40 @@
   </head>
   <body>
     <div class="page-shell">
+
       <header>
         <h1>Planify</h1>
-        <p>Login ou cadastro mockado. Nome e senha apenas, backend ainda não implementado.</p>
       </header>
+
       {% if messages %}
-        <div id="message-popup-container">
-          {% for message in messages %}
-            <div class="message-popup message-popup--visible{% if 'error' in message.tags %} message-popup--error{% elif 'success' in message.tags %} message-popup--success{% endif %}">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
+        {% for message in messages %}
+          <div class="toast {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
       {% endif %}
 
+      <script>
+        setTimeout(() => {
+          document.querySelectorAll('.toast').forEach(el => {
+            el.style.opacity = "0";
+            setTimeout(() => el.remove(), 500);
+          });
+        }, 3000);
+      </script>
+
       <main class="forms-grid">
+        
         <section class="panel">
           <h2>Já sou usuário</h2>
           <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
-
             <label for="login-name">Nome</label>
             <input type="text" id="login-name" name="name" placeholder="Seu nome" required />
-
             <label for="login-password">Senha</label>
             <input type="password" id="login-password" name="password" placeholder="Senha" required />
-
             <button class="button" type="submit">Entrar</button>
           </form>
-          <p class="hint">Este formulário é somente de demonstração; a validação real será feita depois.</p>
         </section>
 
         <section class="panel panel--secondary">
@@ -46,36 +51,15 @@
             {% csrf_token %}
             <label for="register-name">Nome</label>
             <input type="text" id="register-name" name="name" placeholder="Seu nome" required />
-
             <label for="register-password">Senha</label>
             <input type="password" id="register-password" name="password" placeholder="Senha" required />
-
             <label for="register-password-confirm">Confirmar senha</label>
             <input type="password" id="register-password-confirm" name="password_confirm" placeholder="Confirme sua senha" required />
-
             <button type="submit">Cadastrar</button>
           </form>
-          <p class="hint">Cadastro mockado: os dados não serão salvos até o backend estar pronto.</p>
         </section>
+
       </main>
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var popups = document.querySelectorAll(".message-popup");
-        if (!popups.length) return;
-
-        popups.forEach(function (popup) {
-          window.setTimeout(function () {
-            popup.classList.add("message-popup--hidden");
-          }, 7000);
-
-          popup.addEventListener("transitionend", function () {
-            if (popup.classList.contains("message-popup--hidden")) {
-              popup.style.display = "none";
-            }
-          });
-        });
-      });
-    </script>
   </body>
 </html>
