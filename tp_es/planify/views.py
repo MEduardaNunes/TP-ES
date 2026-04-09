@@ -89,3 +89,12 @@ def edit_user(request):
         return redirect("user_space")
     
     return redirect("user_space")
+
+def delete_user(request):
+    if request.method == "POST":
+        user = request.user
+        user.delete()
+        messages.success(request, "Usuário deletado com sucesso")
+        return redirect("home")
+    
+    return redirect("user_space")
