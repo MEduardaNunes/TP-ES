@@ -19,11 +19,11 @@ def register(request):
         return redirect("calendar")
     
     if request.method == "POST":
-        name = request.POST.get("name")
+        username = request.POST.get("username")
         password = request.POST.get("password")
         password_confirm = request.POST.get("password_confirm")
 
-        if User.objects.filter(username=name).exists():
+        if User.objects.filter(username=username).exists():
             messages.error(request, "Nome de usuário já existe")
             return redirect("home") 
 
@@ -31,7 +31,7 @@ def register(request):
             messages.error(request, "As senhas não coincidem")
             return redirect("home")
         
-        User.objects.create_user(username=name, password=password)
+        User.objects.create_user(username=username, password=password)
         messages.success(request, "Usuário criado com sucesso")
     
     return redirect("home")
@@ -41,9 +41,9 @@ def login_user(request):
         return redirect("calendar")
     
     if request.method == "POST":
-        name = request.POST.get("name")
+        username = request.POST.get("username")
         password = request.POST.get("password")
-        user = authenticate(request, username=name, password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
@@ -61,11 +61,11 @@ def logout_user(request):
 
 def edit_user(request):
     if request.method == "POST":
-        name = request.POST.get("name")
+        username = request.POST.get("username")
         password = request.POST.get("password")
         password_confirm = request.POST.get("password_confirm")
 
-        if User.objects.filter(username=name).exclude(id=request.user.id).exists():
+        if User.objects.filter(username=username).exclude(id=request.user.id).exists():
             messages.error(request, "Nome de usuário já existe")
             return redirect("user_space") 
 
@@ -74,7 +74,7 @@ def edit_user(request):
             return redirect("user_space")
         
         user = request.user
-        user.username = name
+        user.username = username
         if password:
             user.set_password(password)
         user.save()

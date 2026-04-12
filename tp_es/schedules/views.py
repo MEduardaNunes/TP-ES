@@ -9,7 +9,9 @@ from .models import Schedule, Participant, Event
 def calendar(request):
     """Lista todas as agendas do usuário logado."""
     participations = request.user.participations.select_related("schedule").all()
-    return render(request, "schedules/calendar.html", {"participations": participations})
+    # Mock de eventos para demonstração
+    # return render(request, "calendar.html", {"participations": participations})
+    return render(request, "calendar.html")
 
 def get_participant(user, schedule):
     try:

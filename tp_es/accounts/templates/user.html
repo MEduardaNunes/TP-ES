@@ -57,7 +57,7 @@
         </section>
 
         <section class="user-card user-actions">
-          <a class="button button--secondary button--small" href="/calendar/">Voltar</a>
+          <a class="button button--secondary button--small" href="/schedule/calendar/">Voltar</a>
           <form method="post" action="{% url 'delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')">
             {% csrf_token %}
             <button type="submit" class="button button--danger">Excluir usuário</button>
