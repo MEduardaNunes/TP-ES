@@ -16,9 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from planify.views import home
+from planify.views import home, calendar, user_space, register, login_user, logout_user, edit_user, delete_user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home),
+    path('', home, name='home'),
+    path('calendar/', calendar, name='calendar'),
+    path('user/', user_space, name='user_space'),
+    path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
+    path("edit-user/", edit_user, name="edit_user"),
+    path("delete-user/", delete_user, name="delete_user"),
 ]

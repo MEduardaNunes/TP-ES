@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planify — Calendário</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <h1>Calendário do Mês</h1>
+        <p>Uma visão leve das datas, com eventos mockados e navegação clara.</p>
+      </header>
+
+      <div class="home-toolbar">
+        <a class="button button--icon" href="/user/">
+          <span class="button__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+              <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4 0-7 2-7 4v1h14v-1c0-2-3-4-7-4Z" />
+            </svg>
+          </span>
+          Acesse o espaço de usuário
+        </a>
+        <a class="button button--secondary" href="/logout/">
+          Sair
+        </a>
+      </div>
+
+      <section class="calendar-shell">
+        <div class="calendar-header">
+          <div>
+            <span class="calendar-month">Abril 2026</span>
+            <p class="calendar-subtitle">Planeje seu mês com tranquilidade.</p>
+          </div>
+          <a class="button button--secondary button--small" href="/">Voltar</a>
+        </div>
+
+        <div class="weekday-row">
+          <span>Dom</span>
+          <span>Seg</span>
+          <span>Ter</span>
+          <span>Qua</span>
+          <span>Qui</span>
+          <span>Sex</span>
+          <span>Sáb</span>
+        </div>
+
+        <div class="days-grid">
+          <span class="day-cell empty"></span>
+          <span class="day-cell empty"></span>
+          <span class="day-cell empty"></span>
+          <span class="day-cell"><span class="day-number">1</span></span>
+          <span class="day-cell"><span class="day-number">2</span></span>
+          <span class="day-cell"><span class="day-number">3</span></span>
+          <span class="day-cell"><span class="day-number">4</span></span>
+          <span class="day-cell"><span class="day-number">5</span></span>
+          <span class="day-cell"><span class="day-number">6</span></span>
+          <span class="day-cell"><span class="day-number">7</span></span>
+          <span class="day-cell day-cell--event"><span class="day-number">8</span><span class="day-event">Reunião de planejamento</span></span>
+          <span class="day-cell"><span class="day-number">9</span></span>
+          <span class="day-cell"><span class="day-number">10</span></span>
+          <span class="day-cell"><span class="day-number">11</span></span>
+          <span class="day-cell"><span class="day-number">12</span></span>
+          <span class="day-cell"><span class="day-number">13</span></span>
+          <span class="day-cell day-cell--today"><span class="day-number">14</span><span class="day-event">Evento em destaque</span></span>
+          <span class="day-cell"><span class="day-number">15</span></span>
+          <span class="day-cell"><span class="day-number">16</span></span>
+          <span class="day-cell"><span class="day-number">17</span></span>
+          <span class="day-cell"><span class="day-number">18</span></span>
+          <span class="day-cell"><span class="day-number">19</span></span>
+          <span class="day-cell"><span class="day-number">20</span></span>
+          <span class="day-cell"><span class="day-number">21</span></span>
+          <span class="day-cell"><span class="day-number">22</span></span>
+          <span class="day-cell day-cell--event"><span class="day-number">23</span><span class="day-event">Entrega de mock</span></span>
+          <span class="day-cell"><span class="day-number">24</span></span>
+          <span class="day-cell"><span class="day-number">25</span></span>
+          <span class="day-cell"><span class="day-number">26</span></span>
+          <span class="day-cell"><span class="day-number">27</span></span>
+          <span class="day-cell"><span class="day-number">28</span></span>
+          <span class="day-cell"><span class="day-number">29</span></span>
+          <span class="day-cell"><span class="day-number">30</span></span>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
