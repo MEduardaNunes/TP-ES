@@ -137,3 +137,62 @@ def remove_participant(request, schedule, participant):
     messages.success(request, "Participante removido.")
     return redirect("view_schedule", schedule_id=schedule.id)
 
+@admin_required
+def create_event(request, schedule, participant):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        event_type = request.POST.get("type")
+        date = request.POST.get("date")
+
+        if not title or not event_type or not date:
+            messages.error(request, "Preencha todos os campos obrigatórios.")
+            return redirect("create_event", schedule_id=schedule.id)
+
+        Event.objects.create(
+            schedule=schedule,
+            title=title,
+            type=event_type,
+            date=date,
+            start_time=request.POST.get("start_time") or None,
+            end_time=request.POST.get("end_time") or None,
+            notes=request.POST.get("notes", ""),
+            color=request.POST.get("color", ""),
+        )
+        messages.success(request, "Evento criado com sucesso.")
+        return redirect("view_schedule", schedule_id=schedule.id)
+
+    return render(request, "schedules/create_event.html", {
+        "schedule": schedule,
+        "event_types": Event.Type.choices
+    })
+    
+@admin_required
+def edit_event(request, schedule, participant, event_id):
+    event = get_object_or_404(Event, id=event_id, schedule=schedule)
+
+    if request.method == "POST":
+        event.title = request.POST.get("title", event.title)
+        event.type = request.POST.get("type", event.type)
+        event.date = request.POST.get("date", event.date)
+        event.start_time = request.POST.get("start_time") or None
+        event.end_time = request.POST.get("end_time") or None
+        event.notes = request.POST.get("notes", event.notes)
+        event.color = request.POST.get("color", event.color)
+        event.save()
+        messages.success(request, "Evento atualizado com sucesso.")
+        return redirect("view_schedule", schedule_id=schedule.id)
+
+    return render(request, "schedules/edit_event.html", {
+        "schedule": schedule,
+        "event": event,
+        "event_types": Event.Type.choices
+    })
+    
+@admin_required
+@require_POST
+def delete_event(request, schedule, participant, event_id):
+    event = get_object_or_404(Event, id=event_id, schedule=schedule)
+    event.delete()
+    messages.success(request, "Evento deletado com sucesso.")
+    return redirect("view_schedule", schedule_id=schedule.id)
+
