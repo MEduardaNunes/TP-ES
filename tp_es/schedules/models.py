@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-class Schedule(models.Models):
+class Schedule(models.Model):
     name = models.CharField(max_length=200)
     color = models.CharField(max_length=7, default="#6366f1")
     created_at = models.DateTimeField(auto_now_add=True)
