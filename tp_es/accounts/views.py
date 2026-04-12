@@ -5,6 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 
+def home(request):
+    if request.user.is_authenticated:
+        return redirect("calendar")
+    return render(request, "home.html")
 
 @login_required
 def user_space(request):

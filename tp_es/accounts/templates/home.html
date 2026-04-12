@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Planify — Login / Cadastro</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
   </head>
   <body>
     <div class="page-shell">
@@ -38,7 +39,7 @@
           <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             <label for="login-name">Nome</label>
-            <input type="text" id="login-name" name="name" placeholder="Seu nome" required />
+            <input type="text" id="login-name" name="username" placeholder="Seu nome" required />
             <label for="login-password">Senha</label>
             <input type="password" id="login-password" name="password" placeholder="Senha" required />
             <button class="button" type="submit">Entrar</button>
@@ -50,7 +51,7 @@
           <form method="POST" action="{% url 'register' %}">
             {% csrf_token %}
             <label for="register-name">Nome</label>
-            <input type="text" id="register-name" name="name" placeholder="Seu nome" required />
+            <input type="text" id="register-name" name="username" placeholder="Seu nome" required />
             <label for="register-password">Senha</label>
             <input type="password" id="register-password" name="password" placeholder="Senha" required />
             <label for="register-password-confirm">Confirmar senha</label>
