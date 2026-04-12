@@ -3,14 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
-from .models import Schedule, Participant
-
-def home(request):
-    return render(request, "home.html")
+from .models import Schedule, Participant, Event
 
 @login_required
 def calendar(request):
-    return render(request, "calendar.html")
+    """Lista todas as agendas do usuário logado."""
+    participations = request.user.participations.select_related("schedule").all()
+    return render(request, "schedules/calendar.html", {"participations": participations})
 
 def get_participant(user, schedule):
     try:
@@ -41,13 +40,6 @@ def admin_required(view_func):
             return redirect("calendar")
         return view_func(request, schedule, participant, *args, **kwargs)
     return wrapper
-
-
-@login_required
-def calendar(request):
-    """Lista todas as agendas do usuário logado."""
-    participations = request.user.participations.select_related("schedule").all()
-    return render(request, "schedules/calendar.html", {"participations": participations})
 
 @login_required
 def create_schedule(request):

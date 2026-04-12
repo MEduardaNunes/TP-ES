@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Planify - Espaço do Usuário</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
   </head>
   <body>
     <div class="page-shell">
@@ -46,7 +47,7 @@
           <form method="post" action="{% url 'edit_user' %}">
             {% csrf_token %}
             <label for="user-name">Nome</label>
-            <input type="text" id="user-name" name="name" value="{{ user.username }}" />
+            <input type="text" id="user-name" name="username" value="{{ user.username }}" />
             <label for="user-password">Nova senha</label>
             <input type="password" id="user-password" name="password" placeholder="Nova senha" />
             <label for="user-password-confirm">Confirmar nova senha</label>

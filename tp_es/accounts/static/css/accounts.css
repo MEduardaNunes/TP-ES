@@ -1,0 +1,47 @@
+.forms-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+} 
+
+form {
+  display: grid;
+  gap: 18px;
+}
+
+.user-card {
+  padding: 28px;
+  border-radius: 26px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+  margin-bottom: 26px;
+} 
+
+.user-grid {
+  display: grid;
+  gap: 24px;
+} 
+
+.user-info dt {
+  font-weight: 700;
+  color: #334155;
+} 
+
+.user-info dd {
+  margin: 0 0 18px;
+  color: #475569;
+}
+
+.user-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.user-actions .button,
+.user-actions button {
+  width: auto;
+  min-width: 180px;
+}
