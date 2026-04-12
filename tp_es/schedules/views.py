@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
 from .models import Schedule, Participant
 
@@ -95,3 +96,44 @@ def view_schedule(request, schedule, participant):
         "participant": participant,
         "events": events,
     })
+    
+@admin_required
+def add_participant(request, schedule, participant):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        User = get_user_model()
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            messages.error(request, "Usuário não encontrado.")
+            return redirect("view_schedule", schedule_id=schedule.id)
+
+        if schedule.participants.filter(user=user).exists():
+            messages.error(request, "Usuário já é participante.")
+            return redirect("view_schedule", schedule_id=schedule.id)
+
+        Participant.objects.create(
+            schedule=schedule,
+            user=user,
+            role=Participant.Role.MEMBER
+        )
+        messages.success(request, "Participante adicionado.")
+        return redirect("view_schedule", schedule_id=schedule.id)
+
+    return redirect("view_schedule", schedule_id=schedule.id)
+
+@admin_required
+@require_POST
+def remove_participant(request, schedule, participant):
+    user_id = request.POST.get("user_id")
+    target = get_object_or_404(Participant, schedule=schedule, user_id=user_id)
+
+    if target.is_admin:
+        messages.error(request, "Não é possível remover um administrador.")
+        return redirect("view_schedule", schedule_id=schedule.id)
+
+    target.delete()
+    messages.success(request, "Participante removido.")
+    return redirect("view_schedule", schedule_id=schedule.id)
+
