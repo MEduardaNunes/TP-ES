@@ -6,14 +6,6 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 
 
-# Create your views here.
-def home(request):
-    return render(request, "home.html")
-
-@login_required
-def calendar(request):
-    return render(request, "calendar.html")
-
 @login_required
 def user_space(request):
     return render(request, "user.html")

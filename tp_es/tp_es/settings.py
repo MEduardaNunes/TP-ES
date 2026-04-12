@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
-    'schedules.app.SchedulesConfig',
+    'schedules.apps.SchedulesConfig',
 ]
 
 MIDDLEWARE = [
