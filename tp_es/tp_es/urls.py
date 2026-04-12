@@ -15,17 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from planify.views import home, calendar, user_space, register, login_user, logout_user, edit_user, delete_user
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home'),
-    path('calendar/', calendar, name='calendar'),
-    path('user/', user_space, name='user_space'),
-    path("register/", register, name="register"),
-    path("login/", login_user, name="login"),
-    path("logout/", logout_user, name="logout"),
-    path("edit-user/", edit_user, name="edit_user"),
-    path("delete-user/", delete_user, name="delete_user"),
+    path('accounts/', include('accounts.urls')), 
+    path('', include('schedules.urls')),      
 ]
