@@ -268,3 +268,13 @@ form {
   display: grid;
   gap: 18px;
 }
+
+.center-line {
+  display: flex;
+  justify-content: center;
+  margin: 1px;
+}
+
+.margin-bottom {
+  padding-bottom: 1px;
+}

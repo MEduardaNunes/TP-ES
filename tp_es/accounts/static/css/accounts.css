@@ -34,9 +34,3 @@
   width: auto;
   min-width: 180px;
 }
-
-.center-line {
-  display: flex;
-  justify-content: center;
-  margin: 1px;
-}
