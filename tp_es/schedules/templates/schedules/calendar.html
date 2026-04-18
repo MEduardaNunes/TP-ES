@@ -1,0 +1,85 @@
+{% load static %}
+{% load schedules_extras %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planify — Calendário</title>
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
+  <link rel="stylesheet" href="{% static 'schedules/calendar.css' %}" />
+  <link rel="stylesheet" href="{% static 'schedules/sidebar.css' %}" />
+</head>
+
+<body>
+  {% include "schedules/calendar_sidebar.html" %}
+  <div class="content">
+    <div class="page-shell">
+      <!--<div class="home-toolbar">
+        <a class="button button--icon" href="/accounts/user/">
+          Acesse o espaço de usuário
+        </a>
+
+        <a class="button button--secondary" href="/accounts/logout/">
+          Sair
+        </a>
+      </div>-->
+
+      <div class="main-calendar-layout">
+
+        <section class="calendar-shell">
+
+          <div class="calendar-header">
+            <div>
+              <span class="calendar-month">{{ month_name }} {{ year }}</span>
+            </div>
+
+            <div class="calendar-nav">
+              <a class="button button--secondary button--small"
+                href="?mes={{ prev_month }}&ano={{ prev_year }}">
+                ← Anterior
+              </a>
+
+              <a class="button button--secondary button--small"
+                href="?mes={{ next_month }}&ano={{ next_year }}">
+                Próximo →
+              </a>
+            </div>
+          </div>
+
+          <div class="weekday-row">
+            <span>Dom</span><span>Seg</span><span>Ter</span>
+            <span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+          </div>
+
+          <div class="days-grid">
+            {% for day in calendar_days %}
+              {% if day == 0 %}
+                <span class="day-cell empty"></span>
+              {% else %}
+                {% with day_string=day|stringformat:"s" %}
+                <span class="day-cell {% if day == today_day and month == today_month and year == today_year %}day-cell--today{% endif %}">
+                  
+                  <span class="day-number">{{ day }}</span>
+
+                  {% if day_string in activities_by_day %}
+                    {% for activity in activities_by_day|get_item:day_string %}
+                      <span class="day-event">{{ activity.title }}</span>
+                    {% endfor %}
+                  {% endif %}
+
+                </span>
+                {% endwith %}
+              {% endif %}
+            {% endfor %}
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

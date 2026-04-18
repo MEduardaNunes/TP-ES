@@ -1,0 +1,137 @@
+.content {
+  margin-left: 85px;
+  transition: margin-left 0.3s ease;
+}
+
+body:has(.sidebar:hover) .content {
+  margin-left: 260px;
+}
+
+.sidebar:hover ~ .content {
+  margin-left: 260px;
+}
+
+.page-shell {
+  margin-left: 85px;
+  padding: 32px;
+  min-height: 100vh;
+  transition: margin-left 0.4s ease;
+}
+
+.main-calendar-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.calendar-shell {
+  flex: 1;
+  background: #fff;
+  padding: 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.calendar-month {
+  font-size: clamp(1.6rem, 2vw, 2.25rem);
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.calendar-subtitle {
+  margin: 10px 0 0;
+  color: #475569;
+}
+
+.calendar-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.weekday-row,
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.weekday-row {
+  padding: 0 10px;
+  margin-bottom: 14px;
+  color: #64748b;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
+
+.day-cell {
+  min-height: 90px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.day-cell.empty {
+  background: transparent;
+}
+
+.day-cell--today {
+  background: #e0f2fe;
+}
+
+.day-cell--event {
+  border-left: 3px solid #6366f1;
+}
+
+.day-number {
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.day-event {
+  font-size: 0.75rem;
+  color: #6366f1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .page-shell {
+    margin-left: 0;
+    padding: 16px;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar:hover {
+    transform: translateX(0);
+  }
+  
+  .main-calendar-layout {
+    flex-direction: column;
+  }
+  
+  .day-cell {
+    min-height: 60px;
+    padding: 6px;
+  }
+}

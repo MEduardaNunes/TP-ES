@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planify - Espaço do Usuário</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <h1>Espaço do Usuário</h1>
+        <p>Aqui você vê e edita seus dados de conta.</p>
+      </header>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <script>
+        setTimeout(() => {
+          document.querySelectorAll('.toast').forEach(el => {
+            el.style.opacity = "0";
+            setTimeout(() => el.remove(), 500);
+          });
+        }, 3000);
+      </script>
+
+      <div class="user-grid">
+
+        <section class="user-card">
+          <h2>Dados da Conta</h2>
+          <dl class="user-info">
+            <dt>Nome</dt>
+            <dd>{{ user.username }}</dd>
+          </dl>
+        </section>
+
+        <section class="user-card">
+          <h2>Editar informações</h2>
+          <form method="post" action="{% url 'edit_user' %}">
+            {% csrf_token %}
+            <label for="user-name">Nome</label>
+            <input type="text" id="user-name" name="username" value="{{ user.username }}" />
+            <label for="user-password">Nova senha</label>
+            <input type="password" id="user-password" name="password" placeholder="Nova senha" />
+            <label for="user-password-confirm">Confirmar nova senha</label>
+            <input type="password" id="user-password-confirm" name="password_confirm" placeholder="Confirme sua senha" required />
+            <button type="submit">Salvar alterações</button>
+          </form>
+        </section>
+
+        <section class="user-card user-actions">
+          <a class="button button--secondary button--small" href="{% url 'schedules:main_calendar_view' %}">Voltar</a>
+          <form method="post" action="{% url 'delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')">
+            {% csrf_token %}
+            <button type="submit" class="button button--danger">Excluir usuário</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
