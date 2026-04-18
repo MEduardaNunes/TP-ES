@@ -61,11 +61,12 @@ main p {
 #sidebar{
   box-sizing: border-box;
   background-color: var(--sidebar-clr);
-  height: 100vh;
+  height: calc(100vh - 20px);
   width: 240px;
   padding: 20px 1.4em;
-  border-right: 1px solid var(--line-clr);
-
+  border-radius: .9em;
+  border: 1px solid var(--line-clr);
+  margin: 10px;
   position: sticky;
   top: 0;
   align-self: start;

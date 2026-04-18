@@ -44,7 +44,7 @@
 
         <section class="user-card">
           <h2>Editar informações</h2>
-          <form method="post" action="{% url 'edit_user' %}">
+          <form method="post" action="{% url 'accounts:edit_user' %}">
             {% csrf_token %}
             <label for="user-name">Nome</label>
             <input type="text" id="user-name" name="username" value="{{ user.username }}" />
@@ -58,7 +58,7 @@
 
         <section class="user-card user-actions">
           <a class="button button--secondary button--small" href="{% url 'schedules:main_calendar_view' %}">Voltar</a>
-          <form method="post" action="{% url 'delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')">
+          <form method="post" action="{% url 'accounts:delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')">
             {% csrf_token %}
             <button type="submit" class="button button--danger">Excluir usuário</button>
           </form>

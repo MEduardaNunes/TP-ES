@@ -38,7 +38,7 @@
       <main class="forms-grid">
         <section class="panel panel--secondary">
           <h2>Cadastrar novo usuário</h2>
-          <form method="POST" action="{% url 'register' %}">
+          <form method="POST" action="{% url 'accounts:register' %}">
             {% csrf_token %}
             <label for="register-name">Nome</label>
             <input type="text" id="register-name" name="username" placeholder="Seu nome" required />

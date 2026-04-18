@@ -36,7 +36,7 @@
         
         <section class="panel">
           <h2>Já sou usuário</h2>
-          <form method="POST" action="{% url 'login' %}">
+          <form method="POST" action="{% url 'accounts:login_user' %}">
             {% csrf_token %}
             <label for="login-name">Nome</label>
             <input type="text" id="login-name" name="username" placeholder="Seu nome" required />
