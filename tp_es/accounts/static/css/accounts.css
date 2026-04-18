@@ -1,14 +1,3 @@
-zz.forms-grid {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr;
-} 
-
-form {
-  display: grid;
-  gap: 18px;
-}
-
 .user-card {
   padding: 28px;
   border-radius: 26px;
@@ -44,4 +33,10 @@ form {
 .user-actions button {
   width: auto;
   min-width: 180px;
+}
+
+.center-line {
+  display: flex;
+  justify-content: center;
+  margin: 1px;
 }

@@ -5,14 +5,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 
-def home(request):
+def login_page(request):
     if request.user.is_authenticated:
         return redirect("schedules:main_calendar_view")
-    return render(request, "home.html")
+    return render(request, "login.html")
 
 @login_required
 def user_space(request):
     return render(request, "user.html")
+
+def sign_up(request):
+    return render(request, "sign_up.html")
 
 def register(request):
     if request.user.is_authenticated:
@@ -25,16 +28,17 @@ def register(request):
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Nome de usuário já existe")
-            return redirect("home") 
+            return redirect("sign_up") 
 
         if password != password_confirm:
             messages.error(request, "As senhas não coincidem")
-            return redirect("home")
+            return redirect("sign_up")
         
         User.objects.create_user(username=username, password=password)
         messages.success(request, "Usuário criado com sucesso")
     
-    return redirect("home")
+    return redirect("login_page")
+
 
 def login_user(request):
     if request.user.is_authenticated:
@@ -51,18 +55,22 @@ def login_user(request):
         
         else:
             messages.error(request, "Nome de usuário ou senha incorretos")
-            return redirect("home")
+            return redirect("login_page")
         
-    return redirect("home")
-        
+    return redirect("login_page")
+
+
+@login_required      
 def logout_user(request):
     logout(request)
-    return redirect("home")
+    return redirect("login_page")
 
+
+@login_required
 def edit_user(request):
     """Edita o perfil do usuário logado."""
     if not request.user.is_authenticated:
-        return redirect("home")
+        return redirect("login_page")
     
     if request.method == "POST":
         username = request.POST.get("username")
@@ -90,6 +98,7 @@ def edit_user(request):
     
     return redirect("user_space")
 
+
 @login_required
 def delete_user(request):
     """Deleta a conta do usuário logado."""
@@ -97,6 +106,6 @@ def delete_user(request):
         user = request.user
         user.delete()
         messages.success(request, "Usuário deletado com sucesso")
-        return redirect("home")
+        return redirect("login_page")
     
     return redirect("user_space")
