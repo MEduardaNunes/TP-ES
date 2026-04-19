@@ -12,6 +12,8 @@
   --secondary-danger-clr: #8c0000;
   --secondary-base-clr: #ce9aff;
   --container-background-base: #f3f0fe;
+  color-scheme: light;
+  font-family: 'Poppins', sans-serif;
 }
 
 *{
@@ -22,6 +24,13 @@
 html {
   font-family: 'Poppins', sans-serif;
   line-height: 1.3rem;
+}
+
+input, 
+button, 
+textarea, 
+select {
+  font-family: inherit;
 }
 
 body {
