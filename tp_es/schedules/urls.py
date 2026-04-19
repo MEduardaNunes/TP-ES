@@ -8,4 +8,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("conta/", include("accounts.urls")),
     path("main_calendar_view/", views.main_calendar_view, name="main_calendar_view"),
+    path('logout/', views.logout_view, name='logout'),
 ]

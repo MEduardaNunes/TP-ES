@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
 import calendar
 from .models import Schedule, Participant, Activity, ActivityCheck
+from django.contrib.auth import logout, login
 
 @login_required
 def calendar_view(request):
@@ -307,3 +308,7 @@ def toggle_check(request, schedule, participant, activity_id):
 
     return redirect("view_schedule", schedule_id=schedule.id)
 
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Você saiu do sistema com sucesso!")
+    return redirect('accounts:login')

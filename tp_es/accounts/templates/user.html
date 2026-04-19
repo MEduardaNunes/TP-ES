@@ -1,69 +1,111 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Planify - Espaço do Usuário</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
-  </head>
-  <body>
-    <div class="page-shell">
-      <header>
-        <h1>Espaço do Usuário</h1>
-      </header>
-      <p class="center-line margin-bottom">Aqui você vê e edita seus dados de conta.</p>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planify - Perfil</title>
+  
+  <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
+  <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
+  
+  <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}" />
+  
+  <script type="text/javascript" src="{% static 'schedules/js/app.js' %}" defer></script>
+</head>
 
-      {% if messages %}
-        {% for message in messages %}
-          <div class="toast {{ message.tags }}">
-            {{ message }}
+<body>
+  <nav id="sidebar">
+    <ul>
+      <li>
+        <span class="logo">Planify</span>
+        <button onclick="toggleSidebar()" id="toggle-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z"/></svg>
+        </button>
+      </li>
+      <li>
+        <a href="{% url 'schedules:main_calendar_view' %}">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg>
+          <span>Home</span>
+        </a>
+      </li>
+      <li class="active">
+        <button onclick=toggleSubMenu(this) class="dropdown-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z"/></svg>
+          <span>Perfil</span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
+        </button>
+        <ul class="sub-menu">
+          <div>
+            <li>
+              <a href="{% url 'accounts:user_space' %}">Acessar Perfil</a>
+              <a href="{% url 'schedules:logout' %}">Logout</a>
+            </li>
           </div>
-        {% endfor %}
-      {% endif %}
+        </ul>
+      </li>
+    </ul>
+  </nav>
 
-      <script>
-        setTimeout(() => {
-          document.querySelectorAll('.toast').forEach(el => {
-            el.style.opacity = "0";
-            setTimeout(() => el.remove(), 500);
-          });
-        }, 3000);
-      </script>
+  <main class="profile-page">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="toast {{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
 
-      <div class="user-grid">
+    <header>
+      <h1>Espaço do Usuário</h1>
+    </header>
 
-        <section class="user-card">
-          <h2>Dados da Conta</h2>
-          <dl class="user-info">
-            <dt>Nome</dt>
-            <dd>{{ user.username }}</dd>
-          </dl>
-        </section>
+    <section class="container profile-info">
+      <h2>Dados da Conta</h2>
+      
+      <dl class="user-profile-list">
+        <div class="outlined-box">
+          <dt>Nome</dt>
+          <dd>{{ user.username }}</dd>
+        </div>
+    </section>
 
-        <section class="user-card">
-          <h2>Editar informações</h2>
-          <form method="post" action="{% url 'accounts:edit_user' %}">
-            {% csrf_token %}
+      <section class="container profile-edit">
+        <h2>Editar Perfil</h2>
+        <form method="post" action="{% url 'accounts:edit_user' %}">
+          {% csrf_token %}
+          <div class="outlined-box">
             <label for="user-name">Nome</label>
             <input type="text" id="user-name" name="username" value="{{ user.username }}" />
+          </div>
+          <div class="outlined-box">
             <label for="user-password">Nova senha</label>
             <input type="password" id="user-password" name="password" placeholder="Nova senha" />
+          </div>
+          <div class="outlined-box">
             <label for="user-password-confirm">Confirmar nova senha</label>
             <input type="password" id="user-password-confirm" name="password_confirm" placeholder="Confirme sua senha" required />
-            <button type="submit">Salvar alterações</button>
-          </form>
-        </section>
+          </div>
+          <button type="submit" class="button button-primary">Salvar alterações</button>
+        </form>
+      </section>
 
-        <section class="user-card user-actions">
-          <a class="button button--secondary button--small" href="{% url 'schedules:main_calendar_view' %}">Voltar</a>
-          <form method="post" action="{% url 'accounts:delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.')">
-            {% csrf_token %}
-            <button type="submit" class="button button--danger">Excluir usuário</button>
-          </form>
-        </section>
-      </div>
+      <section class="container profile-danger">
+        <form method="post" action="{% url 'accounts:delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta?')">
+          {% csrf_token %}
+          <button type="submit" class="button button-danger">Excluir usuário</button>
+        </form>
+      </section>
     </div>
-  </body>
+  </main>
+
+  <script>
+    setTimeout(() => {
+      document.querySelectorAll('.toast').forEach(el => {
+        el.style.opacity = "0";
+        setTimeout(() => el.remove(), 500);
+      });
+    }, 3000);
+  </script>
+</body>
 </html>

@@ -94,6 +94,20 @@ main p {
   background-color: var(--hover-clr);
 }
 
+#sidebar .sub-menu{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: 300ms ease-in-out;
+
+  > div{
+    overflow: hidden;
+  }
+}
+
+#sidebar .sub-menu.show {
+  grid-template-rows: 1fr;
+}
+
 #toggle-btn {
   margin-left: auto;
   padding: 1em;
@@ -113,6 +127,52 @@ main p {
 
 #toggle-btn.rotate svg {
   transform: rotate(180deg);
+}
+
+.dropdown-btn svg{
+  transition: 200ms ease;
+}
+
+.rotate svg:last-child {
+  rotate: 180deg;
+}
+
+#sidebar .sub-menu a{
+  padding-left: 2em;
+}
+
+.sub-menu li a, 
+.logout-btn {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    
+    /* Ajuste este valor para alinhar com o texto "Perfil" acima */
+    padding: 0.8em 0 0.8em 3.5rem; 
+    
+    background: transparent;
+    border: none;
+    color: #e3e3e3;
+    font-family: inherit;
+    font-size: 1.1rem; /* Tamanho igual para os dois */
+    text-decoration: none;
+    cursor: pointer;
+    transition: 200ms ease;
+}
+
+/* 2. Remove qualquer margem do formulário */
+.sub-menu form {
+    margin: 0;
+    padding: 0;
+    display: block;
+    width: 100%;
+}
+
+/* 3. Hover igual para os dois */
+.sub-menu li a:hover, 
+.logout-btn:hover {
+    background-color: var(--hover-clr);
+    color: #fff;
 }
 
 @media(max-width: 800px) {
@@ -162,6 +222,15 @@ main p {
 
     ul li span, ul li:first-child, .dropdown-btn svg:last-child {
       display: none;
+    }
+
+    ul li .sub-menu.show{
+      position: fixed;
+      bottom: 60px;
+      left: 0;
+      box-sizing: border-box;
+      height: 60px;
+      width: 100%;
     }
   }
 }

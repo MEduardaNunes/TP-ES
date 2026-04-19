@@ -28,16 +28,16 @@ def register(request):
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Nome de usuário já existe")
-            return redirect("sign_up") 
+            return redirect("accounts:sign_up") 
 
         if password != password_confirm:
             messages.error(request, "As senhas não coincidem")
-            return redirect("sign_up")
+            return redirect("accounts:sign_up")
         
         User.objects.create_user(username=username, password=password)
         messages.success(request, "Usuário criado com sucesso")
     
-    return redirect("login_page")
+    return redirect("accounts:login_page")
 
 
 def login_user(request):
@@ -55,22 +55,22 @@ def login_user(request):
         
         else:
             messages.error(request, "Nome de usuário ou senha incorretos")
-            return redirect("login_page")
+            return redirect("accounts:login_page")
         
-    return redirect("login_page")
+    return redirect("accounts:login_page")
 
 
 @login_required      
 def logout_user(request):
     logout(request)
-    return redirect("login_page")
+    return redirect('accounts:login_page')
 
 
 @login_required
 def edit_user(request):
     """Edita o perfil do usuário logado."""
     if not request.user.is_authenticated:
-        return redirect("login_page")
+        return redirect('accounts:login_page')
     
     if request.method == "POST":
         username = request.POST.get("username")
@@ -79,11 +79,11 @@ def edit_user(request):
 
         if User.objects.filter(username=username).exclude(id=request.user.id).exists():
             messages.error(request, "Nome de usuário já existe")
-            return redirect("user_space") 
+            return redirect("accounts:user_space") 
 
         if password != password_confirm:
             messages.error(request, "As senhas não coincidem")
-            return redirect("user_space")
+            return redirect("accounts:user_space")
         
         user = request.user
         user.username = username
@@ -94,9 +94,9 @@ def edit_user(request):
         messages.success(request, "Usuário atualizado com sucesso")
         update_session_auth_hash(request, user)
        
-        return redirect("user_space")
+        return redirect("accounts:user_space")
     
-    return redirect("user_space")
+    return redirect("accounts:user_space")
 
 
 @login_required
@@ -106,6 +106,6 @@ def delete_user(request):
         user = request.user
         user.delete()
         messages.success(request, "Usuário deletado com sucesso")
-        return redirect("login_page")
+        return redirect("accounts:login_page")
     
-    return redirect("user_space")
+    return redirect("accounts:user_space")

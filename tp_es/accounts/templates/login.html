@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Planify — Login</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/accounts.css' %}" />
+    <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}" />
   </head>
-  <body>
+  <body class="auth-page">
     <div class="page-shell">
 
       <header>
@@ -35,8 +35,8 @@
       <main class="forms-grid">
         
         <section class="panel">
-          <h2>Já sou usuário</h2>
-          <form method="POST" action="{% url 'accounts:login_user' %}">
+          <h2>Já sou usuário</h2> 
+          <form method="POST" action="{% url 'accounts:login' %}">
             {% csrf_token %}
             <label for="login-name">Nome</label>
             <input type="text" id="login-name" name="username" placeholder="Seu nome" required />
