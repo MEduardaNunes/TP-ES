@@ -199,7 +199,6 @@ function renderCalendar() {
     grid.innerHTML = html;
 }
  
- 
 // modal de criação de eventos/tarefas
 function openCreateModal(day) {
     const modal     = document.getElementById('modal');
