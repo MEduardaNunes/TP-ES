@@ -7,6 +7,8 @@
     <title>Planify - Espaço do Usuário</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
     <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}" />
+    <script type="text/javascript" src="{% static 'accounts/js/app.js' %}" defer></script>
+</head>
   </head>
   <body>
     <div class="page-shell">
@@ -23,14 +25,7 @@
         {% endfor %}
       {% endif %}
 
-      <script>
-        setTimeout(() => {
-          document.querySelectorAll('.toast').forEach(el => {
-            el.style.opacity = "0";
-            setTimeout(() => el.remove(), 500);
-          });
-        }, 3000);
-      </script>
+      <script>hideToast();</script>
 
       <div class="user-grid">
 

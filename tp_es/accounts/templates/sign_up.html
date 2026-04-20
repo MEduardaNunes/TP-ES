@@ -7,6 +7,7 @@
     <title>Planify — Cadastro</title>
     <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
     <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}" />
+    <script type="text/javascript" src="{% static 'accounts/js/app.js' %}" defer></script>
   </head>
   <body class="auth-page">
     <div class="page-shell">
@@ -23,17 +24,6 @@
           </div>
         {% endfor %}
       {% endif %}
-
-      <script>
-        setTimeout(() => {
-          document.querySelectorAll('.toast').forEach(el => {
-            el.style.opacity = "0";
-            setTimeout(() => el.remove(), 500);
-          });
-        }, 3000);
-      </script>
-
-    
 
       <main>
         <section class="panel panel--secondary">
