@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planify — Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.google.com/share?selection.family=Oswald:wght@200..700|Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900">
+    <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'accounts/css/accounts.css' %}" />
+  </head>
+  <body class="auth-page">
+    <div class="page-shell">
+
+      <header>
+        <h1>Planify</h1>
+      </header>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast {{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <script>
+        setTimeout(() => {user-grid}, 3000);
+      </script>
+
+      <main>
+        
+        <section class="panel">
+          <h2>Já sou usuário</h2> 
+          <form method="POST" action="{% url 'accounts:login' %}">
+            {% csrf_token %}
+            <label for="login-name">Nome</label>
+            <input type="text" id="login-name" name="username" placeholder="Seu nome" required />
+            <label for="login-password">Senha</label>
+            <input type="password" id="login-password" name="password" placeholder="Senha" required />
+            <button class="button" type="submit">Entrar</button>
+          </form>
+        </section>
+        
+        <div class="center-line">
+          <a href="/sign-up/">Criar nova conta</a>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+{% load static %}
+{% url 'accounts:user_space' %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil</title>
+  <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
+  <script type="text/javascript" src="{% static 'schedules/js/app.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
+</head>
+
+<body>
+  <nav id="sidebar">
+    <ul>
+      <li>
+        <span class="logo">Planify</span>
+        <button onclick=toggleSidebar() id="toggle-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z"/></svg>
+        </button>
+      </li>
+      <li>
+        <a href="{% url 'schedules:main_calendar_view' %}">
+          <img src="{% static 'images/home_icon.svg' %}" class="icon" alt="">
+          <span>Home</span>
+        </a>
+      </li>
+      <li class="active">
+        <a href="{% url 'accounts:user_space' %}">
+          <img src="{% static 'images/profile_icon.svg' %}" class="icon" alt="">
+          <span>Perfil</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <main>
+    <div class="container">
+      <h2>Hello</h2>
+    </div>
+    <div class="container">
+      <h2>AAAAA</h2>
+    </div>
+    <div class="container">
+      <h2>BBBBB</h2>
+    </div>
+  </main>
+</body>
+</html>

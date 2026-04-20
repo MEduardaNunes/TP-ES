@@ -127,4 +127,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/calendar/"
+LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'schedules:main_calendar_view'
+LOGIN_URL = 'accounts:login_page'
+LOGOUT_REDIRECT_URL = 'accounts:login_page'
