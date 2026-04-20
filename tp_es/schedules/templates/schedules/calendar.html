@@ -1,4 +1,5 @@
 {% load static %}
+{% load calendar_tags %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -51,9 +52,125 @@
     </ul>
   </nav>
   <main>
-    <div class="container">
-      <h2>Hello</h2>
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
+          </svg>
+        </a>
+
+        <h2>{{ month_name }} {{ year }}</h2>
+
+        <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+          </svg>
+        </a>
+      </div>
+ 
+      <div class="calendar-weekdays">
+        <div>Dom</div><div>Seg</div><div>Ter</div>
+        <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+ 
+      <div class="calendar-grid" id="calendar-grid"></div>
+ 
     </div>
   </main>
+ 
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+        </svg>
+      </button>
+ 
+      <h3>Nova atividade</h3>
+ 
+      <form method="POST" id="activity-form" action="">
+        {% csrf_token %}
+ 
+        <input type="hidden" name="date" id="modal-date">
+ 
+        <label>Agenda</label>
+        {% if admin_participations %}
+          <select name="schedule_id" id="schedule-select" required>
+            {% for p in admin_participations %}
+              <option value="{{ p.schedule.id }}">{{ p.schedule.name }}</option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <p class="modal-warning">Você não é administrador de nenhuma agenda. Crie ou peça acesso de admin a uma agenda para criar atividades.</p>
+        {% endif %}
+ 
+        <label>Título</label>
+        <input type="text" name="title" required>
+ 
+        <label>Tipo</label>
+        <select name="kind" id="kind-select">
+          <option value="event">Evento</option>
+          <option value="task">Tarefa</option>
+        </select>
+ 
+        <label>Categoria</label>
+        <select name="activity_type" required>
+          <option value="class">Aula</option>
+          <option value="exam">Prova</option>
+          <option value="assignment">Trabalho</option>
+          <option value="study">Estudo</option>
+          <option value="meeting">Reunião</option>
+          <option value="presentation">Apresentação</option>
+          <option value="personal">Pessoal</option>
+        </select>
+ 
+        <div id="time-fields">
+          <label>Início</label>
+          <input type="time" name="start_time">
+ 
+          <label>Fim</label>
+          <input type="time" name="end_time">
+        </div>
+ 
+        <br>
+ 
+        {% if admin_participations %}
+          <button type="submit">Salvar</button>
+        {% endif %}
+        <button type="button" onclick="closeModal()">Cancelar</button>
+ 
+      </form>
+ 
+    </div>
+  </div>
+ 
+  <script>
+  window.calendarData = {
+    year: {{ year }},
+    month: {{ month }},
+    days: [
+      {% for day in calendar_days %}
+      {
+        day: {{ day }},
+        activities: [
+          {% if activities_by_day|get_item:day %}
+            {% for activity in activities_by_day|get_item:day %}
+            {
+              id: {{ activity.id }},
+              title: "{{ activity.title|escapejs }}",
+              kind: "{{ activity.kind }}",
+              start_time: "{{ activity.start_time }}",
+              end_time: "{{ activity.end_time }}",
+              color: "{{ activity.color|default:activity.schedule.color|default:'#6366f1' }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          {% endif %}
+        ]
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  };
+  </script>
+ 
 </body>
 </html>
