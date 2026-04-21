@@ -1,3 +1,13 @@
+body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 #sidebar ul {
   list-style: none;
 }
@@ -64,10 +74,13 @@ main p {
   background-color: var(--sidebar-clr);
   height: calc(100vh - 20px);
   width: 240px;
-  padding: 20px 1.4em;
+  padding: min(30px, 7%);
   border-radius: .9em;
   border: 1px solid var(--line-clr);
-  margin: 10px;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  margin-right: 0px;
   position: sticky;
   top: 0;
   align-self: start;
@@ -302,7 +315,7 @@ main p {
 .calendar-weekdays,
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .calendar-grid {
@@ -310,12 +323,14 @@ main p {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
+  display: grid;
+  width: 100%;
 }
 
 .calendar-weekdays div {
   text-align: center;
   font-weight: 600;
-  padding: 8px 0;
+  padding: 0;
 }
 
 .calendar-weekdays {
@@ -336,16 +351,18 @@ main p {
  
 .calendar-day {
   background: var(--base-clr);
-  border-radius: 0.5em;
+  border-radius: 0;
   border-right: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
-  min-height: 10em;
-  min-width: 10em;
+  min-width: 0;
+  min-height: unset;
   padding: 6px;
+  margin: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
+  aspect-ratio: 1 / 1;
 }
  
 .calendar-day.other-month {
@@ -394,9 +411,10 @@ main p {
 }
  
 .day-events {
-  position: relative;       
-  height: 180px;            
+  position: relative;        
   flex-shrink: 0;
+  height: auto;
+  max-height: 80px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -497,7 +515,8 @@ main p {
   }
  
   main {
-    padding: 2em 1em 60px 1em;
+    width: 100%;
+    overflow-x: hidden;
   }
  
   .container {
@@ -783,7 +802,7 @@ main p {
 /*TABS*/
 
 .tabs-header {
-  padding: 20px;
+  padding: 0;
   flex-direction: column;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
@@ -845,8 +864,11 @@ main p {
   display: block;
   background-color: rgb(230, 239, 245);
   border-radius: 0px 0px 8px 8px;
-  padding: 16px;
+  padding: 22px;
+  width: 100%;
   opacity: 1;
+  overflow: hidden;
+  overflow-x: auto;
   transition: 0.2s ease;
 }
 
