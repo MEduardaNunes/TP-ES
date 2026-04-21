@@ -10,10 +10,10 @@
   <title>Planify</title>
   <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
   <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
-  <script type="text/javascript" src="{% static 'tp_es/accounts/js/app.js' %}" defer></script>
- </head>
+  <script type="text/javascript" src="{% static 'accounts/js/app.js' %}" defer></script>
+</head>
 
-<body>
+<body class="schedule-page">
   <nav id="sidebar">
     {% with rota_atual=request.resolver_match.url_name %}
     <ul>
@@ -21,8 +21,7 @@
         <span class="logo">Planify</span>
         <button onclick="toggleSidebar()" id="toggle-btn">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-            <path
-              d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z" />
+            <path d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z" />
           </svg>
         </button>
       </li>
@@ -30,11 +29,9 @@
       <li class="{% if rota_atual == 'main_calendar_view' %}active{% endif %}">
         <a href="{% url 'schedules:main_calendar_view' %}">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-            <path
-              d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+            <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
           </svg>
-
-            <span>Home</span>
+          <span>Home</span>
         </a>
       </li>
 
@@ -42,21 +39,26 @@
         <form action="{% url 'schedules:logout' %}" method="post" class="logout-form">
           {% csrf_token %}
           <button type="submit" class="logout-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+              <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
+            </svg>
             <span>Logout</span>
           </button>
         </form>
       </li>
 
       <li class="profile-item {% if rota_atual == 'user_space' %}active{% endif %}">
-         <a href="{% url 'accounts:user_space' %}">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" /></svg>
+        <a href="{% url 'accounts:user_space' %}">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+            <path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
+          </svg>
           <span>Perfil</span>
         </a>
       </li>
     </ul>
     {% endwith %}
   </nav>
+
   <main>
     {% if messages %}
       {% for message in messages %}
@@ -65,11 +67,13 @@
         </div>
       {% endfor %}
     {% endif %}
+
+
     <div class="tabs-header">
       <div class="tabs-topbar">
         <div class="tab-buttons">
           <button class="tab-btn active" content-id="calendario">
-            Calendário
+            Calend&aacute;rio
           </button>
 
           <button class="tab-btn" content-id="eventos">
@@ -86,14 +90,14 @@
         </div>
 
         <div class="tab-actions">
-          <button class="action-btn" id="new-btn">
+          <button class="action-btn action-btn--primary" id="new-btn">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
               <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
             </svg>
             Novo
           </button>
 
-          <button class="action-btn">
+          <button class="action-btn action-btn--ghost" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
               <path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z" />
             </svg>
@@ -108,19 +112,15 @@
             <div class="calendar-left">
               <h2>{{ month_name }} {{ year }}</h2>
               <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                    viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </a>
 
               <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                    viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
               </a>
@@ -134,81 +134,121 @@
             <div>QUA</div>
             <div>QUI</div>
             <div>SEX</div>
-            <div>SÁB</div>
+            <div>S&Aacute;B</div>
           </div>
 
           <div class="calendar-grid" id="calendar-grid"></div>
-
         </div>
 
         <div class="content" id="eventos">
-          <h1>Eventos Futuros</h1>
+          <div class="panel-header">
+            <div>
+              <h1>Eventos futuros</h1>
+            </div>
+          </div>
+
           <div class="events-list">
             {% for event in future_events %}
-            <div class="event-item">
-              <h3>{{ event.title }}</h3>
-              <p>{{ event.schedule.name }} - {{ event.date }} às {{ event.start_time }}</p>
-              <a href="{% url 'schedules:edit_activity' event.schedule.id event.id %}">Editar</a>
-              <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
-              </form>
-            </div>
+              <article class="list-card">
+                <div class="list-card__top">
+                  <span class="list-badge">Evento</span>
+                  <span class="list-meta">{{ event.schedule.name }}</span>
+                </div>
+                <h3>{{ event.title }}</h3>
+                <p>{{ event.date }} &agrave;s {{ event.start_time }}</p>
+                <div class="list-card__actions">
+                  <a class="text-link" href="{% url 'schedules:edit_activity' event.schedule.id event.id %}">Editar</a>
+                  <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
+                  </form>
+                </div>
+              </article>
             {% empty %}
-            <p>Não há eventos futuros.</p>
+              <div class="empty-state">
+                <h3>Nenhum evento futuro</h3>
+                <p>Quando novos compromissos forem criados, eles aparecer&atilde;o aqui com acesso r&aacute;pido para edi&ccedil;&atilde;o.</p>
+              </div>
             {% endfor %}
           </div>
         </div>
 
         <div class="content" id="tarefas">
-          <h1>Tarefas Pendentes</h1>
+          <div class="panel-header">
+            <div>
+              <h1>Tarefas pendentes</h1>
+            </div>
+          </div>
+
           <div class="tasks-list">
             {% for task in pending_tasks %}
-            <div class="task-item">
-              <h3>{{ task.title }}</h3>
-              <p>{{ task.schedule.name }} - {{ task.date }}</p>
-              <a href="{% url 'schedules:edit_activity' task.schedule.id task.id %}">Editar</a>
-              <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">Deletar</button>
-              </form>
-            </div>
+              <article class="list-card">
+                <div class="list-card__top">
+                  <span class="list-badge list-badge--task">Tarefa</span>
+                  <span class="list-meta">{{ task.schedule.name }}</span>
+                </div>
+                <h3>{{ task.title }}</h3>
+                <p>Entrega em {{ task.date }}</p>
+                <div class="list-card__actions">
+                  <a class="text-link" href="{% url 'schedules:edit_activity' task.schedule.id task.id %}">Editar</a>
+                  <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">Deletar</button>
+                  </form>
+                </div>
+              </article>
             {% empty %}
-            <p>Não há tarefas pendentes.</p>
+              <div class="empty-state">
+                <h3>Nenhuma tarefa pendente</h3>
+                <p>Sua lista est&aacute; limpa no momento. Novas tarefas aparecer&atilde;o aqui com destaque visual.</p>
+              </div>
             {% endfor %}
           </div>
         </div>
 
         <div class="content" id="agendas">
-          <h1>Agendas</h1>
+          <div class="panel-header">
+            <div>
+              <h1>Agendas</h1>
+            </div>
+          </div>
+
           <div class="schedules-list">
             {% for participation in participations %}
-            <div class="schedule-item">
-              <h3>{{ participation.schedule.name }}</h3>
-              <p>{{ participation.schedule.description|default:"Sem descrição" }}</p>
-              <a href="{% url 'schedules:view_schedule' participation.schedule.id %}">Ver Detalhes</a>
-              {% if participation.is_admin %}
-              <a href="{% url 'schedules:edit_schedule' participation.schedule.id %}">Editar</a>
-              <form method="post" action="{% url 'schedules:delete_schedule' participation.schedule.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta agenda?')">Deletar</button>
-              </form>
-              {% endif %}
-            </div>
+              <article class="list-card list-card--schedule" style="--schedule-color: {{ participation.schedule.color|default:'#6366f1' }};">
+                <div class="list-card__top">
+                  <span class="list-badge list-badge--schedule">
+                    <span class="schedule-color-dot" aria-hidden="true"></span>
+                    {% if participation.is_admin %}Administrador{% else %}Participante{% endif %}
+                  </span>
+                </div>
+                <h3>{{ participation.schedule.name }}</h3>
+                <p>{{ participation.schedule.description|default:"Sem descri&ccedil;&atilde;o" }}</p>
+                <div class="list-card__actions">
+                  <a class="text-link" href="{% url 'schedules:view_schedule' participation.schedule.id %}">Ver detalhes</a>
+                  {% if participation.is_admin %}
+                    <a class="text-link" href="{% url 'schedules:edit_schedule' participation.schedule.id %}">Editar</a>
+                    <form method="post" action="{% url 'schedules:delete_schedule' participation.schedule.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta agenda?')">Deletar</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </article>
             {% empty %}
-            <p>Você não participa de nenhuma agenda.</p>
+              <div class="empty-state">
+                <h3>Nenhuma agenda encontrada</h3>
+                <p>Crie uma nova agenda para come&ccedil;ar a organizar eventos e tarefas com sua equipe.</p>
+              </div>
             {% endfor %}
           </div>
         </div>
-
       </div>
-    </div>
     </div>
   </main>
 
   <div id="modal" class="modal hidden">
     <div class="modal-content">
-
       <button class="close-btn" onclick="closeModal()">
         <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -226,23 +266,23 @@
           <label>Agenda</label>
 
           {% if admin_participations %}
-          <select name="schedule_id" id="schedule-select" required>
-            {% for p in admin_participations %}
-            <option value="{{ p.schedule.id }}">
-              {{ p.schedule.name }}
-            </option>
-            {% endfor %}
-          </select>
+            <select name="schedule_id" id="schedule-select" required>
+              {% for p in admin_participations %}
+                <option value="{{ p.schedule.id }}">
+                  {{ p.schedule.name }}
+                </option>
+              {% endfor %}
+            </select>
           {% else %}
-          <p class="modal-warning">
-            Você não é administrador de nenhuma agenda.
-          </p>
+            <p class="modal-warning">
+              Voc&ecirc; n&atilde;o &eacute; administrador de nenhuma agenda.
+            </p>
           {% endif %}
         </div>
 
         <div class="form-group">
-          <label>Título</label>
-          <input type="text" name="title" placeholder="Ex: Prova de Cálculo" required>
+          <label>T&iacute;tulo</label>
+          <input type="text" name="title" placeholder="Ex: Prova de C&aacute;lculo" required>
         </div>
 
         <div class="form-row">
@@ -261,51 +301,47 @@
               <option value="exam">Prova</option>
               <option value="assignment">Trabalho</option>
               <option value="study">Estudo</option>
-              <option value="meeting">Reunião</option>
-              <option value="presentation">Apresentação</option>
+              <option value="meeting">Reuni&atilde;o</option>
+              <option value="presentation">Apresenta&ccedil;&atilde;o</option>
               <option value="personal">Pessoal</option>
             </select>
           </div>
         </div>
 
-          <div id="date-field" class="form-group">
-            <label>Data</label>
-            <input type="date" name="date" id="date-input" required>
+        <div id="date-field" class="form-group">
+          <label>Data</label>
+          <input type="date" name="date" id="date-input" required>
+        </div>
+
+        <div id="time-fields" class="form-row">
+          <div class="form-group">
+            <label>In&iacute;cio</label>
+            <input type="time" name="start_time">
           </div>
 
-          <div id="time-fields" class="form-row">
-
-            <div class="form-group">
-              <label>Início</label>
-              <input type="time" name="start_time">
-            </div>
-
-            <div class="form-group">
-              <label>Fim</label>
-              <input type="time" name="end_time">
-            </div>
-
+          <div class="form-group">
+            <label>Fim</label>
+            <input type="time" name="end_time">
           </div>
+        </div>
 
-          <div class="modal-actions">
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal()">
+            Cancelar
+          </button>
 
-            <button type="button" class="btn-secondary" onclick="closeModal()">
-              Cancelar
-            </button>
-
-            {% if admin_participations %}
+          {% if admin_participations %}
             <button type="submit" class="btn-primary" {% if not admin_participations %}disabled{% endif %}>
               Salvar
             </button>
-            {% endif %}
-          </div>
-        </form>
+          {% endif %}
+        </div>
+      </form>
     </div>
   </div>
 
   <div id="agenda-modal" class="modal hidden">
     <div class="modal-content">
-
       <button class="close-btn" onclick="closeAgendaModal()">
         <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -314,7 +350,7 @@
         </svg>
       </button>
 
-      <h3 class="modal-title">Nova Agenda</h3>
+      <h3 class="modal-title">Nova agenda</h3>
 
       <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}">
         {% csrf_token %}
@@ -325,13 +361,19 @@
         </div>
 
         <div class="form-group">
-          <label>Descrição</label>
-          <textarea name="description" placeholder="Descrição opcional"></textarea>
+          <label>Descri&ccedil;&atilde;o</label>
+          <textarea name="description" placeholder="Descri&ccedil;&atilde;o opcional"></textarea>
         </div>
 
         <div class="form-group">
           <label>Cor</label>
-          <input type="color" name="color" value="#6366f1">
+          <div class="color-picker-row">
+            <input type="color" name="color" id="schedule-color-input" value="#6366f1">
+            <div class="color-preview-chip">
+              <span class="schedule-color-dot" id="schedule-color-preview" aria-hidden="true"></span>
+              <span id="schedule-color-value">#6366f1</span>
+            </div>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -384,7 +426,7 @@
     function openNewModal() {
       const activeTab = document.querySelector('.tab-btn.active');
       const contentId = activeTab.getAttribute('content-id');
-      
+
       if (contentId === 'agendas') {
         openAgendaModal();
       } else if (contentId === 'eventos') {
@@ -392,13 +434,13 @@
       } else if (contentId === 'tarefas') {
         openActivityModal('task');
       } else if (contentId === 'calendario') {
-        openActivityModal('event'); // Padrão: abre como evento
+        openActivityModal('event');
       }
     }
 
     function openAgendaModal() {
-      // Resetar formulário
       document.getElementById('agenda-form').reset();
+      syncScheduleColorPreview();
       document.getElementById('agenda-modal').classList.remove('hidden');
     }
 
@@ -411,19 +453,18 @@
       const kindSelect = document.getElementById('kind-select');
       const dateInput = document.getElementById('date-input');
       const timeFields = document.getElementById('time-fields');
-      
-      // Resetar formulário
+
       document.getElementById('activity-form').reset();
-      
+
       kindSelect.value = kind;
-      dateInput.value = ''; // sem data específica
-      
+      dateInput.value = '';
+
       if (kind === 'task') {
         timeFields.style.display = 'none';
       } else {
         timeFields.style.display = 'flex';
       }
-      
+
       modal.classList.remove('hidden');
     }
 
@@ -441,6 +482,22 @@
         timeFields.style.display = 'flex';
       }
     });
+
+    function syncScheduleColorPreview() {
+      const colorInput = document.getElementById('schedule-color-input');
+      const colorPreview = document.getElementById('schedule-color-preview');
+      const colorValue = document.getElementById('schedule-color-value');
+
+      if (!colorInput || !colorPreview || !colorValue) {
+        return;
+      }
+
+      colorPreview.style.backgroundColor = colorInput.value;
+      colorValue.textContent = colorInput.value.toUpperCase();
+    }
+
+    document.getElementById('schedule-color-input')?.addEventListener('input', syncScheduleColorPreview);
+    syncScheduleColorPreview();
   </script>
 </body>
 

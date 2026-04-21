@@ -3,8 +3,8 @@
 :root {
   --base-clr: #f8f9ff; /*fundo principal*/
   --line-clr: #42434a; /*bordas e divisórias*/
-  --sidebar-clr: #0B0742;
-  --hover-clr: #211974; 
+  --sidebar-clr: #f8f9ff;
+  --hover-clr: #f8f9ff; 
   --text-clr: #ffffff; /*texto e ícones*/
   --accent-clr: #59e7ec; /*destaque*/
   --secondary-text-clr: #000000; /*texto secundário*/

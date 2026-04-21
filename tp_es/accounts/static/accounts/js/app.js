@@ -6,7 +6,7 @@ function hideToast () {
             el.style.opacity = "0";
             setTimeout(() => el.remove(), 500);
         });
-    }, 3000);
+    }, 8000);
 }
 
 hideToast();

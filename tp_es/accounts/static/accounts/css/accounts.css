@@ -285,30 +285,28 @@ body.auth-page .user-card { /**/
 .profile-page .toast {
   position: fixed;
   top: 20px;
-  right: 20px;
-  padding: 16px 24px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-  font-weight: 600;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 6px;
   z-index: 1000;
-  animation: slideIn 0.3s ease;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  transition: opacity 0.5s ease;
 }
 
 .profile-page .toast.success {
-  color: #059669;
-  border-color: rgba(5, 150, 105, 0.2);
+  background: #5fff64;
 }
 
 .profile-page .toast.error {
-  color: #dc2626;
-  border-color: rgba(220, 38, 38, 0.2);
+  background: #ff5144;
 }
 
 .profile-page .toast.warning {
-  color: #d97706;
-  border-color: rgba(217, 119, 6, 0.2);
+  background: hsl(36, 91%, 58%);
 }
 
 .profile-page .form-actions {
