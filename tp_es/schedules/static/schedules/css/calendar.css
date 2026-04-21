@@ -112,12 +112,12 @@ main p {
 
 #sidebar{
   box-sizing: border-box;
-  background-color: var(--sidebar-clr);
+  background: linear-gradient(135deg, #8b5cf6 0%, #60a5fa 100%);
   height: calc(100vh - 20px);
   width: 240px;
   padding: min(30px, 7%);
   border-radius: .9em;
-  border: 1px solid var(--line-clr);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   margin-top: 10px;
   margin-left: 10px;
   margin-bottom: 10px;
@@ -728,8 +728,8 @@ main p {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -749,7 +749,28 @@ main p {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.modal-actions button {
+  flex: 1;
 }
 
 .btn-primary:disabled {
@@ -760,17 +781,18 @@ main p {
 
 .modal-content {
   position: relative;
-  background: var(--base-clr);
-  padding: 24px;
-  border-radius: 16px;
-  width: 380px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  background: #f8fafc;
+  padding: 28px;
+  border-radius: 26px;
+  width: 420px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65), 0 20px 50px rgba(0, 0, 0, 0.12);
 
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
 
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.3s ease;
   box-sizing: border-box;
   overflow: visible;
 }
@@ -786,25 +808,28 @@ main p {
   }
 }
 
-.modal-content label {
-  font-size: 0.85rem;
-  color: var(--secondary-text-clr);
-  font-weight: 500;
+.mdisplay: block;
+  font-size: 0.95rem;
+  color: #334155;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .modal-content input,
 .modal-content select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 16px 18px;
 
-  border-radius: 8px;
+  border-radius: 16px;
   box-sizing: border-box;
-  border: 1px solid var(--line-clr);
-  background: var(--container-background-base);
+  border: 1px solid #d1d5db;
+  background: #ffffff;
 
-  font-size: 0.9rem;
-  color: var(--text-clr);
+  font-size: 1rem;
+  color: #334155;
 
+  transition: all 0.2s ease;
+  font-family: inherit
   transition: all 0.2s ease;
 }
 
@@ -815,16 +840,15 @@ main p {
 .modal-warning {
   background: #fef3c7;
   color: #92400e;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  padding: 8px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
   border: 1px solid #fde68a;
+  font-weight: 500;
 }
 
-.modal-content input:focus,
-.modal-content select:focus {
+.modal-content i#8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1
   outline: none;
   border-color: var(--accent-clr);
   box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
@@ -845,37 +869,50 @@ main p {
   max-width: 100%;
 }
 
-.modal-content h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: black;
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .modal-content label {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--secondary-text-clr);
-}
-
-.modal-content button[type="submit"] {
-  background: var(--accent-clr);
+},
+.btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #60a5fa 100%);
   color: white;
   border: none;
-  padding: 10px;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 16px 18px;
+  border-radius: 16px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.18);
+  font-size: 1rem;
 }
 
-.modal-content button[type="submit"]:hover {
-  filter: brightness(1.1);
-}
-
-.modal-content button[type="button"] {
+.modal-content button[type="submit"]:hover,
+.btn-primary:hover {,
+.btn-secondary {
   background: transparent;
-  border: 1px solid var(--line-clr);
-  padding: 10px;
+  border: 1px solid #d1d5db;
+  padding: 16px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  color: #334155;
+  font-size: 1rem;
+}
+
+.modal-content button[type="button"]:hover,
+.btn-secondary:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af
   border-radius: 8px;
   cursor: pointer;
   transition: 0.2s;
@@ -887,27 +924,28 @@ main p {
 
 .close-btn {
   position: absolute;
-  top: 10px;
-  right: 12px;
-  padding: 4px;
+  top: 16px;
+  right: 16px;
+  padding: 8px;
 
   cursor: pointer;
-  color: black;
+  color: #64748b;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
+  border-radius: 8px;
   border: none;
   background: transparent;
 
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  background: var(--hover-clr);
+  background: #f3f4f6;
+  color: #1e293b;
   transform: rotate(90deg);
 }
 
@@ -928,6 +966,7 @@ main p {
   justify-content: flex-start;
   align-items: stretch;
   width: 100%;
+  gap: 0;
 }
 
 .tabs-topbar {
@@ -935,35 +974,40 @@ main p {
   justify-content: space-between;
   align-items: center;
   flex-wrap: nowrap;
-  gap: 10px;
+  gap: 16px;
+  background: transparent;
+  border-bottom: none;
 }
 
 .tab-buttons {
   display: flex;
-  gap: 6px;
-  max-width: 600px;
+  gap: 0;
+  max-width: 100%;
 }
 
 .tab-btn {
   flex: 1;
   border: none;
-  background-color: var(--base-clr);
-  color: black;
+  background-color: transparent;
+  color: #475569;
   border-radius: 8px 8px 0px 0px;
-  box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
-  font-weight: 500;
-  font-size: 1.3em;
-  padding: 10px 16px;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 12px 16px;
   cursor: pointer;
-  transition: background-color .3s ease;
+  transition: all 0.3s ease;
 }
 
 .tab-btn.active {
-  background-color: rgb(230, 239, 245);
+  background-color: #f0f9ff;
+  color: #8b5cf6;
+  border-bottom-color: #8b5cf6;
 }
 
 .tab-btn:hover {
-  background-color: #97ccfd;
+  background-color: #f8fafc;
+  color: #1e293b;
 }
 
 .content {
@@ -980,14 +1024,16 @@ main p {
 
 .content.show {
   display: block;
-  background-color: rgb(230, 239, 245);
-  border-radius: 0px 0px 8px 8px;
-  padding: 22px;
+  background-color: #f0f9ff;
+  border-radius: 0px 8px 8px 8px;
+  padding: 24px;
   width: 100%;
   opacity: 1;
   overflow: hidden;
   overflow-x: auto;
   transition: 0.2s ease;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-top: none;
 }
 
 .tab-actions {
@@ -996,6 +1042,24 @@ main p {
   margin-left: auto;
 }
 
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
 .action-btn {
   display: flex;
   align-items: center;
