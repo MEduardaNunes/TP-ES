@@ -10,6 +10,9 @@ body {
 
 #sidebar ul {
   list-style: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 #sidebar > ul > li:first-child{
@@ -38,6 +41,44 @@ body {
   display: flex;
   align-items: center;
   gap: 1em;
+}
+
+.logout-form {
+  margin-top: auto;
+}
+
+#sidebar.close ul li span {
+  display: none;
+}
+
+#sidebar a span, #sidebar .dropdown-btn span {
+  flex-grow: 1;
+  font-size: 1.4rem;
+}
+
+#sidebar a span, #sidebar .dropdown-btn span, .logout-btn span {
+  flex-grow: 1;
+  font-size: 1.4rem;
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+
+  padding: 0.85em;
+  border-radius: 0.5em;
+
+  background: none;
+  border: none;
+  color: var(--text-clr);
+  cursor: pointer;
+  text-align: left;
+}
+
+.logout-btn:hover {
+  background-color: var(--hover-clr);
 }
 
 .dropdown-btn{
@@ -87,6 +128,9 @@ main p {
   transition: 300ms ease-in-out;
   overflow: hidden;
   text-wrap: nowrap;
+
+  display: flex;
+  flex-direction: column;
 }
 
 #sidebar.close {
@@ -155,8 +199,7 @@ main p {
   padding-left: 2em;
 }
 
-.sub-menu li a, 
-.logout-btn {
+.sub-menu li a {
     display: flex !important;
     align-items: center;
     width: 100%;
@@ -180,8 +223,7 @@ main p {
     width: 100%;
 }
 
-.sub-menu li a:hover, 
-.logout-btn:hover {
+.sub-menu li a:hover {
     background-color: var(--hover-clr);
     color: #fff;
 }
@@ -203,6 +245,8 @@ main p {
   #sidebar{
     height: 60px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
     border-right: none;
     border-top: 1px solid var(-line-clr);
     padding: 0;
@@ -212,7 +256,10 @@ main p {
 
     > ul {
       padding: 0;
-      display: grid;
+      list-style: none;
+      flex: 1; /* Isso faz a lista ocupar todo o espaço vazio */
+      display: flex;
+      flex-direction: column;
       grid-auto-columns: 60px;
       grid-auto-flow: column;
       align-items: center;
@@ -246,7 +293,40 @@ main p {
   }
 }
 
+.logout-item {
+  margin-top: auto; /* Agora isso vai empurrar tudo pro final! */
+  width: 100%;
+  padding-bottom: 5px;
+}
 
+.logout-form {
+  margin: 0; 
+  width: 100%;
+}
+
+#sidebar ul {
+  list-style: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.push-bottom {
+  margin-top: auto; /* Empurra este item e os que estão abaixo dele para o fim */
+  border-top: 1px solid var(--line-clr);
+  padding-top: 10px;
+}
+
+.logout-form {
+  margin-top: 5px; /* Apenas um pequeno respiro entre o Perfil e o Logout */
+}
+
+.profile-item {
+  border-top: 1px solid var(--line-clr); /* A linha entre eles */
+  margin-top: 8px;
+  padding-top: 8px;
+  width: 100%;
+}
  
 .calendar-header {
   display: flex;
@@ -525,9 +605,14 @@ main p {
   }
  
   #sidebar {
-    height: 60px;
+    height: 100vh;
+    display: flex;
     width: 100%;
+    margin: 0;
+    top: 0;
     border-right: none;
+    flex-direction: column;
+    justify-content: space-between;
     border-top: 1px solid var(--line-clr);
     padding: 0;
     position: fixed;
