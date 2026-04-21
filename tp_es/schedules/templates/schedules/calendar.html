@@ -100,19 +100,26 @@
       <div class="tab-contents">
         <div class="content" id="agenda">
           <div class="calendar-header">
-            <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-                <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z" />
-              </svg>
-            </a>
+            <div class="calendar-left">
+              <h2>{{ month_name }} {{ year }}</h2>
+              <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </a>
 
-            <h2>{{ month_name }} {{ year }}</h2>
-
-            <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-                <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
-              </svg>
-            </a>
+              <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </a>
+            </div>
           </div>
 
           <div class="calendar-weekdays">
@@ -143,68 +150,95 @@
 
   <div id="modal" class="modal hidden">
     <div class="modal-content">
+
       <button class="close-btn" onclick="closeModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
 
-      <h3>Nova atividade</h3>
+      <h3 class="modal-title">Nova atividade</h3>
 
       <form method="POST" id="activity-form" action="">
         {% csrf_token %}
 
         <input type="hidden" name="date" id="modal-date">
 
-        <label>Agenda</label>
-        {% if admin_participations %}
-        <select name="schedule_id" id="schedule-select" required>
-          {% for p in admin_participations %}
-          <option value="{{ p.schedule.id }}">{{ p.schedule.name }}</option>
-          {% endfor %}
-        </select>
-        {% else %}
-        <p class="modal-warning">Você não é administrador de nenhuma agenda. Crie ou peça acesso de admin a uma agenda
-          para criar atividades.</p>
-        {% endif %}
+        <div class="form-group">
+          <label>Agenda</label>
 
-        <label>Título</label>
-        <input type="text" name="title" required>
-
-        <label>Tipo</label>
-        <select name="kind" id="kind-select">
-          <option value="event">Evento</option>
-          <option value="task">Tarefa</option>
-        </select>
-
-        <label>Categoria</label>
-        <select name="activity_type" required>
-          <option value="class">Aula</option>
-          <option value="exam">Prova</option>
-          <option value="assignment">Trabalho</option>
-          <option value="study">Estudo</option>
-          <option value="meeting">Reunião</option>
-          <option value="presentation">Apresentação</option>
-          <option value="personal">Pessoal</option>
-        </select>
-
-        <div id="time-fields">
-          <label>Início</label>
-          <input type="time" name="start_time">
-
-          <label>Fim</label>
-          <input type="time" name="end_time">
+          {% if admin_participations %}
+          <select name="schedule_id" id="schedule-select" required>
+            {% for p in admin_participations %}
+            <option value="{{ p.schedule.id }}">
+              {{ p.schedule.name }}
+            </option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <p class="modal-warning">
+            Você não é administrador de nenhuma agenda.
+          </p>
+          {% endif %}
         </div>
 
-        <br>
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" name="title" placeholder="Ex: Prova de Cálculo" required>
+        </div>
 
-        {% if admin_participations %}
-        <button type="submit">Salvar</button>
-        {% endif %}
-        <button type="button" onclick="closeModal()">Cancelar</button>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select name="kind" id="kind-select">
+              <option value="event">Evento</option>
+              <option value="task">Tarefa</option>
+            </select>
+          </div>
 
-      </form>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select name="activity_type" required>
+              <option value="class">Aula</option>
+              <option value="exam">Prova</option>
+              <option value="assignment">Trabalho</option>
+              <option value="study">Estudo</option>
+              <option value="meeting">Reunião</option>
+              <option value="presentation">Apresentação</option>
+              <option value="personal">Pessoal</option>
+            </select>
+          </div>
+        </div>
 
+          <div id="time-fields" class="form-row">
+
+            <div class="form-group">
+              <label>Início</label>
+              <input type="time" name="start_time">
+            </div>
+
+            <div class="form-group">
+              <label>Fim</label>
+              <input type="time" name="end_time">
+            </div>
+
+          </div>
+
+          <div class="modal-actions">
+
+            <button type="button" class="btn-secondary" onclick="closeModal()">
+              Cancelar
+            </button>
+
+            {% if admin_participations %}
+            <button type="submit" class="btn-primary" {% if not admin_participations %}disabled{% endif %}>
+              Salvar
+            </button>
+            {% endif %}
+          </div>
+        </form>
     </div>
   </div>
 

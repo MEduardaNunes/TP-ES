@@ -259,5 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 }
 
+const kindSelect = document.getElementById("kind-select");
+const timeFields = document.getElementById("time-fields");
+
+kindSelect.addEventListener("change", () => {
+  if (kindSelect.value === "task") {
+    timeFields.style.display = "none";
+  } else {
+    timeFields.style.display = "flex";
+  }
+});
 
 
