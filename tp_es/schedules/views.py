@@ -5,6 +5,7 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
+from django.urls import reverse
 from functools import wraps
 import calendar
 from .models import Schedule, Participant, Activity, ActivityCheck
@@ -14,9 +15,7 @@ from django.contrib.auth import logout, login
 def calendar_view(request):
     """Lista todas as agendas do usuário logado."""
     participations = request.user.participations.select_related("schedule").all()
-    # Mock de eventos para demonstração
-    # return render(request, "calendar.html", {"participations": participations})
-    return render(request, "calendar.html")
+    return render(request, "calendar.html", {"participations": participations})
 
 def get_participant(user, schedule):
     try:
@@ -33,7 +32,7 @@ def participant_required(view_func):
         participant = get_participant(request.user, schedule)
         if not participant:
             messages.error(request, "Você não tem acesso a essa agenda.")
-            return redirect("calendar")
+            return redirect("schedules:main_calendar_view")
         return view_func(request, schedule, participant, *args, **kwargs)
     return wrapper
 
@@ -46,7 +45,7 @@ def admin_required(view_func):
         participant = get_participant(request.user, schedule)
         if not participant or not participant.is_admin:
             messages.error(request, "Você não tem permissão para isso.")
-            return redirect("calendar")
+            return redirect("schedules:main_calendar_view")
         return view_func(request, schedule, participant, *args, **kwargs)
     return wrapper
 
@@ -138,7 +137,7 @@ def create_schedule(request):
  
         if not name:
             messages.error(request, "Preencha o nome da agenda.")
-            return redirect("create_schedule")
+            return redirect("schedules:create_schedule")
  
         schedule = Schedule.objects.create(name=name, color=color)
         Participant.objects.create(
@@ -147,7 +146,7 @@ def create_schedule(request):
             role=Participant.Role.ADMIN,
         )
         messages.success(request, "Agenda criada com sucesso.")
-        return redirect("calendar")
+        return redirect("schedules:main_calendar_view")
  
     return render(request, "schedules/create_schedule.html")
 
@@ -158,7 +157,7 @@ def edit_schedule(request, schedule, participant):
         schedule.color = request.POST.get("color", schedule.color)
         schedule.save()
         messages.success(request, "Agenda atualizada com sucesso.")
-        return redirect("view_schedule", schedule_id=schedule.id)
+        return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
     return render(request, "schedules/edit_schedule.html", {"schedule": schedule})
 
@@ -167,7 +166,7 @@ def edit_schedule(request, schedule, participant):
 def delete_schedule(request, schedule, participant):
     schedule.delete()
     messages.success(request, "Agenda deletada com sucesso.")
-    return redirect("calendar")
+    return redirect(reverse('schedules:main_calendar_view') + '?tab=agendas')
 
 @participant_required
 def view_schedule(request, schedule, participant):
@@ -199,11 +198,11 @@ def add_participant(request, schedule, participant):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             messages.error(request, "Usuário não encontrado.")
-            return redirect("view_schedule", schedule_id=schedule.id)
+            return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
         if schedule.participants.filter(user=user).exists():
             messages.error(request, "Usuário já é participante.")
-            return redirect("view_schedule", schedule_id=schedule.id)
+            return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
         Participant.objects.create(
             schedule=schedule,
@@ -211,9 +210,9 @@ def add_participant(request, schedule, participant):
             role=Participant.Role.MEMBER
         )
         messages.success(request, "Participante adicionado.")
-        return redirect("view_schedule", schedule_id=schedule.id)
+        return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
-    return redirect("view_schedule", schedule_id=schedule.id)
+    return redirect("schedules:view_schedule", schedule_id=schedule.id)
 
 @admin_required
 @require_POST
@@ -223,11 +222,11 @@ def remove_participant(request, schedule, participant):
  
     if target.is_admin:
         messages.error(request, "Não é possível remover um administrador.")
-        return redirect("view_schedule", schedule_id=schedule.id)
+        return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
     target.delete()
     messages.success(request, "Participante removido.")
-    return redirect("view_schedule", schedule_id=schedule.id)
+    return redirect("schedules:view_schedule", schedule_id=schedule.id)
 
 @admin_required
 def create_activity(request, schedule, participant):
@@ -239,12 +238,14 @@ def create_activity(request, schedule, participant):
  
         if not title or not kind or not activity_type_value:
             messages.error(request, "Preencha todos os campos obrigatórios.")
-            return redirect("create_activity", schedule_id=schedule.id)
+            #return redirect("schedules:create_activity", schedule_id=schedule.id)
+            return redirect("schedules:main_calendar_view")
  
         date_value = request.POST.get("date") or None
         if kind == Activity.Kind.EVENT and not date_value:
             messages.error(request, "Eventos precisam de uma data.")
-            return redirect("create_activity", schedule_id=schedule.id)
+            #return redirect("schedules:create_activity", schedule_id=schedule.id)
+            return redirect("schedules:main_calendar_view")
  
         Activity.objects.create(
             schedule=schedule,
@@ -258,7 +259,8 @@ def create_activity(request, schedule, participant):
             color=request.POST.get("color", ""),
         )
         messages.success(request, "Atividade criada com sucesso.")
-        return redirect("view_schedule", schedule_id=schedule.id)
+        return redirect("schedules:main_calendar_view")
+        # return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
     return render(request, "schedules/create_activity.html", {
         "schedule": schedule,
@@ -331,7 +333,8 @@ def edit_activity(request, schedule, participant, activity_id):
         activity.color = request.POST.get("color", activity.color)
         activity.save()
         messages.success(request, "Atividade atualizada com sucesso.")
-        return redirect("view_schedule", schedule_id=schedule.id)
+        tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
+        return redirect(reverse('schedules:main_calendar_view') + f'?tab={tab}')
  
     return render(request, "schedules/edit_activity.html", {
         "schedule": schedule,
@@ -344,10 +347,17 @@ def edit_activity(request, schedule, participant, activity_id):
 @admin_required
 @require_POST
 def delete_activity(request, schedule, participant, activity_id):
-    activity = get_object_or_404(Activity, id=activity_id, schedule=schedule)
+    try:
+        activity = Activity.objects.get(id=activity_id, schedule=schedule)
+    except Activity.DoesNotExist:
+        messages.error(request, "Atividade não encontrada.")
+        return redirect("schedules:main_calendar_view")
+    
+    activity_kind = activity.kind
     activity.delete()
     messages.success(request, "Atividade deletada com sucesso.")
-    return redirect("view_schedule", schedule_id=schedule.id)
+    tab = "eventos" if activity_kind == Activity.Kind.EVENT else "tarefas"
+    return redirect(reverse('schedules:main_calendar_view') + f'?tab={tab}')
 
 @participant_required
 @require_POST
@@ -357,7 +367,7 @@ def toggle_check(request, schedule, participant, activity_id):
  
     if not activity.is_task:
         messages.error(request, "Apenas tarefas podem ser marcadas como concluídas.")
-        return redirect("view_schedule", schedule_id=schedule.id)
+        return redirect(reverse('schedules:main_calendar_view') + '?tab=tarefas')
  
     check, created = ActivityCheck.objects.get_or_create(
         activity=activity,
@@ -366,7 +376,7 @@ def toggle_check(request, schedule, participant, activity_id):
     if not created:
         check.delete()
  
-    return redirect("view_schedule", schedule_id=schedule.id)
+    return redirect(reverse('schedules:main_calendar_view') + '?tab=tarefas')
  
  
 def logout_view(request):

@@ -10,6 +10,7 @@
   <title>Planify</title>
   <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
   <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
+  <script type="text/javascript" src="{% static 'tp_es/accounts/js/app.js' %}" defer></script>
  </head>
 
 <body>
@@ -57,11 +58,18 @@
     {% endwith %}
   </nav>
   <main>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="toast {{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
     <div class="tabs-header">
       <div class="tabs-topbar">
         <div class="tab-buttons">
-          <button class="tab-btn active" content-id="agenda">
-            Agenda
+          <button class="tab-btn active" content-id="calendario">
+            Calendário
           </button>
 
           <button class="tab-btn" content-id="eventos">
@@ -71,10 +79,14 @@
           <button class="tab-btn" content-id="tarefas">
             Tarefas
           </button>
+
+          <button class="tab-btn" content-id="agendas">
+            Agendas
+          </button>
         </div>
 
         <div class="tab-actions">
-          <button class="action-btn">
+          <button class="action-btn" id="new-btn">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
               <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
             </svg>
@@ -91,7 +103,7 @@
       </div>
 
       <div class="tab-contents">
-        <div class="content" id="agenda">
+        <div class="content" id="calendario">
           <div class="calendar-header">
             <div class="calendar-left">
               <h2>{{ month_name }} {{ year }}</h2>
@@ -130,12 +142,65 @@
         </div>
 
         <div class="content" id="eventos">
-          <h1>EVENTOS</h1>
+          <h1>Eventos Futuros</h1>
+          <div class="events-list">
+            {% for event in future_events %}
+            <div class="event-item">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.schedule.name }} - {{ event.date }} às {{ event.start_time }}</p>
+              <a href="{% url 'schedules:edit_activity' event.schedule.id event.id %}">Editar</a>
+              <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
+              </form>
+            </div>
+            {% empty %}
+            <p>Não há eventos futuros.</p>
+            {% endfor %}
+          </div>
         </div>
 
         <div class="content" id="tarefas">
-          <h1>TAREFAS</h1>
+          <h1>Tarefas Pendentes</h1>
+          <div class="tasks-list">
+            {% for task in pending_tasks %}
+            <div class="task-item">
+              <h3>{{ task.title }}</h3>
+              <p>{{ task.schedule.name }} - {{ task.date }}</p>
+              <a href="{% url 'schedules:edit_activity' task.schedule.id task.id %}">Editar</a>
+              <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">Deletar</button>
+              </form>
+            </div>
+            {% empty %}
+            <p>Não há tarefas pendentes.</p>
+            {% endfor %}
+          </div>
         </div>
+
+        <div class="content" id="agendas">
+          <h1>Agendas</h1>
+          <div class="schedules-list">
+            {% for participation in participations %}
+            <div class="schedule-item">
+              <h3>{{ participation.schedule.name }}</h3>
+              <p>{{ participation.schedule.description|default:"Sem descrição" }}</p>
+              <a href="{% url 'schedules:view_schedule' participation.schedule.id %}">Ver Detalhes</a>
+              {% if participation.is_admin %}
+              <a href="{% url 'schedules:edit_schedule' participation.schedule.id %}">Editar</a>
+              <form method="post" action="{% url 'schedules:delete_schedule' participation.schedule.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta agenda?')">Deletar</button>
+              </form>
+              {% endif %}
+            </div>
+            {% empty %}
+            <p>Você não participa de nenhuma agenda.</p>
+            {% endfor %}
+          </div>
+        </div>
+
       </div>
     </div>
     </div>
@@ -154,10 +219,8 @@
 
       <h3 class="modal-title">Nova atividade</h3>
 
-      <form method="POST" id="activity-form" action="">
+      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}">
         {% csrf_token %}
-
-        <input type="hidden" name="date" id="modal-date">
 
         <div class="form-group">
           <label>Agenda</label>
@@ -205,6 +268,11 @@
           </div>
         </div>
 
+          <div id="date-field" class="form-group">
+            <label>Data</label>
+            <input type="date" name="date" id="date-input" required>
+          </div>
+
           <div id="time-fields" class="form-row">
 
             <div class="form-group">
@@ -232,6 +300,50 @@
             {% endif %}
           </div>
         </form>
+    </div>
+  </div>
+
+  <div id="agenda-modal" class="modal hidden">
+    <div class="modal-content">
+
+      <button class="close-btn" onclick="closeAgendaModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <h3 class="modal-title">Nova Agenda</h3>
+
+      <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" name="name" placeholder="Nome da agenda" required>
+        </div>
+
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea name="description" placeholder="Descrição opcional"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Cor</label>
+          <input type="color" name="color" value="#6366f1">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeAgendaModal()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn-primary">
+            Criar
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -267,6 +379,69 @@
   <script src="{% static 'schedules/js/tabs.js' %}" defer></script>
   <script src="{% static 'schedules/js/sidebar.js' %}" defer></script>
   <script src="{% static 'schedules/js/calendar.js' %}" defer></script>
+
+  <script>
+    function openNewModal() {
+      const activeTab = document.querySelector('.tab-btn.active');
+      const contentId = activeTab.getAttribute('content-id');
+      
+      if (contentId === 'agendas') {
+        openAgendaModal();
+      } else if (contentId === 'eventos') {
+        openActivityModal('event');
+      } else if (contentId === 'tarefas') {
+        openActivityModal('task');
+      } else if (contentId === 'calendario') {
+        openActivityModal('event'); // Padrão: abre como evento
+      }
+    }
+
+    function openAgendaModal() {
+      // Resetar formulário
+      document.getElementById('agenda-form').reset();
+      document.getElementById('agenda-modal').classList.remove('hidden');
+    }
+
+    function closeAgendaModal() {
+      document.getElementById('agenda-modal').classList.add('hidden');
+    }
+
+    function openActivityModal(kind) {
+      const modal = document.getElementById('modal');
+      const kindSelect = document.getElementById('kind-select');
+      const dateInput = document.getElementById('date-input');
+      const timeFields = document.getElementById('time-fields');
+      
+      // Resetar formulário
+      document.getElementById('activity-form').reset();
+      
+      kindSelect.value = kind;
+      dateInput.value = ''; // sem data específica
+      
+      if (kind === 'task') {
+        timeFields.style.display = 'none';
+      } else {
+        timeFields.style.display = 'flex';
+      }
+      
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    document.getElementById('new-btn').addEventListener('click', openNewModal);
+
+    document.getElementById('kind-select').addEventListener('change', function() {
+      const timeFields = document.getElementById('time-fields');
+      if (this.value === 'task') {
+        timeFields.style.display = 'none';
+      } else {
+        timeFields.style.display = 'flex';
+      }
+    });
+  </script>
 </body>
 
 </html>

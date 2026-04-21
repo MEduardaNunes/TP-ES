@@ -299,6 +299,39 @@ main p {
   padding-bottom: 5px;
 }
 
+/* Schedules list */
+.schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.schedule-item {
+  background: var(--bg-clr);
+  border: 1px solid var(--line-clr);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.schedule-item h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-clr);
+}
+
+.schedule-item p {
+  margin: 0 0 1rem 0;
+  color: var(--secondary-text-clr);
+}
+
+.schedule-item a {
+  color: var(--accent-clr);
+  text-decoration: none;
+}
+
+.schedule-item a:hover {
+  text-decoration: underline;
+}
+
 .logout-form {
   margin: 0; 
   width: 100%;

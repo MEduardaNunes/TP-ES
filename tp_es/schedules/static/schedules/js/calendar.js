@@ -157,11 +157,7 @@ function renderCalendar() {
             month === (today.getMonth() + 1) &&
             year === today.getFullYear();
  
-        return `
-            <div class="calendar-day ${isToday ? 'today' : ''}" data-day="${dayData.day}">
-                <div class="day-number">${dayData.day}</div>
-            </div>
-        `;
+        return renderDayCell(dayData, isToday);
     }).join('');
  
     grid.innerHTML = html;
