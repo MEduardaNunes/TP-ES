@@ -52,30 +52,62 @@
     </ul>
   </nav>
   <main>
+    <div class="tabs-header">
+
+      <div class="tab-buttons">
+        <button class="tab-btn active" content-id="agenda">
+          Agenda
+        </button>
+
+        <button class="tab-btn" content-id="eventos">
+          Eventos
+        </button>
+
+        <button class="tab-btn" content-id="tarefas">
+          Tarefas
+        </button>
+      </div>
+
+      <div class="tab-contents">
+        <div class="content" id="agenda">
+          <div class="calendar-header">
+            <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
+              </svg>
+            </a>
+
+            <h2>{{ month_name }} {{ year }}</h2>
+
+            <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+              </svg>
+            </a>
+          </div>
+    
+          <div class="calendar-weekdays">
+            <div>Dom</div><div>Seg</div><div>Ter</div>
+            <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+          </div>
+    
+          <div class="calendar-grid" id="calendar-grid"></div>
+    
+        </div>
+
+        <div class="content" id="eventos">
+          <h1>EVENTOS</h1>
+        </div>
+
+        <div class="content" id="tarefas">
+          <h1>TAREFAS</h1>
+        </div>
+      </div>
+
+    </div>
+
     <div class="calendar-container">
-      <div class="calendar-header">
-        <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-            <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
-          </svg>
-        </a>
-
-        <h2>{{ month_name }} {{ year }}</h2>
-
-        <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
-          </svg>
-        </a>
-      </div>
- 
-      <div class="calendar-weekdays">
-        <div>Dom</div><div>Seg</div><div>Ter</div>
-        <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-      </div>
- 
-      <div class="calendar-grid" id="calendar-grid"></div>
- 
+      
     </div>
   </main>
  
@@ -171,6 +203,6 @@
     ]
   };
   </script>
- 
+  <script src="{% static 'schedules/js/tabs.js' %}" defer></script>
 </body>
 </html>

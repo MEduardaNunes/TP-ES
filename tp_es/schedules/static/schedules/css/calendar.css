@@ -41,6 +41,7 @@
 
 main{
   padding: min(30px, 7%);
+  margin-bottom: 2em;
 }
 
 main p {
@@ -232,13 +233,7 @@ main p {
   }
 }
 
-.calendar-container {
-  background: var(--container-background-base);
-  border-radius: 1em;
-  border: 1px solid var(--line-clr);
-  padding: 1.5em;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+
  
 .calendar-header {
   display: flex;
@@ -597,3 +592,67 @@ main p {
   justify-content: space-between;
   align-items: center;
 }
+
+/*TABS*/
+
+.tabs-header {
+  padding: 20px;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  width: 100%;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.tab-btn {
+  width: 100%;
+  border: none;
+  background-color: var(--base-clr);
+  color: black;
+  border-radius: 8px 8px 0px 0px;
+  box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  font-size: 1.3em;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color .3s ease;
+}
+
+.tab-btn.active {
+  background-color: rgb(197, 232, 255);
+}
+
+.tab-btn:hover {
+  background-color: #97ccfd;
+}
+
+.content {
+  width: 100%;
+  display: none;
+  top: 0;
+  left: 0;
+  position: absolute;
+  transition: opacity 0.2s ease;
+}
+
+.tab-contents {
+  position: relative;
+}
+
+.content.show {
+  display: block;
+  background-color: rgb(197, 232, 255);
+  border-radius: 0px 0px 8px 8px;
+  padding: 16px;
+  opacity: 1;
+  transition: 0.2s ease;
+}
+
