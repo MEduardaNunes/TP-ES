@@ -240,6 +240,7 @@ main p {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5em;
+  padding: 10px 16px;
 }
 
 .calendar-header h2 {
@@ -257,27 +258,48 @@ main p {
   display: flex;
   align-items: center;
   justify-content: center;
+
   width: 40px;
   height: 40px;
-  border-radius: 2em;
+
+  border-radius: 10px;
   background: var(--base-clr);
-  border: 1px solid var(--line-clr);
+  border: none;
   color: var(--secondary-text-clr);
   text-decoration: none;
   transition: all 200ms ease;
+  cursor: pointer;
 }
  
 .calendar-nav-btn:hover {
   background: var(--accent-clr);
-  border-color: var(--accent-clr);
-  color: var(--sidebar-clr);
+  transform: translateY(-1px);
+}
+
+.calendar-nav-btn {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.calendar-nav-btn:hover {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.calendar-weekdays {
+  gap: 4px;
+  margin-bottom: 0px;
 }
 
 .calendar-weekdays,
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+}
+
+.calendar-grid {
+  gap: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .calendar-weekdays div {
@@ -305,7 +327,8 @@ main p {
 .calendar-day {
   background: var(--base-clr);
   border-radius: 0.5em;
-  border: 1px solid var(--line-clr);
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
   min-height: 10em;
   min-width: 10em;
   padding: 6px;
@@ -320,8 +343,15 @@ main p {
 }
  
 .calendar-day.today {
-  border: 2px solid var(--accent-clr);
-  box-shadow: 0 0 0 2px rgba(89, 231, 236, 0.15);
+  background: transparent;
+}
+
+.calendar-day:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar-day:nth-last-child(-n+7) {
+  border-bottom: none;
 }
  
 .day-number {
@@ -335,15 +365,22 @@ main p {
  
 .calendar-day.today .day-number {
   font-size: 1.2rem;
-  color: var(--sidebar-clr);
-  background: var(--accent-clr);
+  background-color: #3b82f6;
+  color: white;
   width: 1.5rem;
   height: 1.5rem;
+
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.calendar-day.today {
+  background: rgba(59, 130, 246, 0.05);
 }
  
 .day-events {
@@ -376,6 +413,7 @@ main p {
   color: #fff;
   cursor: pointer;
   overflow: hidden;
+  margin-top: 2px;
   transition: filter 150ms ease, box-shadow 150ms ease;
   min-height: 14px;
 }
@@ -606,14 +644,22 @@ main p {
   width: 100%;
 }
 
+.tabs-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
 .tab-buttons {
   display: flex;
   gap: 6px;
-  width: 100%;
+  max-width: 600px;
 }
 
 .tab-btn {
-  width: 100%;
+  flex: 1;
   border: none;
   background-color: var(--base-clr);
   color: black;
@@ -621,13 +667,13 @@ main p {
   box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
   font-weight: 500;
   font-size: 1.3em;
-  padding: 8px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: background-color .3s ease;
 }
 
 .tab-btn.active {
-  background-color: rgb(197, 232, 255);
+  background-color: rgb(230, 239, 245);
 }
 
 .tab-btn:hover {
@@ -637,22 +683,48 @@ main p {
 .content {
   width: 100%;
   display: none;
-  top: 0;
-  left: 0;
-  position: absolute;
   transition: opacity 0.2s ease;
 }
 
 .tab-contents {
   position: relative;
+  width: 100%;
 }
+
 
 .content.show {
   display: block;
-  background-color: rgb(197, 232, 255);
+  background-color: rgb(230, 239, 245);
   border-radius: 0px 0px 8px 8px;
   padding: 16px;
   opacity: 1;
   transition: 0.2s ease;
 }
 
+.tab-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #97ccfd;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background: #6bb8f5;
+}
+
+.action-btn svg {
+  fill: currentColor;
+}
