@@ -10,11 +10,11 @@
   <title>Planify</title>
   <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
   <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
-  <script type="text/javascript" src="{% static 'schedules/js/app.js' %}" defer></script>
-</head>
+ </head>
 
 <body>
   <nav id="sidebar">
+    {% with rota_atual=request.resolver_match.url_name %}
     <ul>
       <li>
         <span class="logo">Planify</span>
@@ -25,43 +25,36 @@
           </svg>
         </button>
       </li>
-      <li class="active">
+
+      <li class="{% if rota_atual == 'main_calendar_view' %}active{% endif %}">
         <a href="{% url 'schedules:main_calendar_view' %}">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
             <path
               d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
           </svg>
-          <span>Home</span>
+
+            <span>Home</span>
         </a>
       </li>
-      <li>
-        <button onclick=toggleSubMenu(this) class="dropdown-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-            <path
-              d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
-          </svg>
+
+      <li class="logout-item">
+        <form action="{% url 'schedules:logout' %}" method="post" class="logout-form">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
+            <span>Logout</span>
+          </button>
+        </form>
+      </li>
+
+      <li class="profile-item {% if rota_atual == 'user_space' %}active{% endif %}">
+         <a href="{% url 'accounts:user_space' %}">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" /></svg>
           <span>Perfil</span>
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
-            <path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z" />
-          </svg>
-        </button>
-        <ul class="sub-menu">
-          <div>
-            <li>
-              <a href="{% url 'accounts:user_space' %}">Acessar Perfil</a>
-            </li>
-            <li>
-              <form action="{% url 'schedules:logout' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="logout-btn">
-                  <span>Logout</span>
-                </button>
-              </form>
-            </li>
-          </div>
-        </ul>
+        </a>
       </li>
     </ul>
+    {% endwith %}
   </nav>
   <main>
     <div class="tabs-header">
@@ -100,19 +93,26 @@
       <div class="tab-contents">
         <div class="content" id="agenda">
           <div class="calendar-header">
-            <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-                <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z" />
-              </svg>
-            </a>
+            <div class="calendar-left">
+              <h2>{{ month_name }} {{ year }}</h2>
+              <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </a>
 
-            <h2>{{ month_name }} {{ year }}</h2>
-
-            <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
-                <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
-              </svg>
-            </a>
+              <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </a>
+            </div>
           </div>
 
           <div class="calendar-weekdays">
@@ -143,68 +143,95 @@
 
   <div id="modal" class="modal hidden">
     <div class="modal-content">
+
       <button class="close-btn" onclick="closeModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
 
-      <h3>Nova atividade</h3>
+      <h3 class="modal-title">Nova atividade</h3>
 
       <form method="POST" id="activity-form" action="">
         {% csrf_token %}
 
         <input type="hidden" name="date" id="modal-date">
 
-        <label>Agenda</label>
-        {% if admin_participations %}
-        <select name="schedule_id" id="schedule-select" required>
-          {% for p in admin_participations %}
-          <option value="{{ p.schedule.id }}">{{ p.schedule.name }}</option>
-          {% endfor %}
-        </select>
-        {% else %}
-        <p class="modal-warning">Você não é administrador de nenhuma agenda. Crie ou peça acesso de admin a uma agenda
-          para criar atividades.</p>
-        {% endif %}
+        <div class="form-group">
+          <label>Agenda</label>
 
-        <label>Título</label>
-        <input type="text" name="title" required>
-
-        <label>Tipo</label>
-        <select name="kind" id="kind-select">
-          <option value="event">Evento</option>
-          <option value="task">Tarefa</option>
-        </select>
-
-        <label>Categoria</label>
-        <select name="activity_type" required>
-          <option value="class">Aula</option>
-          <option value="exam">Prova</option>
-          <option value="assignment">Trabalho</option>
-          <option value="study">Estudo</option>
-          <option value="meeting">Reunião</option>
-          <option value="presentation">Apresentação</option>
-          <option value="personal">Pessoal</option>
-        </select>
-
-        <div id="time-fields">
-          <label>Início</label>
-          <input type="time" name="start_time">
-
-          <label>Fim</label>
-          <input type="time" name="end_time">
+          {% if admin_participations %}
+          <select name="schedule_id" id="schedule-select" required>
+            {% for p in admin_participations %}
+            <option value="{{ p.schedule.id }}">
+              {{ p.schedule.name }}
+            </option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <p class="modal-warning">
+            Você não é administrador de nenhuma agenda.
+          </p>
+          {% endif %}
         </div>
 
-        <br>
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" name="title" placeholder="Ex: Prova de Cálculo" required>
+        </div>
 
-        {% if admin_participations %}
-        <button type="submit">Salvar</button>
-        {% endif %}
-        <button type="button" onclick="closeModal()">Cancelar</button>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select name="kind" id="kind-select">
+              <option value="event">Evento</option>
+              <option value="task">Tarefa</option>
+            </select>
+          </div>
 
-      </form>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select name="activity_type" required>
+              <option value="class">Aula</option>
+              <option value="exam">Prova</option>
+              <option value="assignment">Trabalho</option>
+              <option value="study">Estudo</option>
+              <option value="meeting">Reunião</option>
+              <option value="presentation">Apresentação</option>
+              <option value="personal">Pessoal</option>
+            </select>
+          </div>
+        </div>
 
+          <div id="time-fields" class="form-row">
+
+            <div class="form-group">
+              <label>Início</label>
+              <input type="time" name="start_time">
+            </div>
+
+            <div class="form-group">
+              <label>Fim</label>
+              <input type="time" name="end_time">
+            </div>
+
+          </div>
+
+          <div class="modal-actions">
+
+            <button type="button" class="btn-secondary" onclick="closeModal()">
+              Cancelar
+            </button>
+
+            {% if admin_participations %}
+            <button type="submit" class="btn-primary" {% if not admin_participations %}disabled{% endif %}>
+              Salvar
+            </button>
+            {% endif %}
+          </div>
+        </form>
     </div>
   </div>
 
@@ -238,6 +265,8 @@
     };
   </script>
   <script src="{% static 'schedules/js/tabs.js' %}" defer></script>
+  <script src="{% static 'schedules/js/sidebar.js' %}" defer></script>
+  <script src="{% static 'schedules/js/calendar.js' %}" defer></script>
 </body>
 
 </html>
