@@ -75,6 +75,9 @@ function layoutGroup(group) {
 function renderEvent(event) {
     const rawStart = parseTimeToMinutes(event.start_time);
     const rawEnd   = parseTimeToMinutes(event.end_time);
+    const timeHtml = event.start_time
+        ? `<div class="event-time">${event.start_time}</div>`
+        : '';
  
     const start = Math.max(rawStart, DAY_START_MIN);
     const end   = Math.min(rawEnd, DAY_END_MIN);
@@ -88,6 +91,14 @@ function renderEvent(event) {
     return `
         <div class="event-card"
              data-event-id="${event.id}"
+             data-schedule-id="${event.schedule_id}"
+             data-can-manage="${event.can_manage ? 'true' : 'false'}"
+             data-title="${event.title.replace(/"/g, '&quot;')}"
+             data-kind="${event.kind}"
+             data-activity-type="${event.activity_type}"
+             data-date="${event.date}"
+             data-start-time="${event.start_time || ''}"
+             data-end-time="${event.end_time || ''}"
              style="
                 top:    ${top}%;
                 height: ${height}%;
@@ -95,7 +106,7 @@ function renderEvent(event) {
                 width:  calc(${widthPct}% - 3px);
                 background-color: ${event.color};
              ">
-            <div class="event-time">${event.start_time}</div>
+            ${timeHtml}
             <div class="event-title">${event.title}</div>
         </div>
     `;
@@ -107,7 +118,16 @@ function renderEvent(event) {
 function renderTask(task) {
     const color = task.color || '#6366f1';
     return `
-        <div class="task-item" data-task-id="${task.id}">
+        <div class="task-item" 
+             data-task-id="${task.id}"
+             data-schedule-id="${task.schedule_id}"
+             data-can-manage="${task.can_manage ? 'true' : 'false'}"
+             data-title="${task.title.replace(/"/g, '&quot;')}"
+             data-kind="${task.kind}"
+             data-activity-type="${task.activity_type}"
+             data-date="${task.date}"
+             data-start-time="${task.start_time || ''}"
+             data-end-time="${task.end_time || ''}">
             <div class="task-dot" style="background-color:${color};"></div>
             <span class="task-title">${task.title}</span>
         </div>
@@ -213,12 +233,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('calendar-grid');
  
     grid.addEventListener('click', (e) => {
+        const eventCard = e.target.closest('.event-card');
+        if (eventCard) {
+            if (eventCard.dataset.canManage !== 'true') {
+                return;
+            }
+            // Handle event card click
+            const activityData = {
+                id: eventCard.dataset.eventId,
+                schedule_id: eventCard.dataset.scheduleId,
+                title: eventCard.dataset.title,
+                kind: eventCard.dataset.kind,
+                activity_type: eventCard.dataset.activityType,
+                date: eventCard.dataset.date,
+                start_time: eventCard.dataset.startTime,
+                end_time: eventCard.dataset.endTime
+            };
+            openEditActivityModal(activityData);
+            return;
+        }
+
+        const taskItem = e.target.closest('.task-item');
+        if (taskItem) {
+            if (taskItem.dataset.canManage !== 'true') {
+                return;
+            }
+            // Handle task item click
+            const activityData = {
+                id: taskItem.dataset.taskId,
+                schedule_id: taskItem.dataset.scheduleId,
+                title: taskItem.dataset.title,
+                kind: taskItem.dataset.kind,
+                activity_type: taskItem.dataset.activityType,
+                date: taskItem.dataset.date,
+                start_time: taskItem.dataset.startTime,
+                end_time: taskItem.dataset.endTime
+            };
+            openEditActivityModal(activityData);
+            return;
+        }
+
         const dayCell = e.target.closest('.calendar-day');
         if (!dayCell) return;
- 
+
         const day = dayCell.dataset.day;
         if (!day) return;
- 
+
         openCreateModal(day);
     });
 }

@@ -4,9 +4,9 @@ function hideToast () {
     setTimeout(() => {
         toasts.forEach(el => {
             el.style.opacity = "0";
-            setTimeout(() => el.remove(), 500);
+            setTimeout(() => el.remove(), 200);
         });
-    }, 8000);
+    }, 1200);
 }
 
 hideToast();

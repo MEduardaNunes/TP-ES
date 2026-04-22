@@ -155,13 +155,35 @@
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
                 <h3>{{ event.title }}</h3>
-                <p>{{ event.date }} &agrave;s {{ event.start_time }}</p>
+                <p>
+                  {{ event.date }}
+                  {% if event.start_time %}
+                    &agrave;s {{ event.start_time }}
+                  {% endif %}
+                </p>
                 <div class="list-card__actions">
-                  <a class="text-link" href="{% url 'schedules:edit_activity' event.schedule.id event.id %}">Editar</a>
-                  <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" class="inline-form">
-                    {% csrf_token %}
-                    <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
-                  </form>
+                  {% if event.schedule.id in admin_schedule_ids %}
+                    <button
+                      type="button"
+                      class="text-link"
+                      onclick="handleEditActivityClick(event, {
+                        id: {{ event.id }},
+                        schedule_id: {{ event.schedule.id }},
+                        title: '{{ event.title|escapejs }}',
+                        kind: '{{ event.kind }}',
+                        activity_type: '{{ event.activity_type }}',
+                        date: '{{ event.date|date:"Y-m-d" }}',
+                        start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
+                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+                      })"
+                    >
+                      Editar
+                    </button>
+                    <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
+                    </form>
+                  {% endif %}
                 </div>
               </article>
             {% empty %}
@@ -190,11 +212,28 @@
                 <h3>{{ task.title }}</h3>
                 <p>Entrega em {{ task.date }}</p>
                 <div class="list-card__actions">
-                  <a class="text-link" href="{% url 'schedules:edit_activity' task.schedule.id task.id %}">Editar</a>
-                  <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
-                    {% csrf_token %}
-                    <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">Deletar</button>
-                  </form>
+                  {% if task.schedule.id in admin_schedule_ids %}
+                    <button
+                      type="button"
+                      class="text-link"
+                      onclick="handleEditActivityClick(event, {
+                        id: {{ task.id }},
+                        schedule_id: {{ task.schedule.id }},
+                        title: '{{ task.title|escapejs }}',
+                        kind: '{{ task.kind }}',
+                        activity_type: '{{ task.activity_type }}',
+                        date: '{{ task.date|date:"Y-m-d" }}',
+                        start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                        end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                      })"
+                    >
+                      Editar
+                    </button>
+                    <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">Deletar</button>
+                    </form>
+                  {% endif %}
                 </div>
               </article>
             {% empty %}
@@ -225,12 +264,50 @@
                 <h3>{{ participation.schedule.name }}</h3>
                 <p>{{ participation.schedule.description|default:"Sem descri&ccedil;&atilde;o" }}</p>
                 <div class="list-card__actions">
-                  <a class="text-link" href="{% url 'schedules:view_schedule' participation.schedule.id %}">Ver detalhes</a>
+                  <button
+                    type="button"
+                    class="text-link"
+                    data-schedule-id="{{ participation.schedule.id }}"
+                    data-schedule-name="{{ participation.schedule.name|escapejs }}"
+                    data-schedule-description="{{ participation.schedule.description|default_if_none:''|escapejs }}"
+                    data-schedule-color="{{ participation.schedule.color|default:'#6366f1' }}"
+                    data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
+                    onclick="openScheduleDetailsModal(this)"
+                  >
+                    Ver detalhes
+                  </button>
+                  <script type="application/json" id="schedule-participants-{{ participation.schedule.id }}">
+                    [
+                      {% for member in participation.schedule.participants.all %}
+                        {
+                          "id": {{ member.user.id }},
+                          "username": "{{ member.user.username|escapejs }}",
+                          "is_admin": {% if member.is_admin %}true{% else %}false{% endif %}
+                        }{% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    ]
+                  </script>
                   {% if participation.is_admin %}
-                    <a class="text-link" href="{% url 'schedules:edit_schedule' participation.schedule.id %}">Editar</a>
+                    <button
+                      type="button"
+                      class="text-link"
+                      data-schedule-id="{{ participation.schedule.id }}"
+                      data-schedule-name="{{ participation.schedule.name|escapejs }}"
+                      data-schedule-description="{{ participation.schedule.description|default_if_none:''|escapejs }}"
+                      data-schedule-color="{{ participation.schedule.color|default:'#6366f1' }}"
+                      data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
+                      onclick="handleEditScheduleClick(event, this)"
+                    >
+                      Editar
+                    </button>
                     <form method="post" action="{% url 'schedules:delete_schedule' participation.schedule.id %}" class="inline-form">
                       {% csrf_token %}
                       <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta agenda?')">Deletar</button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{% url 'schedules:leave_schedule' participation.schedule.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja sair desta agenda?')">Sair da agenda</button>
                     </form>
                   {% endif %}
                 </div>
@@ -340,6 +417,90 @@
     </div>
   </div>
 
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeEditModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <h3 class="modal-title">Editar atividade</h3>
+
+      <form method="POST" id="edit-activity-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Agenda</label>
+          <select name="schedule_id" id="edit-schedule-select" required>
+            {% for p in admin_participations %}
+              <option value="{{ p.schedule.id }}">
+                {{ p.schedule.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>T&iacute;tulo</label>
+          <input type="text" name="title" id="edit-title" placeholder="Ex: Prova de C&aacute;lculo" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select name="kind" id="edit-kind-select">
+              <option value="event">Evento</option>
+              <option value="task">Tarefa</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Categoria</label>
+            <select name="activity_type" id="edit-activity-type" required>
+              <option value="class">Aula</option>
+              <option value="exam">Prova</option>
+              <option value="assignment">Trabalho</option>
+              <option value="study">Estudo</option>
+              <option value="meeting">Reuni&atilde;o</option>
+              <option value="presentation">Apresenta&ccedil;&atilde;o</option>
+              <option value="personal">Pessoal</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="edit-date-field" class="form-group">
+          <label>Data</label>
+          <input type="date" name="date" id="edit-date-input" required>
+        </div>
+
+        <div id="edit-time-fields" class="form-row">
+          <div class="form-group">
+            <label>In&iacute;cio</label>
+            <input type="time" name="start_time" id="edit-start-time">
+          </div>
+
+          <div class="form-group">
+            <label>Fim</label>
+            <input type="time" name="end_time" id="edit-end-time">
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeEditModal()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn-primary">
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="agenda-modal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" onclick="closeAgendaModal()">
@@ -376,6 +537,20 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Participantes</label>
+          <div class="participant-picker">
+            <input type="text" id="schedule-participant-input" placeholder="Digite o nome do usu&aacute;rio">
+            <button type="button" class="btn-secondary" onclick="addCreateScheduleParticipant()">
+              Adicionar
+            </button>
+          </div>
+          <p id="schedule-participant-feedback" class="participant-feedback" aria-live="polite"></p>
+          <p class="participant-admin-note">Voc&ecirc; ser&aacute; mantido como administrador da agenda.</p>
+          <div id="schedule-participant-list" class="participant-selected-list"></div>
+          <div id="schedule-participant-inputs"></div>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeAgendaModal()">
             Cancelar
@@ -386,6 +561,105 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="edit-agenda-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeEditAgendaModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <h3 class="modal-title">Editar agenda</h3>
+
+      <form method="POST" id="edit-agenda-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" name="name" id="edit-agenda-name" placeholder="Nome da agenda" required>
+        </div>
+
+        <div class="form-group">
+          <label>Descri&ccedil;&atilde;o</label>
+          <textarea name="description" id="edit-agenda-description" placeholder="Descri&ccedil;&atilde;o opcional"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Cor</label>
+          <div class="color-picker-row">
+            <input type="color" name="color" id="edit-schedule-color-input" value="#6366f1">
+            <div class="color-preview-chip">
+              <span class="schedule-color-dot" id="edit-schedule-color-preview" aria-hidden="true"></span>
+              <span id="edit-schedule-color-value">#6366f1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Participantes</label>
+          <div class="participant-picker">
+            <input type="text" id="edit-schedule-participant-input" placeholder="Digite o nome do usu&aacute;rio">
+            <button type="button" class="btn-secondary" onclick="addEditScheduleParticipant()">
+              Adicionar
+            </button>
+          </div>
+          <p id="edit-schedule-participant-feedback" class="participant-feedback" aria-live="polite"></p>
+          <p class="participant-admin-note">Voc&ecirc; continua como administrador da agenda.</p>
+          <div id="edit-schedule-participant-list" class="participant-selected-list"></div>
+          <div id="edit-schedule-participant-inputs"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeEditAgendaModal()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn-primary">
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="schedule-details-modal" class="modal hidden">
+    <div class="modal-content modal-content--details">
+      <button class="close-btn" onclick="closeScheduleDetailsModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="details-header">
+        <span class="details-color-dot" id="details-schedule-color" aria-hidden="true"></span>
+        <div>
+          <h3 class="modal-title" id="details-schedule-name"></h3>
+          <p class="details-admin" id="details-schedule-admin"></p>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Descri&ccedil;&atilde;o</h4>
+        <p id="details-schedule-description" class="details-description"></p>
+      </div>
+
+      <div class="details-section">
+        <h4>Participantes</h4>
+        <div id="details-schedule-participants" class="details-participants-list"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeScheduleDetailsModal()">
+          Fechar
+        </button>
+      </div>
     </div>
   </div>
 
@@ -403,8 +677,12 @@
               {% for activity in activities %}
               {
                 id: {{ activity.id }},
+                schedule_id: {{ activity.schedule.id }},
+                can_manage: {% if activity.schedule.id in admin_schedule_ids %}true{% else %}false{% endif %},
                 title: "{{ activity.title|escapejs }}",
                 kind: "{{ activity.kind }}",
+                activity_type: "{{ activity.activity_type }}",
+                date: "{{ activity.date }}",
                 start_time: "{{ activity.start_time }}",
                 end_time: "{{ activity.end_time }}",
                 color: "{{ activity.color|default:activity.schedule.color|default:'#6366f1' }}"
@@ -423,6 +701,9 @@
   <script src="{% static 'schedules/js/calendar.js' %}" defer></script>
 
   <script>
+    let createScheduleParticipants = [];
+    let editScheduleParticipants = [];
+
     function openNewModal() {
       const activeTab = document.querySelector('.tab-btn.active');
       const contentId = activeTab.getAttribute('content-id');
@@ -439,13 +720,323 @@
     }
 
     function openAgendaModal() {
-      document.getElementById('agenda-form').reset();
-      syncScheduleColorPreview();
+      const form = document.getElementById('agenda-form');
+      const colorInput = document.getElementById('schedule-color-input');
+
+      form.reset();
+      colorInput.value = '#6366f1';
+      syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
+      createScheduleParticipants = [];
+      renderScheduleParticipants(
+        'schedule-participant-list',
+        'schedule-participant-inputs',
+        createScheduleParticipants
+      );
+      setParticipantFeedback('schedule-participant-feedback', '');
+      document.getElementById('schedule-participant-input').value = '';
       document.getElementById('agenda-modal').classList.remove('hidden');
     }
 
     function closeAgendaModal() {
       document.getElementById('agenda-modal').classList.add('hidden');
+    }
+
+    function openEditScheduleModal(scheduleData) {
+      const modal = document.getElementById('edit-agenda-modal');
+      const form = document.getElementById('edit-agenda-form');
+      const colorInput = document.getElementById('edit-schedule-color-input');
+
+      form.action = `/schedules/${scheduleData.id}/edit/`;
+      document.getElementById('edit-agenda-name').value = scheduleData.name;
+      document.getElementById('edit-agenda-description').value = scheduleData.description || '';
+      colorInput.value = scheduleData.color || '#6366f1';
+      syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
+      editScheduleParticipants = Array.isArray(scheduleData.participants)
+        ? scheduleData.participants
+          .filter(participant => !participant.is_admin)
+          .map(participant => ({
+            username: participant.username
+          }))
+        : [];
+      renderScheduleParticipants(
+        'edit-schedule-participant-list',
+        'edit-schedule-participant-inputs',
+        editScheduleParticipants
+      );
+      setParticipantFeedback('edit-schedule-participant-feedback', '');
+      document.getElementById('edit-schedule-participant-input').value = '';
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeEditAgendaModal() {
+      document.getElementById('edit-agenda-modal').classList.add('hidden');
+    }
+
+    function openScheduleDetailsModal(buttonElement) {
+      const participantsElementId = buttonElement.dataset.scheduleParticipantsId;
+      const participantsElement = participantsElementId
+        ? document.getElementById(participantsElementId)
+        : null;
+
+      let participants = [];
+      if (participantsElement?.textContent) {
+        try {
+          participants = JSON.parse(participantsElement.textContent);
+        } catch (error) {
+          participants = [];
+        }
+      }
+
+      const adminParticipant = participants.find(participant => participant.is_admin);
+      const participantsContainer = document.getElementById('details-schedule-participants');
+
+      document.getElementById('details-schedule-name').textContent = buttonElement.dataset.scheduleName || '';
+      document.getElementById('details-schedule-description').textContent =
+        buttonElement.dataset.scheduleDescription || 'Sem descrição.';
+      document.getElementById('details-schedule-admin').textContent = adminParticipant
+        ? `Administrador: ${adminParticipant.username}`
+        : 'Administrador não identificado';
+      document.getElementById('details-schedule-color').style.backgroundColor =
+        buttonElement.dataset.scheduleColor || '#6366f1';
+
+      participantsContainer.innerHTML = '';
+
+      if (!participants.length) {
+        const emptyState = document.createElement('p');
+        emptyState.className = 'details-empty';
+        emptyState.textContent = 'Nenhum participante encontrado.';
+        participantsContainer.appendChild(emptyState);
+      } else {
+        participants.forEach(participant => {
+          const chip = document.createElement('span');
+          chip.className = 'details-participant-chip';
+          chip.textContent = participant.is_admin
+            ? `${participant.username} (Admin)`
+            : participant.username;
+          if (participant.is_admin) {
+            chip.classList.add('details-participant-chip--admin');
+          }
+          participantsContainer.appendChild(chip);
+        });
+      }
+
+      document.getElementById('schedule-details-modal').classList.remove('hidden');
+    }
+
+    function closeScheduleDetailsModal() {
+      document.getElementById('schedule-details-modal').classList.add('hidden');
+    }
+
+    function handleEditScheduleClick(domEvent, buttonElement) {
+      domEvent.preventDefault();
+      domEvent.stopPropagation();
+
+      const participantsElementId = buttonElement.dataset.scheduleParticipantsId;
+      const participantsElement = participantsElementId
+        ? document.getElementById(participantsElementId)
+        : null;
+
+      let participants = [];
+      if (participantsElement?.textContent) {
+        try {
+          participants = JSON.parse(participantsElement.textContent);
+        } catch (error) {
+          participants = [];
+        }
+      }
+
+      const scheduleData = {
+        id: Number(buttonElement.dataset.scheduleId),
+        name: buttonElement.dataset.scheduleName || '',
+        description: buttonElement.dataset.scheduleDescription || '',
+        color: buttonElement.dataset.scheduleColor || '#6366f1',
+        participants
+      };
+
+      openEditScheduleModal(scheduleData);
+    }
+
+    function renderScheduleParticipants(listId, inputsId, selectedParticipants) {
+      const list = document.getElementById(listId);
+      const inputs = document.getElementById(inputsId);
+
+      if (!list || !inputs) {
+        return;
+      }
+
+      list.innerHTML = '';
+      inputs.innerHTML = '';
+
+      if (!selectedParticipants.length) {
+        const emptyState = document.createElement('p');
+        emptyState.className = 'participant-empty';
+        emptyState.textContent = 'Nenhum participante adicional selecionado.';
+        list.appendChild(emptyState);
+        return;
+      }
+
+      selectedParticipants.forEach(participant => {
+        const chip = document.createElement('div');
+        chip.className = 'participant-chip';
+
+        const label = document.createElement('span');
+        label.textContent = participant.username;
+        chip.appendChild(label);
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'participant-remove';
+        removeButton.textContent = 'x';
+        removeButton.setAttribute('aria-label', `Remover ${participant.username}`);
+        removeButton.addEventListener('click', () => {
+          removeScheduleParticipant(listId, participant.username);
+        });
+        chip.appendChild(removeButton);
+
+        list.appendChild(chip);
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'participant_usernames';
+        input.value = participant.username;
+        inputs.appendChild(input);
+      });
+    }
+
+    function setParticipantFeedback(feedbackId, message, level = '') {
+      const feedback = document.getElementById(feedbackId);
+      if (!feedback) {
+        return;
+      }
+
+      feedback.textContent = message;
+      feedback.classList.remove(
+        'participant-feedback--error',
+        'participant-feedback--success',
+        'participant-feedback--warning'
+      );
+
+      if (message && level) {
+        feedback.classList.add(`participant-feedback--${level}`);
+      }
+    }
+
+    async function addScheduleParticipant(inputId, feedbackId, listId, inputsId, stateKey) {
+      const input = document.getElementById(inputId);
+      if (!input) {
+        return;
+      }
+
+      const typedUsername = input.value.trim();
+      if (!typedUsername) {
+        setParticipantFeedback(feedbackId, 'Digite o nome do usuário para adicionar.', 'warning');
+        return;
+      }
+
+      const state = stateKey === 'create'
+        ? createScheduleParticipants
+        : editScheduleParticipants;
+
+      if (state.some(user => user.username === typedUsername)) {
+        setParticipantFeedback(feedbackId, 'Esse usuário já foi adicionado.', 'warning');
+        return;
+      }
+
+      setParticipantFeedback(feedbackId, 'Validando usuário...', '');
+
+      try {
+        const response = await fetch(
+          `{% url 'schedules:validate_participant_username' %}?username=${encodeURIComponent(typedUsername)}`,
+          {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('validation_failed');
+        }
+
+        const result = await response.json();
+        if (!result.valid) {
+          setParticipantFeedback(
+            feedbackId,
+            result.message || 'Usuário não encontrado. Verifique o nome e tente novamente.',
+            result.level || 'warning'
+          );
+          return;
+        }
+
+        const validatedUsername = result.username || typedUsername;
+        if (state.some(user => user.username === validatedUsername)) {
+          setParticipantFeedback(feedbackId, 'Esse usuário já foi adicionado.', 'warning');
+          return;
+        }
+
+        state.push({
+          username: validatedUsername
+        });
+
+        renderScheduleParticipants(listId, inputsId, state);
+        setParticipantFeedback(
+          feedbackId,
+          result.message || `Usuário "${validatedUsername}" encontrado e adicionado.`,
+          result.level || 'success'
+        );
+        input.value = '';
+      } catch (error) {
+        setParticipantFeedback(
+          feedbackId,
+          'Não foi possível validar o usuário agora. Tente novamente.',
+          'warning'
+        );
+      }
+    }
+
+    function removeScheduleParticipant(listId, participantUsername) {
+      const state = listId === 'schedule-participant-list'
+        ? createScheduleParticipants
+        : editScheduleParticipants;
+
+      const nextState = state.filter(user => user.username !== participantUsername);
+      if (listId === 'schedule-participant-list') {
+        createScheduleParticipants = nextState;
+        setParticipantFeedback('schedule-participant-feedback', '');
+      } else {
+        editScheduleParticipants = nextState;
+        setParticipantFeedback('edit-schedule-participant-feedback', '');
+      }
+
+      renderScheduleParticipants(
+        listId,
+        listId === 'schedule-participant-list'
+          ? 'schedule-participant-inputs'
+          : 'edit-schedule-participant-inputs',
+        nextState
+      );
+    }
+
+    function addCreateScheduleParticipant() {
+      addScheduleParticipant(
+        'schedule-participant-input',
+        'schedule-participant-feedback',
+        'schedule-participant-list',
+        'schedule-participant-inputs',
+        'create'
+      );
+    }
+
+    function addEditScheduleParticipant() {
+      addScheduleParticipant(
+        'edit-schedule-participant-input',
+        'edit-schedule-participant-feedback',
+        'edit-schedule-participant-list',
+        'edit-schedule-participant-inputs',
+        'edit'
+      );
     }
 
     function openActivityModal(kind) {
@@ -472,6 +1063,43 @@
       document.getElementById('modal').classList.add('hidden');
     }
 
+    function openEditActivityModal(activityData) {
+      const modal = document.getElementById('edit-modal');
+      const form = document.getElementById('edit-activity-form');
+
+      // Set form action to edit URL
+      form.action = `/schedules/${activityData.schedule_id}/activity/${activityData.id}/edit/`;
+
+      // Populate form fields
+      document.getElementById('edit-schedule-select').value = activityData.schedule_id;
+      document.getElementById('edit-title').value = activityData.title;
+      document.getElementById('edit-kind-select').value = activityData.kind;
+      document.getElementById('edit-activity-type').value = activityData.activity_type;
+      document.getElementById('edit-date-input').value = activityData.date;
+      document.getElementById('edit-start-time').value = activityData.start_time || '';
+      document.getElementById('edit-end-time').value = activityData.end_time || '';
+
+      // Show/hide time fields based on kind
+      const timeFields = document.getElementById('edit-time-fields');
+      if (activityData.kind === 'task') {
+        timeFields.style.display = 'none';
+      } else {
+        timeFields.style.display = 'flex';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function handleEditActivityClick(domEvent, activityData) {
+      domEvent.preventDefault();
+      domEvent.stopPropagation();
+      openEditActivityModal(activityData);
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.add('hidden');
+    }
+
     document.getElementById('new-btn').addEventListener('click', openNewModal);
 
     document.getElementById('kind-select').addEventListener('change', function() {
@@ -483,10 +1111,19 @@
       }
     });
 
-    function syncScheduleColorPreview() {
-      const colorInput = document.getElementById('schedule-color-input');
-      const colorPreview = document.getElementById('schedule-color-preview');
-      const colorValue = document.getElementById('schedule-color-value');
+    document.getElementById('edit-kind-select').addEventListener('change', function() {
+      const timeFields = document.getElementById('edit-time-fields');
+      if (this.value === 'task') {
+        timeFields.style.display = 'none';
+      } else {
+        timeFields.style.display = 'flex';
+      }
+    });
+
+    function syncColorPreview(inputId, previewId, valueId) {
+      const colorInput = document.getElementById(inputId);
+      const colorPreview = document.getElementById(previewId);
+      const colorValue = document.getElementById(valueId);
 
       if (!colorInput || !colorPreview || !colorValue) {
         return;
@@ -496,8 +1133,16 @@
       colorValue.textContent = colorInput.value.toUpperCase();
     }
 
-    document.getElementById('schedule-color-input')?.addEventListener('input', syncScheduleColorPreview);
-    syncScheduleColorPreview();
+    document.getElementById('schedule-color-input')?.addEventListener('input', function() {
+      syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
+    });
+
+    document.getElementById('edit-schedule-color-input')?.addEventListener('input', function() {
+      syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
+    });
+
+    syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
+    syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
   </script>
 </body>
 

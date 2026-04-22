@@ -4,12 +4,82 @@ from django.contrib import messages
 from datetime import date
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
 from functools import wraps
 import calendar
 from .models import Schedule, Participant, Activity, ActivityCheck
 from django.contrib.auth import logout, login
+
+def sync_schedule_members(schedule, selected_usernames):
+    """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
+    User = get_user_model()
+    normalized_usernames = {
+        str(username).strip()
+        for username in selected_usernames
+        if str(username).strip()
+    }
+
+    matched_users = list(User.objects.filter(username__in=normalized_usernames))
+    matched_usernames = {user.username for user in matched_users}
+    missing_usernames = sorted(normalized_usernames - matched_usernames)
+
+    current_admin_ids = set(
+        schedule.participants.filter(role=Participant.Role.ADMIN).values_list("user_id", flat=True)
+    )
+    matched_user_ids = {user.id for user in matched_users} - current_admin_ids
+
+    existing_member_ids = set(
+        schedule.participants.filter(role=Participant.Role.MEMBER).values_list("user_id", flat=True)
+    )
+
+    member_ids_to_remove = existing_member_ids - matched_user_ids
+    if member_ids_to_remove:
+        schedule.participants.filter(
+            role=Participant.Role.MEMBER,
+            user_id__in=member_ids_to_remove,
+        ).delete()
+
+    member_ids_to_add = matched_user_ids - existing_member_ids
+    if member_ids_to_add:
+        Participant.objects.bulk_create(
+            [
+                Participant(
+                    schedule=schedule,
+                    user=user,
+                    role=Participant.Role.MEMBER,
+                )
+                for user in matched_users
+                if user.id in member_ids_to_add
+            ]
+        )
+
+    return missing_usernames
+
+@login_required
+def validate_participant_username(request):
+    username = (request.GET.get("username") or "").strip()
+    if not username:
+        return JsonResponse({
+            "valid": False,
+            "level": "warning",
+            "message": "Digite o nome do usuário para adicionar.",
+        })
+
+    user_exists = get_user_model().objects.filter(username=username).exists()
+    if not user_exists:
+        return JsonResponse({
+            "valid": False,
+            "level": "warning",
+            "message": "Usuário não encontrado. Verifique o nome e tente novamente.",
+        })
+
+    return JsonResponse({
+        "valid": True,
+        "level": "success",
+        "message": f'Usuário "{username}" encontrado e adicionado.',
+        "username": username,
+    })
 
 @login_required
 def calendar_view(request):
@@ -71,12 +141,17 @@ def main_calendar_view(request):
     cal = calendar.Calendar(firstweekday=6)
     calendar_days = list(cal.itermonthdays(year, month))
  
-    participations = request.user.participations.select_related("schedule").all()
+    participations = request.user.participations.select_related("schedule").prefetch_related(
+        "schedule__participants__user"
+    ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
- 
-    admin_participations = request.user.participations.select_related("schedule").filter(
+  
+    admin_participations = request.user.participations.select_related("schedule").prefetch_related(
+        "schedule__participants__user"
+    ).filter(
         role=Participant.Role.ADMIN
     )
+    admin_schedule_ids = list(admin_participations.values_list("schedule_id", flat=True))
  
     activities = Activity.objects.filter(
         schedule_id__in=schedule_ids,
@@ -126,6 +201,7 @@ def main_calendar_view(request):
         "today_year": today.year,
         "future_events": future_events,
         "pending_tasks": pending_tasks,
+        "admin_schedule_ids": admin_schedule_ids,
     })
     
 @login_required
@@ -133,33 +209,53 @@ def create_schedule(request):
     """Cria uma nova agenda para o usuário logado."""
     if request.method == "POST":
         name = request.POST.get("name")
+        description = request.POST.get("description", "").strip()
         color = request.POST.get("color", "#6366f1")
  
         if not name:
             messages.error(request, "Preencha o nome da agenda.")
             return redirect("schedules:create_schedule")
  
-        schedule = Schedule.objects.create(name=name, color=color)
+        schedule = Schedule.objects.create(
+            name=name,
+            description=description,
+            color=color,
+        )
         Participant.objects.create(
             schedule=schedule,
             user=request.user,
             role=Participant.Role.ADMIN,
         )
+        missing_usernames = sync_schedule_members(schedule, request.POST.getlist("participant_usernames"))
+        if missing_usernames:
+            messages.warning(
+                request,
+                "Alguns usuÃ¡rios nÃ£o foram adicionados porque nÃ£o existem: "
+                + ", ".join(missing_usernames)
+            )
         messages.success(request, "Agenda criada com sucesso.")
-        return redirect("schedules:main_calendar_view")
+        return redirect(reverse("schedules:main_calendar_view") + "?tab=agendas")
  
-    return render(request, "schedules/create_schedule.html")
+    return redirect("schedules:main_calendar_view")
 
 @admin_required
 def edit_schedule(request, schedule, participant):
     if request.method == "POST":
         schedule.name = request.POST.get("name", schedule.name)
+        schedule.description = request.POST.get("description", schedule.description).strip()
         schedule.color = request.POST.get("color", schedule.color)
         schedule.save()
+        missing_usernames = sync_schedule_members(schedule, request.POST.getlist("participant_usernames"))
+        if missing_usernames:
+            messages.warning(
+                request,
+                "Alguns usuÃ¡rios nÃ£o foram adicionados porque nÃ£o existem: "
+                + ", ".join(missing_usernames)
+            )
         messages.success(request, "Agenda atualizada com sucesso.")
-        return redirect("schedules:view_schedule", schedule_id=schedule.id)
+        return redirect(reverse("schedules:main_calendar_view") + "?tab=agendas")
  
-    return render(request, "schedules/edit_schedule.html", {"schedule": schedule})
+    return redirect("schedules:main_calendar_view")
 
 @admin_required
 @require_POST
@@ -180,13 +276,7 @@ def view_schedule(request, schedule, participant):
         ).values_list("activity_id", flat=True)
     )
  
-    return render(request, "schedules/view_schedule.html", {
-        "schedule": schedule,
-        "participant": participant,
-        "events": activities.filter(kind=Activity.Kind.EVENT),
-        "tasks": activities.filter(kind=Activity.Kind.TASK),
-        "checked_ids": checked_ids,
-    })
+    return redirect("schedules:main_calendar_view")
     
 @admin_required
 def add_participant(request, schedule, participant):
@@ -228,6 +318,17 @@ def remove_participant(request, schedule, participant):
     messages.success(request, "Participante removido.")
     return redirect("schedules:view_schedule", schedule_id=schedule.id)
 
+@participant_required
+@require_POST
+def leave_schedule(request, schedule, participant):
+    if participant.is_admin:
+        messages.error(request, "Administradores não podem sair da agenda por essa opção.")
+        return redirect(reverse('schedules:main_calendar_view') + '?tab=agendas')
+
+    participant.delete()
+    messages.success(request, "Você saiu da agenda com sucesso.")
+    return redirect(reverse('schedules:main_calendar_view') + '?tab=agendas')
+
 @admin_required
 def create_activity(request, schedule, participant):
     """Cria uma nova atividade (evento ou tarefa) na agenda."""
@@ -262,11 +363,7 @@ def create_activity(request, schedule, participant):
         return redirect("schedules:main_calendar_view")
         # return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
-    return render(request, "schedules/create_activity.html", {
-        "schedule": schedule,
-        "kinds": Activity.Kind.choices,
-        "types": Activity.Type.choices,
-    })
+    return redirect("schedules:main_calendar_view")
     
 @login_required
 def quick_create_activity(request):
@@ -336,12 +433,7 @@ def edit_activity(request, schedule, participant, activity_id):
         tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
         return redirect(reverse('schedules:main_calendar_view') + f'?tab={tab}')
  
-    return render(request, "schedules/edit_activity.html", {
-        "schedule": schedule,
-        "activity": activity,
-        "kinds": Activity.Kind.choices,
-        "types": Activity.Type.choices,
-    })
+    return redirect("schedules:main_calendar_view")
 
     
 @admin_required

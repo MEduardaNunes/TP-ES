@@ -11,6 +11,7 @@ color_validator = RegexValidator(
 
 class Schedule(models.Model):
     name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
     color = models.CharField(max_length=7, default="#6366f1", validators=[color_validator])
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -43,6 +44,7 @@ class Participant(models.Model):
     def __str__(self):
         return f"{self.user} — {self.schedule} ({self.get_role_display()})"
 
+    @property
     def is_admin(self):
         return self.role == self.Role.ADMIN
     

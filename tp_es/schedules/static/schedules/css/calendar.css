@@ -1472,7 +1472,8 @@ body.schedule-page .color-picker-row {
   gap: 14px;
 }
 
-body.schedule-page input[type="color"]#schedule-color-input {
+body.schedule-page input[type="color"]#schedule-color-input,
+body.schedule-page input[type="color"]#edit-schedule-color-input {
   width: 68px;
   min-width: 68px;
   height: 52px;
@@ -1596,4 +1597,129 @@ body.schedule-page .toast.warning {
   body.schedule-page .schedules-list {
     grid-template-columns: 1fr;
   }
+}
+body.schedule-page .participant-picker {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+body.schedule-page .participant-picker select {
+  flex: 1;
+  min-width: 0;
+}
+
+body.schedule-page .participant-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+
+body.schedule-page .participant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #312e81;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+body.schedule-page .participant-remove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+body.schedule-page .participant-empty,
+body.schedule-page .participant-admin-note {
+  margin-top: 0.75rem;
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+body.schedule-page .participant-feedback {
+  min-height: 1.2rem;
+  margin-top: 0.55rem;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+body.schedule-page .participant-feedback--error {
+  color: #b91c1c;
+}
+
+body.schedule-page .participant-feedback--success {
+  color: #0f766e;
+}
+
+body.schedule-page .participant-feedback--warning {
+  color: #b45309;
+}
+
+body.schedule-page .modal-content--details {
+  gap: 1.1rem;
+}
+
+body.schedule-page .details-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-right: 2rem;
+}
+
+body.schedule-page .details-color-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.12);
+}
+
+body.schedule-page .details-admin {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+body.schedule-page .details-section h4 {
+  margin: 0 0 0.55rem;
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+
+body.schedule-page .details-description,
+body.schedule-page .details-empty {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+body.schedule-page .details-participants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+body.schedule-page .details-participant-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.48rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.14);
+  color: #1e3a8a;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  font-weight: 600;
+}
+
+body.schedule-page .details-participant-chip--admin {
+  background: rgba(99, 102, 241, 0.16);
+  color: #4338ca;
+  border-color: rgba(99, 102, 241, 0.28);
 }
