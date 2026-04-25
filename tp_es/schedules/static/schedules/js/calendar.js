@@ -71,23 +71,26 @@ function layoutGroup(group) {
     return result.map(e => ({ ...e, totalColumns }));
 }
  
- 
 function renderEvent(event) {
     const rawStart = parseTimeToMinutes(event.start_time);
     const rawEnd   = parseTimeToMinutes(event.end_time);
+
     const timeHtml = event.start_time
         ? `<div class="event-time">${event.start_time}</div>`
         : '';
- 
+
     const start = Math.max(rawStart, DAY_START_MIN);
     const end   = Math.min(rawEnd, DAY_END_MIN);
- 
+
     const top    = ((start - DAY_START_MIN) / DAY_RANGE_MIN) * 100;
-    const height = Math.max(((end - start) / DAY_RANGE_MIN) * 100, 2.5); // mínimo visível
- 
+    const height = Math.max(((end - start) / DAY_RANGE_MIN) * 100, 2.5);
+
     const widthPct = 100 / event.totalColumns;
     const leftPct  = event.column * widthPct;
- 
+    const isChecked = event.is_checked;
+    const eventColor = isChecked ? '#22c55e' : event.color;
+    const checkIcon = isChecked ? '✅ ' : '';
+
     return `
         <div class="event-card"
              data-event-id="${event.id}"
@@ -104,10 +107,10 @@ function renderEvent(event) {
                 height: ${height}%;
                 left:   ${leftPct}%;
                 width:  calc(${widthPct}% - 3px);
-                background-color: ${event.color};
+                background-color: ${eventColor};
              ">
             ${timeHtml}
-            <div class="event-title">${event.title}</div>
+            <div class="event-title">${checkIcon}${event.title}</div>
         </div>
     `;
 }
@@ -116,9 +119,12 @@ function renderEvent(event) {
  * Render de uma tarefa (sem posicionamento temporal).
  */
 function renderTask(task) {
-    const color = task.color || '#6366f1';
+    const isChecked = task.is_checked;
+    const color = isChecked ? '#22c55e' : (task.color || '#6366f1');
+    const checkIcon = isChecked ? '✅ ' : '';
+
     return `
-        <div class="task-item" 
+        <div class="task-item ${isChecked ? 'task-item--completed' : ''}" 
              data-task-id="${task.id}"
              data-schedule-id="${task.schedule_id}"
              data-can-manage="${task.can_manage ? 'true' : 'false'}"
@@ -129,7 +135,7 @@ function renderTask(task) {
              data-start-time="${task.start_time || ''}"
              data-end-time="${task.end_time || ''}">
             <div class="task-dot" style="background-color:${color};"></div>
-            <span class="task-title">${task.title}</span>
+            <span class="task-title">${checkIcon}${task.title}</span>
         </div>
     `;
 }

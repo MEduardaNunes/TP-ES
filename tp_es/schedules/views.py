@@ -10,6 +10,7 @@ from functools import wraps
 import calendar
 from .models import Schedule, Participant, Activity, ActivityCheck
 from django.contrib.auth import logout, login
+from django.db.models import Exists, OuterRef
 
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
@@ -152,12 +153,26 @@ def main_calendar_view(request):
         role=Participant.Role.ADMIN
     )
     admin_schedule_ids = list(admin_participations.values_list("schedule_id", flat=True))
+    
+    user_checks = ActivityCheck.objects.filter(
+    activity_id=OuterRef("pk"),
+    user=request.user
+)
  
     activities = Activity.objects.filter(
         schedule_id__in=schedule_ids,
         date__year=year,
         date__month=month,
+    ).annotate(
+        is_checked_for_user=Exists(user_checks)
     ).select_related("schedule").order_by("start_time")
+    
+    checked_ids = set(
+    ActivityCheck.objects.filter(
+        user=request.user,
+        activity__schedule_id__in=schedule_ids,
+    ).values_list("activity_id", flat=True)
+    )
  
     activities_by_day = {}
     for activity in activities:
@@ -191,12 +206,6 @@ def main_calendar_view(request):
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
     
-    checked_ids = set(
-    ActivityCheck.objects.filter(
-        user=request.user,
-        activity__schedule_id__in=schedule_ids,
-    ).values_list("activity_id", flat=True)
-)
     completed_tasks = Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.TASK,

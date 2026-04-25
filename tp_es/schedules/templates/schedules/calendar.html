@@ -233,14 +233,35 @@
 				                    {% endif %}
 				                </p>
 
-				                <div class="list-card__actions">
-				                    <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}">
-				                        {% csrf_token %}
-				                        <button type="submit" class="text-link">
-				                            ✅ Realizado
-				                        </button>
-				                    </form>
-				                </div>
+				<div class="list-card__actions">
+				   <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}">
+				      {% csrf_token %}
+				        <button type="submit" class="text-link">
+				            ✅ Realizado
+				              </button>
+				                </form>
+				             {% if event.schedule.id in admin_schedule_ids %}
+				              <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+				               id: {{ event.id }},
+				               schedule_id: {{ event.schedule.id }},
+				               title: '{{ event.title|escapejs }}',
+				               kind: '{{ event.kind }}',
+				               activity_type: '{{ event.activity_type }}',
+				               date: '{{ event.date|date:"Y-m-d" }}',
+				               start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
+				                end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+				               })">
+				                Editar
+				               </button>
+
+				                <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" class="inline-form">
+				                 {% csrf_token %}
+				                 <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar este evento?')">
+				                 Deletar
+				              </button>
+				             </form>
+				           {% endif %}
+				            </div>
 				            </article>
 				        {% empty %}
 				            <p>Nenhum evento concluído</p>
@@ -250,72 +271,134 @@
       </div>
 
         <div class="content" id="tarefas">
-          <div class="panel-header">
+           <div class="panel-header">
             <div>
-              <h1>Tarefas pendentes</h1>
-            </div>
+             <h1>Tarefas</h1>
+
+            <div class="subtabs">
+             <button type="button" class="subtab-btn active" onclick="showSubtab('tarefas-pendentes', this)">
+               Pendentes
+             </button>
+
+            <button type="button" class="subtab-btn" onclick="showSubtab('tarefas-concluidas', this)">
+               Concluídas
+            </button>
+           </div>
+          </div>
           </div>
 
-          <div class="tasks-list">
-            {% for task in pending_tasks %}
-              <article class="list-card">
-                <div class="list-card__top">
-                  <span class="list-badge list-badge--task">Tarefa</span>
-                  <span class="list-meta">{{ task.schedule.name }}</span>
-                </div>
-                <h3 class="{% if task.id in checked_ids %}completed{% endif %}">
-                  {{ task.title }}
-                </h3>
-                <p>Entrega em {{ task.date }}</p>
-                <div class="list-card__actions">
-                  <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
-                  {% csrf_token %}
-                  <button type="submit" class="text-link">
-                  {% if task.id in checked_ids %}
-                   ✅ Concluído
-                  {% else %}
-                   ⬜ Marcar como concluído
-                  {% endif %}
-                   </button>
-                   </form>
-                  {% if task.schedule.id in admin_schedule_ids %}
-                    <button
-                      type="button"
-                      class="text-link"
-                      onclick="handleEditActivityClick(event, {
-                        id: {{ task.id }},
-                        schedule_id: {{ task.schedule.id }},
-                        title: '{{ task.title|escapejs }}',
-                        kind: '{{ task.kind }}',
-                        activity_type: '{{ task.activity_type }}',
-                        date: '{{ task.date|date:"Y-m-d" }}',
-                        start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-                        end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
-                      })"
-                    >
-                      Editar
-                    </button>
-                    <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
-                      {% csrf_token %}
-                      <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">Deletar</button>
-                    </form>
-                  {% endif %}
-                </div>
-              </article>
-            {% empty %}
-              <div class="empty-state">
-                <h3>Nenhuma tarefa pendente</h3>
-                <p>Sua lista est&aacute; limpa no momento. Novas tarefas aparecer&atilde;o aqui com destaque visual.</p>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
+				<div id="tarefas-pendentes" class="subtab-content">
+				  <div class="tasks-list">
+				    {% for task in pending_tasks %}
+				      <article class="list-card">
+				        <div class="list-card__top">
+				          <span class="list-badge list-badge--task">Tarefa</span>
+				          <span class="list-meta">{{ task.schedule.name }}</span>
+				        </div>
 
-        <div class="content" id="agendas">
-          <div class="panel-header">
-            <div>
-              <h1>Agendas</h1>
-            </div>
+				        <h3>{{ task.title }}</h3>
+
+				        <p>Entrega em {{ task.date }}</p>
+
+				        <div class="list-card__actions">
+				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
+				            {% csrf_token %}
+				             <button type="submit" class="text-link">
+				              ⬜ Marcar como concluído
+				            </button>
+				         </form>
+
+				         {% if task.schedule.id in admin_schedule_ids %}
+				           <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+				             id: {{ task.id }},
+				             schedule_id: {{ task.schedule.id }},
+				             title: '{{ task.title|escapejs }}',
+				             kind: '{{ task.kind }}',
+				             activity_type: '{{ task.activity_type }}',
+				             date: '{{ task.date|date:"Y-m-d" }}',
+				             start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+				             end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+				             })">
+				               Editar
+				             </button>
+
+				            <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
+				             {% csrf_token %}
+				                <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">
+				               Deletar
+				              </button>
+				             </form>
+				            {% endif %}
+				        </div>
+				      </article>
+				    {% empty %}
+				      <div class="empty-state">
+				        <h3>Nenhuma tarefa pendente</h3>
+				        <p>Sua lista está limpa no momento.</p>
+				      </div>
+				    {% endfor %}
+				  </div>
+				</div>
+
+          <div id="tarefas-concluidas" class="subtab-content hidden">
+				    <div class="tasks-list">
+				      {% for task in completed_tasks %}
+				        <article class="list-card">
+				          <div class="list-card__top">
+				            <span class="list-badge list-badge--task">Tarefa</span>
+				            <span class="list-meta">{{ task.schedule.name }}</span>
+				          </div>
+
+				          <h3 class="completed">{{ task.title }}</h3>
+
+				          <p>Entrega em {{ task.date }}</p>
+
+				        <div class="list-card__actions">
+				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
+				            {% csrf_token %}
+				            <button type="submit" class="text-link">
+				              ✅ Concluída
+				            </button>
+				          </form>
+
+				          {% if task.schedule.id in admin_schedule_ids %}
+				            <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+				              id: {{ task.id }},
+				              schedule_id: {{ task.schedule.id }},
+				              title: '{{ task.title|escapejs }}',
+				              kind: '{{ task.kind }}',
+				              activity_type: '{{ task.activity_type }}',
+				              date: '{{ task.date|date:"Y-m-d" }}',
+				              start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+				              end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+				            })">
+				              Editar
+				            </button>
+				            <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
+				              {% csrf_token %}
+				              <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">
+				                Deletar
+				              </button>
+				            </form>
+				          {% endif %}
+				        </div>
+
+				        </article>
+				        {% empty %}
+				        <div class="empty-state">
+				          <h3>Nenhuma tarefa concluída</h3>
+				          <p>Tarefas marcadas como concluídas aparecerão aqui.</p>
+				        </div>
+				      {% endfor %}
+				    </div>
+				  </div>
+				</div>
+
+          <div class="content" id="agendas">
+            <div class="panel-header">
+           <div>
+             <h1>Agendas</h1>
+          </div>
           </div>
 
           <div class="schedules-list">
@@ -743,6 +826,7 @@
               {% for activity in activities %}
               {
                 id: {{ activity.id }},
+                is_checked: {% if activity.is_checked_for_user %}true{% else %}false{% endif %},
                 schedule_id: {{ activity.schedule.id }},
                 can_manage: {% if activity.schedule.id in admin_schedule_ids %}true{% else %}false{% endif %},
                 title: "{{ activity.title|escapejs }}",
