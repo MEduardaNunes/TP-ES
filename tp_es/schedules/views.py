@@ -182,6 +182,13 @@ def main_calendar_view(request):
         "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
+    
+    checked_ids = set(
+    ActivityCheck.objects.filter(
+        user=request.user,
+        activity__schedule_id__in=schedule_ids,
+    ).values_list("activity_id", flat=True)
+)
  
     return render(request, "schedules/calendar.html", {
         "participations": participations,
@@ -202,6 +209,7 @@ def main_calendar_view(request):
         "future_events": future_events,
         "pending_tasks": pending_tasks,
         "admin_schedule_ids": admin_schedule_ids,
+        "checked_ids": checked_ids,
     })
     
 @login_required
@@ -454,21 +462,22 @@ def delete_activity(request, schedule, participant, activity_id):
 @participant_required
 @require_POST
 def toggle_check(request, schedule, participant, activity_id):
-    """Marca ou desmarca uma tarefa como concluída para o usuário logado."""
+    """Marca ou desmarca uma atividade como realizada/estudada para o usuário logado."""
     activity = get_object_or_404(Activity, id=activity_id, schedule=schedule)
- 
-    if not activity.is_task:
-        messages.error(request, "Apenas tarefas podem ser marcadas como concluídas.")
-        return redirect(reverse('schedules:main_calendar_view') + '?tab=tarefas')
- 
+
     check, created = ActivityCheck.objects.get_or_create(
         activity=activity,
         user=request.user,
     )
+
     if not created:
         check.delete()
- 
-    return redirect(reverse('schedules:main_calendar_view') + '?tab=tarefas')
+        messages.success(request, "Atividade desmarcada.")
+    else:
+        messages.success(request, "Atividade marcada como realizada/estudada.")
+
+    tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
+    return redirect(reverse("schedules:main_calendar_view") + f"?tab={tab}")
  
  
 def logout_view(request):

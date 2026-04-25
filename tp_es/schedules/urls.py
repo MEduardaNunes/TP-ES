@@ -22,4 +22,5 @@ urlpatterns = [
     path("<int:schedule_id>/activity/<int:activity_id>/edit/", views.edit_activity, name="edit_activity"),
     path("<int:schedule_id>/activity/<int:activity_id>/delete/", views.delete_activity, name="delete_activity"),
     path("<int:schedule_id>/activity/<int:activity_id>/toggle_check/", views.toggle_check, name="toggle_check"),
+    path("<int:schedule_id>/activity/<int:activity_id>/check/",views.toggle_check,name="toggle_check"),
 ]

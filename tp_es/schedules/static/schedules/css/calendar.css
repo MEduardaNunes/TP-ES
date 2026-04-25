@@ -1723,3 +1723,9 @@ body.schedule-page .details-participant-chip--admin {
   color: #4338ca;
   border-color: rgba(99, 102, 241, 0.28);
 }
+
+.completed {
+  text-decoration: line-through;
+  color: gray;
+  opacity: 0.7;
+}

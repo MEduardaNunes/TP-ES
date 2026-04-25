@@ -162,6 +162,16 @@
                   {% endif %}
                 </p>
                 <div class="list-card__actions">
+                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="text-link">
+                    {% if event.id in checked_ids %}
+                         ✅ Realizado
+                    {% else %}
+                        ⬜ Marcar como realizado
+                   {% endif %}
+                    </button>
+                  </form>
                   {% if event.schedule.id in admin_schedule_ids %}
                     <button
                       type="button"
@@ -209,9 +219,21 @@
                   <span class="list-badge list-badge--task">Tarefa</span>
                   <span class="list-meta">{{ task.schedule.name }}</span>
                 </div>
-                <h3>{{ task.title }}</h3>
+                <h3 class="{% if task.id in checked_ids %}completed{% endif %}">
+                  {{ task.title }}
+                </h3>
                 <p>Entrega em {{ task.date }}</p>
                 <div class="list-card__actions">
+                  <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
+                  {% csrf_token %}
+                  <button type="submit" class="text-link">
+                  {% if task.id in checked_ids %}
+                   ✅ Concluído
+                  {% else %}
+                   ⬜ Marcar como concluído
+                  {% endif %}
+                   </button>
+                   </form>
                   {% if task.schedule.id in admin_schedule_ids %}
                     <button
                       type="button"
