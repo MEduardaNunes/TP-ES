@@ -144,9 +144,19 @@
           <div class="panel-header">
             <div>
               <h1>Eventos futuros</h1>
+              <div class="subtabs">
+               <button type="button" class="subtab-btn active" onclick="showSubtab('eventos-futuros', this)">
+                Futuros
+               </button>
+               <button type="button" class="subtab-btn" onclick="showSubtab('eventos-concluidos', this)">
+               Concluídos
+               </button>
+              </div>
             </div>
           </div>
 
+
+        <div id="eventos-futuros" class="subtab-content">
           <div class="events-list">
             {% for event in future_events %}
               <article class="list-card">
@@ -204,6 +214,40 @@
             {% endfor %}
           </div>
         </div>
+
+			  <div id="eventos-concluidos" class="subtab-content hidden">
+				    <div class="events-list">
+				        {% for event in completed_events %}
+				            <article class="list-card">
+				                <div class="list-card__top">
+				                    <span class="list-badge">Evento</span>
+				                    <span class="list-meta">{{ event.schedule.name }}</span>
+				                </div>
+
+				                <h3 class="completed">{{ event.title }}</h3>
+
+				                <p>
+				                    {{ event.date }}
+				                    {% if event.start_time %}
+				                        às {{ event.start_time }}
+				                    {% endif %}
+				                </p>
+
+				                <div class="list-card__actions">
+				                    <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}">
+				                        {% csrf_token %}
+				                        <button type="submit" class="text-link">
+				                            ✅ Realizado
+				                        </button>
+				                    </form>
+				                </div>
+				            </article>
+				        {% empty %}
+				            <p>Nenhum evento concluído</p>
+				        {% endfor %}
+				    </div>
+				</div>
+        <div>
 
         <div class="content" id="tarefas">
           <div class="panel-header">
@@ -1165,6 +1209,20 @@
 
     syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
     syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
+    function showSubtab(id, button) {
+    const parentContent = button.closest('.content');
+
+    parentContent.querySelectorAll('.subtab-content').forEach(content => {
+    content.classList.add('hidden');
+    });
+
+    parentContent.querySelectorAll('.subtab-btn').forEach(btn => {
+    btn.classList.remove('active');
+    });
+
+    document.getElementById(id).classList.remove('hidden');
+    button.classList.add('active');
+    }
   </script>
 </body>
 

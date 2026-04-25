@@ -169,6 +169,14 @@ def main_calendar_view(request):
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         date__gte=today,
+    ).exclude(
+        checks__user=request.user
+    ).select_related("schedule").order_by("date", "start_time")
+
+    completed_events = Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+        kind=Activity.Kind.EVENT,
+        checks__user=request.user,
     ).select_related("schedule").order_by("date", "start_time")
  
     pending_tasks = Activity.objects.filter(
@@ -189,6 +197,11 @@ def main_calendar_view(request):
         activity__schedule_id__in=schedule_ids,
     ).values_list("activity_id", flat=True)
 )
+    completed_tasks = Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+        kind=Activity.Kind.TASK,
+        checks__user=request.user,
+    ).select_related("schedule").order_by("date")
  
     return render(request, "schedules/calendar.html", {
         "participations": participations,
@@ -210,6 +223,8 @@ def main_calendar_view(request):
         "pending_tasks": pending_tasks,
         "admin_schedule_ids": admin_schedule_ids,
         "checked_ids": checked_ids,
+        "completed_events": completed_events,
+        "completed_tasks": completed_tasks, 
     })
     
 @login_required
