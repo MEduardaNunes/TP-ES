@@ -84,6 +84,10 @@
             Tarefas
           </button>
 
+          <button class="tab-btn" content-id="matriz">
+            Matriz
+          </button>
+
           <button class="tab-btn" content-id="agendas">
             Agendas
           </button>
@@ -192,6 +196,7 @@
                         title: '{{ event.title|escapejs }}',
                         kind: '{{ event.kind }}',
                         activity_type: '{{ event.activity_type }}',
+                        priority: '{{ event.priority }}',
                         date: '{{ event.date|date:"Y-m-d" }}',
                         start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
                         end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
@@ -247,6 +252,7 @@
 				               title: '{{ event.title|escapejs }}',
 				               kind: '{{ event.kind }}',
 				               activity_type: '{{ event.activity_type }}',
+                        priority: '{{ event.priority }}',
 				               date: '{{ event.date|date:"Y-m-d" }}',
 				               start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
 				                end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
@@ -293,6 +299,7 @@
 				      <article class="list-card">
 				        <div class="list-card__top">
 				          <span class="list-badge list-badge--task">Tarefa</span>
+                  <span class="priority-card__badge">{{ task.get_priority_display }}</span>
 				          <span class="list-meta">{{ task.schedule.name }}</span>
 				        </div>
 
@@ -315,6 +322,7 @@
 				             title: '{{ task.title|escapejs }}',
 				             kind: '{{ task.kind }}',
 				             activity_type: '{{ task.activity_type }}',
+                     priority: '{{ task.priority }}',
 				             date: '{{ task.date|date:"Y-m-d" }}',
 				             start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
 				             end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
@@ -346,6 +354,7 @@
 				        <article class="list-card">
 				          <div class="list-card__top">
 				            <span class="list-badge list-badge--task">Tarefa</span>
+                    <span class="priority-card__badge">{{ task.get_priority_display }}</span>
 				            <span class="list-meta">{{ task.schedule.name }}</span>
 				          </div>
 
@@ -368,6 +377,7 @@
 				              title: '{{ task.title|escapejs }}',
 				              kind: '{{ task.kind }}',
 				              activity_type: '{{ task.activity_type }}',
+                      priority: '{{ task.priority }}',
 				              date: '{{ task.date|date:"Y-m-d" }}',
 				              start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
 				              end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
@@ -393,6 +403,87 @@
 				    </div>
 				  </div>
 				</div>
+
+        <div class="content" id="matriz">
+          <div class="panel-header">
+            <div>
+              <h1>Matriz de prioridade</h1>
+              <p>Distribua estudos, entregas e provas por urgência e importância.</p>
+            </div>
+          </div>
+
+          <div class="priority-matrix">
+            {% for section in priority_sections %}
+              <section class="priority-quadrant">
+                <div class="priority-quadrant__header">
+                  <div>
+                    <span class="priority-quadrant__label">{{ section.label }}</span>
+                    <h2>{{ section.title }}</h2>
+                  </div>
+                  <span class="priority-quadrant__count">{{ section.tasks|length }}</span>
+                </div>
+                <p class="priority-quadrant__description">{{ section.description }}</p>
+
+                <div class="priority-list">
+                  {% for task in section.tasks %}
+                    <article class="priority-card">
+                      <div class="list-card__top">
+                        <span class="list-badge">{% if task.kind == 'event' %}📅{% else %}✅{% endif %} {{ task.get_kind_display }}</span>
+                        <span class="list-badge list-badge--task">{{ task.get_activity_type_display }}</span>
+                        <span class="priority-card__badge">{{ task.get_priority_display }}</span>
+                      </div>
+
+                      <h3>{{ task.title }}</h3>
+                      <p>
+                        {{ task.schedule.name }}
+                        {% if task.date %}
+                          · {{ task.date }}
+                        {% endif %}
+                      </p>
+
+                      <div class="list-card__actions">
+                        <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
+                          {% csrf_token %}
+                          <button type="submit" class="text-link">
+                            ⬜ Marcar como concluído
+                          </button>
+                        </form>
+
+                        {% if task.schedule.id in admin_schedule_ids %}
+                          <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+                            id: {{ task.id }},
+                            schedule_id: {{ task.schedule.id }},
+                            title: '{{ task.title|escapejs }}',
+                            kind: '{{ task.kind }}',
+                            activity_type: '{{ task.activity_type }}',
+                            priority: '{{ task.priority }}',
+                            date: '{{ task.date|date:"Y-m-d" }}',
+                            start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                            end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                          })">
+                            Editar
+                          </button>
+
+                          <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">
+                              Deletar
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    </article>
+                  {% empty %}
+                    <div class="empty-state empty-state--matrix">
+                      <h3>Nenhuma tarefa nesta categoria</h3>
+                      <p>Crie tarefas com prioridade para visualizar a matriz em ação.</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              </section>
+            {% endfor %}
+          </div>
+        </div>
 
           <div class="content" id="agendas">
             <div class="panel-header">
@@ -515,9 +606,10 @@
           <div class="form-group">
             <label>Tipo</label>
             <select name="kind" id="kind-select">
-              <option value="event">Evento</option>
-              <option value="task">Tarefa</option>
+              <option value="event">📅 Evento (tem horário)</option>
+              <option value="task">✅ Tarefa (tem prazo)</option>
             </select>
+            <small class="form-hint" id="kind-hint">Ambos aparecem na matriz de prioridades</small>
           </div>
 
           <div class="form-group">
@@ -532,6 +624,17 @@
               <option value="personal">Pessoal</option>
             </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Prioridade</label>
+          <select name="priority" id="priority-select">
+            <option value="urgent_important">Urgente e importante</option>
+            <option value="urgent">Urgente</option>
+            <option value="important" selected>Importante</option>
+            <option value="not_urgent_not_important">Não urgente e nem importante</option>
+          </select>
+          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
         </div>
 
         <div id="date-field" class="form-group">
@@ -601,9 +704,10 @@
           <div class="form-group">
             <label>Tipo</label>
             <select name="kind" id="edit-kind-select">
-              <option value="event">Evento</option>
-              <option value="task">Tarefa</option>
+              <option value="event">📅 Evento (tem horário)</option>
+              <option value="task">✅ Tarefa (tem prazo)</option>
             </select>
+            <small class="form-hint">Ambos aparecem na matriz de prioridades</small>
           </div>
 
           <div class="form-group">
@@ -618,6 +722,17 @@
               <option value="personal">Pessoal</option>
             </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Prioridade</label>
+          <select name="priority" id="edit-priority-select">
+            <option value="urgent_important">Urgente e importante</option>
+            <option value="urgent">Urgente</option>
+            <option value="important">Importante</option>
+            <option value="not_urgent_not_important">Não urgente e nem importante</option>
+          </select>
+          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
         </div>
 
         <div id="edit-date-field" class="form-group">
@@ -832,6 +947,7 @@
                 title: "{{ activity.title|escapejs }}",
                 kind: "{{ activity.kind }}",
                 activity_type: "{{ activity.activity_type }}",
+                priority: "{{ activity.priority }}",
                 date: "{{ activity.date }}",
                 start_time: "{{ activity.start_time }}",
                 end_time: "{{ activity.end_time }}",
@@ -1216,6 +1332,7 @@
     function openEditActivityModal(activityData) {
       const modal = document.getElementById('edit-modal');
       const form = document.getElementById('edit-activity-form');
+      const timeFields = document.getElementById('edit-time-fields');
 
       // Set form action to edit URL
       form.action = `/schedules/${activityData.schedule_id}/activity/${activityData.id}/edit/`;
@@ -1225,12 +1342,12 @@
       document.getElementById('edit-title').value = activityData.title;
       document.getElementById('edit-kind-select').value = activityData.kind;
       document.getElementById('edit-activity-type').value = activityData.activity_type;
+      document.getElementById('edit-priority-select').value = activityData.priority || 'important';
       document.getElementById('edit-date-input').value = activityData.date;
       document.getElementById('edit-start-time').value = activityData.start_time || '';
       document.getElementById('edit-end-time').value = activityData.end_time || '';
 
       // Show/hide time fields based on kind
-      const timeFields = document.getElementById('edit-time-fields');
       if (activityData.kind === 'task') {
         timeFields.style.display = 'none';
       } else {

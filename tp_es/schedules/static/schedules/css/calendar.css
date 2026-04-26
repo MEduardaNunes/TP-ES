@@ -468,7 +468,7 @@ main p {
   border-right: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
   min-width: 0;
-  min-height: unset;
+  min-height: 8.5rem;
   padding: 6px;
   margin: 0;
   display: flex;
@@ -524,12 +524,17 @@ main p {
 }
  
 .day-events {
-  position: relative;        
-  flex-shrink: 0;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
   height: auto;
-  max-height: 80px;
+  max-height: none;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 4px;
 }
 
 .day-events {
@@ -546,7 +551,7 @@ main p {
 }
  
 .event-card {
-  position: absolute;       
+  position: relative;
   border-radius: 4px;
   padding: 3px 5px;
   box-sizing: border-box;
@@ -554,9 +559,10 @@ main p {
   color: #fff;
   cursor: pointer;
   overflow: hidden;
-  margin-top: 2px;
+  margin-top: 0;
   transition: filter 150ms ease, box-shadow 150ms ease;
   min-height: 14px;
+  width: 100%;
 }
  
 .event-card:hover {
@@ -583,12 +589,16 @@ main p {
 }
  
 .day-tasks {
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid var(--line-clr);
+  margin-top: 0;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line-clr);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 0 0 auto;
+  max-height: 3.25rem;
+  overflow-y: auto;
 }
  
 .task-item {
@@ -698,6 +708,7 @@ main p {
  
   .calendar-day {
     padding: 3px;
+    min-height: 7.5rem;
   }
  
   .day-number {
@@ -705,7 +716,12 @@ main p {
   }
  
   .day-events {
-    height: 100px;
+    min-height: 2.5rem;
+    max-height: none;
+  }
+
+  .day-tasks {
+    max-height: 2.8rem;
   }
  
   .event-card {
@@ -750,6 +766,13 @@ main p {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.form-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: -4px;
 }
 
 .form-row {
@@ -1759,4 +1782,100 @@ body.schedule-page .details-participant-chip--admin {
 
 .hidden {
   display: none !important;
+}
+
+body.schedule-page .priority-matrix {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+body.schedule-page .priority-quadrant {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.98));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 22px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+body.schedule-page .priority-quadrant__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+body.schedule-page .priority-quadrant__label {
+  display: inline-flex;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+}
+
+body.schedule-page .priority-quadrant h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--secondary-text-clr);
+}
+
+body.schedule-page .priority-quadrant__count {
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+  font-weight: 800;
+}
+
+body.schedule-page .priority-quadrant__description {
+  margin: 0.55rem 0 0.9rem;
+  font-size: 0.92rem;
+}
+
+body.schedule-page .priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+body.schedule-page .priority-card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 18px;
+  padding: 0.9rem;
+}
+
+body.schedule-page .priority-card h3 {
+  margin-top: 0.35rem;
+}
+
+body.schedule-page .priority-card__badge,
+body.schedule-page .list-card__top .priority-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+body.schedule-page .empty-state--matrix {
+  margin-top: 0.25rem;
+  padding: 1rem;
+}
+
+@media (max-width: 1100px) {
+  body.schedule-page .priority-matrix {
+    grid-template-columns: 1fr;
+  }
 }

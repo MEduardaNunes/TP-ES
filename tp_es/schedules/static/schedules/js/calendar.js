@@ -72,21 +72,9 @@ function layoutGroup(group) {
 }
  
 function renderEvent(event) {
-    const rawStart = parseTimeToMinutes(event.start_time);
-    const rawEnd   = parseTimeToMinutes(event.end_time);
-
     const timeHtml = event.start_time
         ? `<div class="event-time">${event.start_time}</div>`
         : '';
-
-    const start = Math.max(rawStart, DAY_START_MIN);
-    const end   = Math.min(rawEnd, DAY_END_MIN);
-
-    const top    = ((start - DAY_START_MIN) / DAY_RANGE_MIN) * 100;
-    const height = Math.max(((end - start) / DAY_RANGE_MIN) * 100, 2.5);
-
-    const widthPct = 100 / event.totalColumns;
-    const leftPct  = event.column * widthPct;
     const isChecked = event.is_checked;
     const eventColor = isChecked ? '#22c55e' : event.color;
     const checkIcon = isChecked ? '✅ ' : '';
@@ -99,16 +87,11 @@ function renderEvent(event) {
              data-title="${event.title.replace(/"/g, '&quot;')}"
              data-kind="${event.kind}"
              data-activity-type="${event.activity_type}"
+             data-priority="${event.priority || 'important'}"
              data-date="${event.date}"
              data-start-time="${event.start_time || ''}"
              data-end-time="${event.end_time || ''}"
-             style="
-                top:    ${top}%;
-                height: ${height}%;
-                left:   ${leftPct}%;
-                width:  calc(${widthPct}% - 3px);
-                background-color: ${eventColor};
-             ">
+             style="background-color: ${eventColor};">
             ${timeHtml}
             <div class="event-title">${checkIcon}${event.title}</div>
         </div>
@@ -131,6 +114,7 @@ function renderTask(task) {
              data-title="${task.title.replace(/"/g, '&quot;')}"
              data-kind="${task.kind}"
              data-activity-type="${task.activity_type}"
+             data-priority="${task.priority || 'important'}"
              data-date="${task.date}"
              data-start-time="${task.start_time || ''}"
              data-end-time="${task.end_time || ''}">
@@ -141,11 +125,10 @@ function renderTask(task) {
 }
  
 function renderDayCell(dayData, isToday) {
-    const events = dayData.activities.filter(a => a.kind === 'event');
+    const events = dayData.activities
+        .filter(a => a.kind === 'event')
+        .sort((a, b) => parseTimeToMinutes(a.start_time) - parseTimeToMinutes(b.start_time));
     const tasks  = dayData.activities.filter(a => a.kind === 'task');
- 
-    const groups = groupOverlappingEvents(events);
-    const positionedEvents = groups.flatMap(group => layoutGroup(group));
  
     const todayClass = isToday ? 'today' : '';
  
@@ -156,10 +139,10 @@ function renderDayCell(dayData, isToday) {
     return `
         <div class="calendar-day ${todayClass}" data-day="${dayData.day}">
             <div class="day-number">${dayData.day}</div>
-            <div class="day-events">
-                ${positionedEvents.map(renderEvent).join('')}
-            </div>
             ${tasksHtml}
+            <div class="day-events">
+                ${events.map(renderEvent).join('')}
+            </div>
         </div>
     `;
 }
@@ -251,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 title: eventCard.dataset.title,
                 kind: eventCard.dataset.kind,
                 activity_type: eventCard.dataset.activityType,
+                priority: eventCard.dataset.priority,
                 date: eventCard.dataset.date,
                 start_time: eventCard.dataset.startTime,
                 end_time: eventCard.dataset.endTime
@@ -271,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 title: taskItem.dataset.title,
                 kind: taskItem.dataset.kind,
                 activity_type: taskItem.dataset.activityType,
+                priority: taskItem.dataset.priority,
                 date: taskItem.dataset.date,
                 start_time: taskItem.dataset.startTime,
                 end_time: taskItem.dataset.endTime

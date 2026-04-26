@@ -52,6 +52,12 @@ class Activity(models.Model):
     class Kind(models.TextChoices):
         EVENT = "event", "Evento"   # tem horário, acontece em um momento
         TASK = "task",  "Tarefa"   # tem prazo, pode ser concluída
+
+    class Priority(models.TextChoices):
+        URGENT_IMPORTANT = "urgent_important", "Urgente e importante"
+        URGENT = "urgent", "Urgente"
+        IMPORTANT = "important", "Importante"
+        NOT_URGENT_NOT_IMPORTANT = "not_urgent_not_important", "Não urgente e nem importante"
         
     class Type(models.TextChoices):
         CLASS = "class", "Aula"
@@ -72,6 +78,11 @@ class Activity(models.Model):
     title = models.CharField(max_length=200)
     kind = models.CharField(max_length=10, choices=Kind.choices)
     activity_type = models.CharField(max_length=20, choices=Type.choices)
+    priority = models.CharField(
+        max_length=40,
+        choices=Priority.choices,
+        default=Priority.IMPORTANT,
+    )
     date = models.DateField(null=True, blank=True) # opcional para tarefas
     start_time = models.TimeField(null=True, blank=True)  # eventos
     end_time = models.TimeField(null=True, blank=True) # eventos
