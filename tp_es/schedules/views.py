@@ -146,6 +146,9 @@ def main_calendar_view(request):
         "schedule__participants__user"
     ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
+    
+    filter_kind = request.GET.get("kind", "")
+    filter_category = request.GET.get("category", "")
   
     admin_participations = request.user.participations.select_related("schedule").prefetch_related(
         "schedule__participants__user"
@@ -166,6 +169,12 @@ def main_calendar_view(request):
     ).annotate(
         is_checked_for_user=Exists(user_checks)
     ).select_related("schedule").order_by("start_time")
+    
+    if filter_kind:
+        activities = activities.filter(kind=filter_kind)
+
+    if filter_category:
+        activities = activities.filter(activity_type=filter_category)
     
     checked_ids = set(
     ActivityCheck.objects.filter(
@@ -211,6 +220,20 @@ def main_calendar_view(request):
         kind=Activity.Kind.TASK,
         checks__user=request.user,
     ).select_related("schedule").order_by("date")
+    
+    if filter_kind:
+        if filter_kind == Activity.Kind.EVENT:
+            pending_tasks = Activity.objects.none()
+            completed_tasks = Activity.objects.none()
+        elif filter_kind == Activity.Kind.TASK:
+            future_events = Activity.objects.none()
+            completed_events = Activity.objects.none()
+    
+    if filter_category:
+        future_events = future_events.filter(activity_type=filter_category)
+        completed_events = completed_events.filter(activity_type=filter_category)
+        pending_tasks = pending_tasks.filter(activity_type=filter_category)
+        completed_tasks = completed_tasks.filter(activity_type=filter_category)
  
     return render(request, "schedules/calendar.html", {
         "participations": participations,
@@ -233,7 +256,9 @@ def main_calendar_view(request):
         "admin_schedule_ids": admin_schedule_ids,
         "checked_ids": checked_ids,
         "completed_events": completed_events,
-        "completed_tasks": completed_tasks, 
+        "completed_tasks": completed_tasks,
+        "filter_kind": filter_kind,
+        "filter_category": filter_category,
     })
     
 @login_required

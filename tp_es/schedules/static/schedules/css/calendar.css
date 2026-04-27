@@ -1760,3 +1760,18 @@ body.schedule-page .details-participant-chip--admin {
 .hidden {
   display: none !important;
 }
+
+.filter-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-form select {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #bfdbfe;
+  background: white;
+  font-weight: 600;
+  color: #1e3a8a;
+}

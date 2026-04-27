@@ -97,12 +97,34 @@
             Novo
           </button>
 
-          <button class="action-btn action-btn--ghost" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
-              <path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z" />
-            </svg>
-            Filtrar
-          </button>
+          <form method="GET" class="filter-form">
+            <input type="hidden" name="mes" value="{{ month }}">
+            <input type="hidden" name="ano" value="{{ year }}">
+
+            <select name="kind">
+              <option value="">Todos</option>
+              <option value="event" {% if filter_kind == "event" %}selected{% endif %}>Eventos</option>
+              <option value="task" {% if filter_kind == "task" %}selected{% endif %}>Tarefas</option>
+            </select>
+
+            <select name="category">
+              <option value="">Todas categorias</option>
+              <option value="class" {% if filter_category == "class" %}selected{% endif %}>Aula</option>
+              <option value="exam" {% if filter_category == "exam" %}selected{% endif %}>Prova</option>
+              <option value="assignment" {% if filter_category == "assignment" %}selected{% endif %}>Trabalho</option>
+              <option value="study" {% if filter_category == "study" %}selected{% endif %}>Estudo</option>
+              <option value="meeting" {% if filter_category == "meeting" %}selected{% endif %}>Reunião</option>
+              <option value="presentation" {% if filter_category == "presentation" %}selected{% endif %}>Apresentação</option>
+              <option value="personal" {% if filter_category == "personal" %}selected{% endif %}>Pessoal</option>
+            </select>
+
+            <button class="action-btn action-btn--ghost" type="submit">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
+                <path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z" />
+              </svg>
+              Filtrar
+            </button>
+          </form>
         </div>
       </div>
 
