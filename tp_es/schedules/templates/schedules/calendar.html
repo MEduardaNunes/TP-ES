@@ -176,9 +176,9 @@
                     {% csrf_token %}
                     <button type="submit" class="text-link">
                     {% if event.id in checked_ids %}
-                         ✅ Realizado
+                        Realizado
                     {% else %}
-                        ⬜ Marcar como realizado
+                        Marcar como realizado
                    {% endif %}
                     </button>
                   </form>
@@ -237,7 +237,7 @@
 				   <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}">
 				      {% csrf_token %}
 				        <button type="submit" class="text-link">
-				            ✅ Realizado
+				             Realizado
 				              </button>
 				                </form>
 				             {% if event.schedule.id in admin_schedule_ids %}
@@ -304,7 +304,7 @@
 				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
 				            {% csrf_token %}
 				             <button type="submit" class="text-link">
-				              ⬜ Marcar como concluído
+				              Marcar como concluído
 				            </button>
 				         </form>
 
@@ -357,7 +357,7 @@
 				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
 				            {% csrf_token %}
 				            <button type="submit" class="text-link">
-				              ✅ Concluída
+				              Desmarcar como concluído
 				            </button>
 				          </form>
 
