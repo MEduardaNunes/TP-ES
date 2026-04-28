@@ -147,8 +147,8 @@ def main_calendar_view(request):
     ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
     
-    filter_kind = request.GET.get("kind", "")
-    filter_category = request.GET.get("category", "")
+    filter_kinds = request.GET.getlist("kind")
+    filter_categories = request.GET.getlist("category")
   
     admin_participations = request.user.participations.select_related("schedule").prefetch_related(
         "schedule__participants__user"
@@ -170,11 +170,10 @@ def main_calendar_view(request):
         is_checked_for_user=Exists(user_checks)
     ).select_related("schedule").order_by("start_time")
     
-    if filter_kind:
-        activities = activities.filter(kind=filter_kind)
-
-    if filter_category:
-        activities = activities.filter(activity_type=filter_category)
+    if filter_kinds:
+        activities = activities.filter(kind__in=filter_kinds)
+    if filter_categories:   
+        activities = activities.filter(activity_type__in=filter_categories)
     
     checked_ids = set(
     ActivityCheck.objects.filter(
@@ -221,19 +220,18 @@ def main_calendar_view(request):
         checks__user=request.user,
     ).select_related("schedule").order_by("date")
     
-    if filter_kind:
-        if filter_kind == Activity.Kind.EVENT:
-            pending_tasks = Activity.objects.none()
-            completed_tasks = Activity.objects.none()
-        elif filter_kind == Activity.Kind.TASK:
+    if filter_kinds:
+        if Activity.Kind.EVENT not in filter_kinds:
             future_events = Activity.objects.none()
-            completed_events = Activity.objects.none()
+
+        if Activity.Kind.TASK not in filter_kinds:
+            pending_tasks = Activity.objects.none()
     
-    if filter_category:
-        future_events = future_events.filter(activity_type=filter_category)
-        completed_events = completed_events.filter(activity_type=filter_category)
-        pending_tasks = pending_tasks.filter(activity_type=filter_category)
-        completed_tasks = completed_tasks.filter(activity_type=filter_category)
+    if filter_categories:
+        future_events = future_events.filter(activity_type__in=filter_categories)
+        completed_events = completed_events.filter(activity_type__in=filter_categories)
+        pending_tasks = pending_tasks.filter(activity_type__in=filter_categories)
+        completed_tasks = completed_tasks.filter(activity_type__in=filter_categories)
  
     return render(request, "schedules/calendar.html", {
         "participations": participations,
@@ -257,8 +255,8 @@ def main_calendar_view(request):
         "checked_ids": checked_ids,
         "completed_events": completed_events,
         "completed_tasks": completed_tasks,
-        "filter_kind": filter_kind,
-        "filter_category": filter_category,
+        "filter_kinds": filter_kinds,   
+        "filter_categories": filter_categories,
     })
     
 @login_required

@@ -97,34 +97,12 @@
             Novo
           </button>
 
-          <form method="GET" class="filter-form">
-            <input type="hidden" name="mes" value="{{ month }}">
-            <input type="hidden" name="ano" value="{{ year }}">
-
-            <select name="kind">
-              <option value="">Todos</option>
-              <option value="event" {% if filter_kind == "event" %}selected{% endif %}>Eventos</option>
-              <option value="task" {% if filter_kind == "task" %}selected{% endif %}>Tarefas</option>
-            </select>
-
-            <select name="category">
-              <option value="">Todas categorias</option>
-              <option value="class" {% if filter_category == "class" %}selected{% endif %}>Aula</option>
-              <option value="exam" {% if filter_category == "exam" %}selected{% endif %}>Prova</option>
-              <option value="assignment" {% if filter_category == "assignment" %}selected{% endif %}>Trabalho</option>
-              <option value="study" {% if filter_category == "study" %}selected{% endif %}>Estudo</option>
-              <option value="meeting" {% if filter_category == "meeting" %}selected{% endif %}>Reunião</option>
-              <option value="presentation" {% if filter_category == "presentation" %}selected{% endif %}>Apresentação</option>
-              <option value="personal" {% if filter_category == "personal" %}selected{% endif %}>Pessoal</option>
-            </select>
-
-            <button class="action-btn action-btn--ghost" type="submit">
-              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
-                <path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z" />
-              </svg>
-              Filtrar
-            </button>
-          </form>
+          <button class="action-btn action-btn--ghost" type="button" onclick="openFilterModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
+              <path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z" />
+            </svg>
+            Filtrar
+          </button>
         </div>
       </div>
 
@@ -1330,6 +1308,87 @@
     button.classList.add('active');
     }
   </script>
+
+  <div id="filter-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeFilterModal()">X</button>
+
+      <h3 class="modal-title">Filtrar atividades</h3>
+
+      <form method="GET">
+        <input type="hidden" name="mes" value="{{ month }}">
+        <input type="hidden" name="ano" value="{{ year }}">
+
+        <div class="form-group">
+          <label>Tipo</label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
+            <span>Eventos</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
+            <span>Tarefas</span>
+          </label>
+        </div>
+
+
+        <div class="form-group">
+          <label>Categorias</label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
+            <span>Aula</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
+            <span>Prova</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
+            <span>Trabalho</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
+            <span>Estudo</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
+            <span>Reunião</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
+            <span>Apresentação</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
+            <span>Pessoal</span>
+          </label>
+        </div>  
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Aplicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+  function openFilterModal() {
+    document.getElementById('filter-modal').classList.remove('hidden');
+  }
+
+  function closeFilterModal() {
+    document.getElementById('filter-modal').classList.add('hidden');
+  }
+</script>
 </body>
 
 </html>

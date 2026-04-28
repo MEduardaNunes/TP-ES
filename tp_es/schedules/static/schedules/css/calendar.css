@@ -1775,3 +1775,24 @@ body.schedule-page .details-participant-chip--admin {
   font-weight: 600;
   color: #1e3a8a;
 }
+
+#filter-modal .filter-option {
+  display: grid;
+  grid-template-columns: 18px auto;
+  align-items: center;
+  column-gap: 10px;
+  width: 100%;
+}
+
+#filter-modal .filter-option input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px;
+  max-width: 18px;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#filter-modal .filter-option span {
+  line-height: 1.2;
+}
