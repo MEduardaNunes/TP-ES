@@ -12,6 +12,39 @@ from .models import Schedule, Participant, Activity, ActivityCheck
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
 
+PRIORITY_MATRIX_SECTIONS = [
+    {
+        "value": Activity.Priority.URGENT_IMPORTANT,
+        "title": "Fazer agora",
+        "label": "Urgente e importante",
+        "description": "Entregas e provas que precisam de atenção imediata.",
+    },
+    {
+        "value": Activity.Priority.URGENT,
+        "title": "Resolver em breve",
+        "label": "Urgente",
+        "description": "Pendências com prazo curto que podem ser delegadas ou aceleradas.",
+    },
+    {
+        "value": Activity.Priority.IMPORTANT,
+        "title": "Planejar com foco",
+        "label": "Importante",
+        "description": "Estudos e preparações que movem seu desempenho, mas não exigem pressa.",
+    },
+    {
+        "value": Activity.Priority.NOT_URGENT_NOT_IMPORTANT,
+        "title": "Baixa prioridade",
+        "label": "Não urgente e nem importante",
+        "description": "Atividades que podem esperar ou ser revisadas depois.",
+    },
+]
+
+
+def normalize_priority(raw_priority, default=Activity.Priority.IMPORTANT):
+    if raw_priority in Activity.Priority.values:
+        return raw_priority
+    return default
+
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
     User = get_user_model()
@@ -176,8 +209,9 @@ def main_calendar_view(request):
  
     activities_by_day = {}
     for activity in activities:
-        day = activity.date.day
-        activities_by_day.setdefault(day, []).append(activity)
+        if activity.date:
+            day = activity.date.day
+            activities_by_day.setdefault(day, []).append(activity)
  
     # Atividades futuras ou não concluídas para a aba lateral
     future_events = Activity.objects.filter(
@@ -194,12 +228,34 @@ def main_calendar_view(request):
         checks__user=request.user,
     ).select_related("schedule").order_by("date", "start_time")
  
-    pending_tasks = Activity.objects.filter(
+    pending_tasks_base = Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.TASK,
     ).exclude(
         checks__user=request.user
-    ).select_related("schedule").order_by("date")
+    ).select_related("schedule")
+
+    pending_tasks = pending_tasks_base.order_by("date", "start_time", "created_at")
+
+    # Matrix shows all unchecked activities (events + tasks) organized by priority
+    all_pending_activities = Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+    ).exclude(
+        checks__user=request.user
+    ).select_related("schedule")
+
+    priority_sections = [
+        {
+            "value": section["value"],
+            "title": section["title"],
+            "label": section["label"],
+            "description": section["description"],
+            "tasks": all_pending_activities.filter(priority=section["value"]).order_by(
+                "date", "start_time", "created_at"
+            ),
+        }
+        for section in PRIORITY_MATRIX_SECTIONS
+    ]
  
     month_names = [
         "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -230,6 +286,7 @@ def main_calendar_view(request):
         "today_year": today.year,
         "future_events": future_events,
         "pending_tasks": pending_tasks,
+        "priority_sections": priority_sections,
         "admin_schedule_ids": admin_schedule_ids,
         "checked_ids": checked_ids,
         "completed_events": completed_events,
@@ -385,6 +442,7 @@ def create_activity(request, schedule, participant):
             title=title,
             kind=kind,
             activity_type=activity_type_value,
+            priority=normalize_priority(request.POST.get("priority")),
             date=date_value,
             start_time=request.POST.get("start_time") or None,
             end_time=request.POST.get("end_time") or None,
@@ -439,6 +497,7 @@ def quick_create_activity(request):
             title=title,
             kind=kind,
             activity_type=activity_type_value,  
+            priority=normalize_priority(request.POST.get("priority")),
             date=date_value,
             start_time=request.POST.get("start_time") or None,
             end_time=request.POST.get("end_time") or None,
@@ -455,6 +514,7 @@ def edit_activity(request, schedule, participant, activity_id):
         activity.title = request.POST.get("title", activity.title)
         activity.kind = request.POST.get("kind", activity.kind)
         activity.activity_type = request.POST.get("activity_type", activity.activity_type)
+        activity.priority = normalize_priority(request.POST.get("priority"), activity.priority)
         activity.date = request.POST.get("date") or None
         activity.start_time = request.POST.get("start_time") or None
         activity.end_time = request.POST.get("end_time") or None
