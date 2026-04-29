@@ -13,6 +13,15 @@ function getCSRFToken() {
         .find(row => row.startsWith('csrftoken='))
         ?.split('=')[1];
 }
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
  
 //Agrupa eventos que se sobrepõem temporalmente (transitivo).
 //Cada evento é adicionado ao primeiro grupo cujo maxEnd > start do evento.
@@ -78,6 +87,11 @@ function renderEvent(event) {
     const isChecked = event.is_checked;
     const eventColor = isChecked ? '#22c55e' : event.color;
     const checkIcon = isChecked ? '✅ ' : '';
+    const iconHtml = event.icon_image_url
+        ? `<img src="${escapeHtml(event.icon_image_url)}" class="activity-icon-image" alt="" onerror="this.style.display='none'">`
+        : (event.icon_emoji || event.default_icon_emoji)
+            ? `<span class="activity-icon-emoji">${escapeHtml(event.icon_emoji || event.default_icon_emoji)}</span>`
+            : '';
 
     return `
         <div class="event-card"
@@ -91,9 +105,11 @@ function renderEvent(event) {
              data-date="${event.date}"
              data-start-time="${event.start_time || ''}"
              data-end-time="${event.end_time || ''}"
+             data-icon-emoji="${event.icon_emoji || ''}"
+             data-icon-image-url="${event.icon_image_url || ''}"
              style="background-color: ${eventColor};">
             ${timeHtml}
-            <div class="event-title">${checkIcon}${event.title}</div>
+            <div class="event-title">${iconHtml}${checkIcon}${escapeHtml(event.title)}</div>
         </div>
     `;
 }
@@ -103,8 +119,13 @@ function renderEvent(event) {
  */
 function renderTask(task) {
     const isChecked = task.is_checked;
-    const color = isChecked ? '#22c55e' : (task.color || '#6366f1');
+    const color = isChecked ? '#22c55e' : (task.color || '#59e7ec');
     const checkIcon = isChecked ? '✅ ' : '';
+    const iconHtml = task.icon_image_url
+        ? `<img src="${escapeHtml(task.icon_image_url)}" class="activity-icon-image" alt="" onerror="this.style.display='none'">`
+        : (task.icon_emoji || task.default_icon_emoji)
+            ? `<span class="activity-icon-emoji">${escapeHtml(task.icon_emoji || task.default_icon_emoji)}</span>`
+            : '';
 
     return `
         <div class="task-item ${isChecked ? 'task-item--completed' : ''}" 
@@ -117,9 +138,11 @@ function renderTask(task) {
              data-priority="${task.priority || 'important'}"
              data-date="${task.date}"
              data-start-time="${task.start_time || ''}"
-             data-end-time="${task.end_time || ''}">
+             data-end-time="${task.end_time || ''}"
+             data-icon-emoji="${task.icon_emoji || ''}"
+             data-icon-image-url="${task.icon_image_url || ''}">
             <div class="task-dot" style="background-color:${color};"></div>
-            <span class="task-title">${checkIcon}${task.title}</span>
+            <span class="task-title">${iconHtml}${checkIcon}${escapeHtml(task.title)}</span>
         </div>
     `;
 }
@@ -237,7 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 priority: eventCard.dataset.priority,
                 date: eventCard.dataset.date,
                 start_time: eventCard.dataset.startTime,
-                end_time: eventCard.dataset.endTime
+                end_time: eventCard.dataset.endTime,
+                icon_emoji: eventCard.dataset.iconEmoji,
+                icon_image_url: eventCard.dataset.iconImageUrl
             };
             openEditActivityModal(activityData);
             return;
@@ -258,7 +283,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 priority: taskItem.dataset.priority,
                 date: taskItem.dataset.date,
                 start_time: taskItem.dataset.startTime,
-                end_time: taskItem.dataset.endTime
+                end_time: taskItem.dataset.endTime,
+                icon_emoji: taskItem.dataset.iconEmoji,
+                icon_image_url: taskItem.dataset.iconImageUrl
             };
             openEditActivityModal(activityData);
             return;

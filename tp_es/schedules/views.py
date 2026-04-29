@@ -8,6 +8,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
 from functools import wraps
 import calendar
+from accounts.models import UserThemePreference
 from .models import Schedule, Participant, Activity, ActivityCheck
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
@@ -299,7 +300,7 @@ def create_schedule(request):
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description", "").strip()
-        color = request.POST.get("color", "#6366f1")
+        color = request.POST.get("color", "#59e7ec")
  
         if not name:
             messages.error(request, "Preencha o nome da agenda.")
@@ -309,6 +310,8 @@ def create_schedule(request):
             name=name,
             description=description,
             color=color,
+            icon_emoji=request.POST.get("icon_emoji", "").strip(),
+            icon_image=request.FILES.get("icon_image"),
         )
         Participant.objects.create(
             schedule=schedule,
@@ -333,6 +336,12 @@ def edit_schedule(request, schedule, participant):
         schedule.name = request.POST.get("name", schedule.name)
         schedule.description = request.POST.get("description", schedule.description).strip()
         schedule.color = request.POST.get("color", schedule.color)
+        schedule.icon_emoji = request.POST.get("icon_emoji", schedule.icon_emoji).strip()
+        if request.POST.get("clear_icon_image") == "1" and schedule.icon_image:
+            schedule.icon_image.delete(save=False)
+            schedule.icon_image = None
+        if request.FILES.get("icon_image"):
+            schedule.icon_image = request.FILES["icon_image"]
         schedule.save()
         missing_usernames = sync_schedule_members(schedule, request.POST.getlist("participant_usernames"))
         if missing_usernames:
@@ -437,6 +446,9 @@ def create_activity(request, schedule, participant):
             #return redirect("schedules:create_activity", schedule_id=schedule.id)
             return redirect("schedules:main_calendar_view")
  
+        preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
+        icon_emoji = request.POST.get("icon_emoji", "").strip() or preference.default_activity_icon_emoji
+
         Activity.objects.create(
             schedule=schedule,
             title=title,
@@ -448,6 +460,8 @@ def create_activity(request, schedule, participant):
             end_time=request.POST.get("end_time") or None,
             notes=request.POST.get("notes", ""),
             color=request.POST.get("color", ""),
+            icon_emoji=icon_emoji,
+            icon_image=request.FILES.get("icon_image") or preference.default_activity_icon_image,
         )
         messages.success(request, "Atividade criada com sucesso.")
         return redirect("schedules:main_calendar_view")
@@ -492,6 +506,9 @@ def quick_create_activity(request):
             messages.error(request, "Eventos precisam de uma data.")
             return redirect("schedules:main_calendar_view")
  
+        preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
+        icon_emoji = request.POST.get("icon_emoji", "").strip() or preference.default_activity_icon_emoji
+
         Activity.objects.create(
             schedule=schedule,
             title=title,
@@ -501,6 +518,8 @@ def quick_create_activity(request):
             date=date_value,
             start_time=request.POST.get("start_time") or None,
             end_time=request.POST.get("end_time") or None,
+            icon_emoji=icon_emoji,
+            icon_image=request.FILES.get("icon_image") or preference.default_activity_icon_image,
         )
         messages.success(request, "Atividade criada com sucesso.")
  
@@ -520,6 +539,14 @@ def edit_activity(request, schedule, participant, activity_id):
         activity.end_time = request.POST.get("end_time") or None
         activity.notes = request.POST.get("notes", activity.notes)
         activity.color = request.POST.get("color", activity.color)
+        activity.icon_emoji = request.POST.get("icon_emoji", activity.icon_emoji).strip()
+        if request.POST.get("clear_icon_image") == "1" and activity.icon_image:
+            activity.icon_image.delete(save=False)
+            activity.icon_image = None
+        if request.POST.get("clear_icon_emoji") == "1":
+            activity.icon_emoji = ""
+        if request.FILES.get("icon_image"):
+            activity.icon_image = request.FILES["icon_image"]
         activity.save()
         messages.success(request, "Atividade atualizada com sucesso.")
         tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"

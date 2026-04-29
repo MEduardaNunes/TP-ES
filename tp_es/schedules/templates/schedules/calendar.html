@@ -11,6 +11,22 @@
   <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
   <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
   <script type="text/javascript" src="{% static 'accounts/js/app.js' %}" defer></script>
+  {% if ui_theme %}
+  <style>
+    :root {
+      --base-clr: {{ ui_theme.base_clr }};
+      --line-clr: {{ ui_theme.line_clr }};
+      --hover-clr: {{ ui_theme.hover_clr }};
+      --text-clr: {{ ui_theme.text_clr }};
+      --accent-clr: {{ ui_theme.accent_clr }};
+      --secondary-text-clr: {{ ui_theme.secondary_text_clr }};
+      --container-background-base: {{ ui_theme.container_background_base }};
+      --secondary-base-clr: {{ ui_theme.secondary_base_clr }};
+      --sidebar-gradient-start: {{ ui_theme.sidebar_gradient_start }};
+      --sidebar-gradient-end: {{ ui_theme.sidebar_gradient_end }};
+    }
+  </style>
+  {% endif %}
 </head>
 
 <body class="schedule-page">
@@ -28,9 +44,15 @@
 
       <li class="{% if rota_atual == 'main_calendar_view' %}active{% endif %}">
         <a href="{% url 'schedules:main_calendar_view' %}">
+          {% if ui_icons.agenda_icon_image %}
+            <img src="{{ ui_icons.agenda_icon_image.url }}" class="sidebar-icon-image" alt="" onerror="this.style.display='none'" />
+          {% elif ui_icons.agenda_icon_emoji %}
+            <span class="sidebar-icon-emoji" aria-hidden="true">{{ ui_icons.agenda_icon_emoji }}</span>
+          {% else %}
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
             <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
           </svg>
+          {% endif %}
           <span>Home</span>
         </a>
       </li>
@@ -49,9 +71,15 @@
 
       <li class="profile-item {% if rota_atual == 'user_space' %}active{% endif %}">
         <a href="{% url 'accounts:user_space' %}">
+          {% if ui_icons.profile_icon_image %}
+            <img src="{{ ui_icons.profile_icon_image.url }}" class="sidebar-icon-image" alt="" onerror="this.style.display='none'" />
+          {% elif ui_icons.profile_icon_emoji %}
+            <span class="sidebar-icon-emoji" aria-hidden="true">{{ ui_icons.profile_icon_emoji }}</span>
+          {% else %}
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
             <path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
           </svg>
+          {% endif %}
           <span>Perfil</span>
         </a>
       </li>
@@ -168,7 +196,18 @@
                   <span class="list-badge">Evento</span>
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
-                <h3>{{ event.title }}</h3>
+                <h3>
+                  {% if event.icon_image %}
+                    <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                  {% elif event.icon_emoji %}
+                    <span class="activity-icon-emoji">{{ event.icon_emoji }}</span>
+                  {% elif ui_icons.default_activity_icon_image %}
+                    <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                  {% elif ui_icons.default_activity_icon_emoji %}
+                    <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                  {% endif %}
+                  {{ event.title }}
+                </h3>
                 <p>
                   {{ event.date }}
                   {% if event.start_time %}
@@ -199,7 +238,9 @@
                         priority: '{{ event.priority }}',
                         date: '{{ event.date|date:"Y-m-d" }}',
                         start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
-                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                        icon_emoji: '{{ event.icon_emoji|escapejs }}',
+                        icon_image_url: '{% if event.icon_image %}{{ event.icon_image.url|escapejs }}{% endif %}'
                       })"
                     >
                       Editar
@@ -229,7 +270,18 @@
 				                    <span class="list-meta">{{ event.schedule.name }}</span>
 				                </div>
 
-				                <h3 class="completed">{{ event.title }}</h3>
+                        <h3 class="completed">
+                          {% if event.icon_image %}
+                            <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif event.icon_emoji %}
+                            <span class="activity-icon-emoji">{{ event.icon_emoji }}</span>
+                          {% elif ui_icons.default_activity_icon_image %}
+                            <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif ui_icons.default_activity_icon_emoji %}
+                            <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                          {% endif %}
+                          {{ event.title }}
+                        </h3>
 
 				                <p>
 				                    {{ event.date }}
@@ -255,7 +307,9 @@
                         priority: '{{ event.priority }}',
 				               date: '{{ event.date|date:"Y-m-d" }}',
 				               start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
-				                end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                          icon_emoji: '{{ event.icon_emoji|escapejs }}',
+                          icon_image_url: '{% if event.icon_image %}{{ event.icon_image.url|escapejs }}{% endif %}'
 				               })">
 				                Editar
 				               </button>
@@ -303,7 +357,18 @@
 				          <span class="list-meta">{{ task.schedule.name }}</span>
 				        </div>
 
-				        <h3>{{ task.title }}</h3>
+  			        <h3>
+                    {% if task.icon_image %}
+                      <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                    {% elif task.icon_emoji %}
+                      <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                    {% elif ui_icons.default_activity_icon_image %}
+                      <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                    {% elif ui_icons.default_activity_icon_emoji %}
+                      <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                    {% endif %}
+                    {{ task.title }}
+                  </h3>
 
 				        <p>Entrega em {{ task.date }}</p>
 
@@ -325,7 +390,9 @@
                      priority: '{{ task.priority }}',
 				             date: '{{ task.date|date:"Y-m-d" }}',
 				             start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-				             end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                     end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                       icon_emoji: '{{ task.icon_emoji|escapejs }}',
+                       icon_image_url: '{% if task.icon_image %}{{ task.icon_image.url|escapejs }}{% endif %}'
 				             })">
 				               Editar
 				             </button>
@@ -358,7 +425,18 @@
 				            <span class="list-meta">{{ task.schedule.name }}</span>
 				          </div>
 
-				          <h3 class="completed">{{ task.title }}</h3>
+  			          <h3 class="completed">
+                      {% if task.icon_image %}
+                        <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                      {% elif task.icon_emoji %}
+                        <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                      {% elif ui_icons.default_activity_icon_image %}
+                        <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                      {% elif ui_icons.default_activity_icon_emoji %}
+                        <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                      {% endif %}
+                      {{ task.title }}
+                    </h3>
 
 				          <p>Entrega em {{ task.date }}</p>
 
@@ -380,7 +458,9 @@
                       priority: '{{ task.priority }}',
 				              date: '{{ task.date|date:"Y-m-d" }}',
 				              start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-				              end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                      end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                        icon_emoji: '{{ task.icon_emoji|escapejs }}',
+                        icon_image_url: '{% if task.icon_image %}{{ task.icon_image.url|escapejs }}{% endif %}'
 				            })">
 				              Editar
 				            </button>
@@ -433,7 +513,18 @@
                         <span class="priority-card__badge">{{ task.get_priority_display }}</span>
                       </div>
 
-                      <h3>{{ task.title }}</h3>
+                      <h3>
+                        {% if task.icon_image %}
+                          <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                        {% elif task.icon_emoji %}
+                          <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                        {% elif ui_icons.default_activity_icon_image %}
+                          <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                        {% elif ui_icons.default_activity_icon_emoji %}
+                          <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                        {% endif %}
+                        {{ task.title }}
+                      </h3>
                       <p>
                         {{ task.schedule.name }}
                         {% if task.date %}
@@ -459,7 +550,9 @@
                             priority: '{{ task.priority }}',
                             date: '{{ task.date|date:"Y-m-d" }}',
                             start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-                            end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                            end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                            icon_emoji: '{{ task.icon_emoji|escapejs }}',
+                            icon_image_url: '{% if task.icon_image %}{{ task.icon_image.url|escapejs }}{% endif %}'
                           })">
                             Editar
                           </button>
@@ -494,7 +587,7 @@
 
           <div class="schedules-list">
             {% for participation in participations %}
-              <article class="list-card list-card--schedule" style="--schedule-color: {{ participation.schedule.color|default:'#6366f1' }};">
+              <article class="list-card list-card--schedule" style="--schedule-color: {{ participation.schedule.color|default:'#59e7ec' }};">
                 <div class="list-card__top">
                   <span class="list-badge list-badge--schedule">
                     <span class="schedule-color-dot" aria-hidden="true"></span>
@@ -502,6 +595,11 @@
                   </span>
                 </div>
                 <h3>{{ participation.schedule.name }}</h3>
+                {% if participation.schedule.icon_image %}
+                  <p><img src="{{ participation.schedule.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" /></p>
+                {% elif participation.schedule.icon_emoji %}
+                  <p><span class="activity-icon-emoji">{{ participation.schedule.icon_emoji }}</span></p>
+                {% endif %}
                 <p>{{ participation.schedule.description|default:"Sem descri&ccedil;&atilde;o" }}</p>
                 <div class="list-card__actions">
                   <button
@@ -510,7 +608,9 @@
                     data-schedule-id="{{ participation.schedule.id }}"
                     data-schedule-name="{{ participation.schedule.name|escapejs }}"
                     data-schedule-description="{{ participation.schedule.description|default_if_none:''|escapejs }}"
-                    data-schedule-color="{{ participation.schedule.color|default:'#6366f1' }}"
+                    data-schedule-color="{{ participation.schedule.color|default:'#59e7ec' }}"
+                    data-schedule-icon-emoji="{{ participation.schedule.icon_emoji|escapejs }}"
+                    data-schedule-icon-image-url="{% if participation.schedule.icon_image %}{{ participation.schedule.icon_image.url|escapejs }}{% endif %}"
                     data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                     onclick="openScheduleDetailsModal(this)"
                   >
@@ -534,7 +634,9 @@
                       data-schedule-id="{{ participation.schedule.id }}"
                       data-schedule-name="{{ participation.schedule.name|escapejs }}"
                       data-schedule-description="{{ participation.schedule.description|default_if_none:''|escapejs }}"
-                      data-schedule-color="{{ participation.schedule.color|default:'#6366f1' }}"
+                      data-schedule-color="{{ participation.schedule.color|default:'#59e7ec' }}"
+                      data-schedule-icon-emoji="{{ participation.schedule.icon_emoji|escapejs }}"
+                      data-schedule-icon-image-url="{% if participation.schedule.icon_image %}{{ participation.schedule.icon_image.url|escapejs }}{% endif %}"
                       data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                       onclick="handleEditScheduleClick(event, this)"
                     >
@@ -576,7 +678,7 @@
 
       <h3 class="modal-title">Nova atividade</h3>
 
-      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}">
+      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -654,6 +756,11 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Ícone (PNG/JPG)</label>
+          <input type="file" name="icon_image" accept="image/png,image/webp,image/jpeg" />
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal()">
             Cancelar
@@ -681,7 +788,7 @@
 
       <h3 class="modal-title">Editar atividade</h3>
 
-      <form method="POST" id="edit-activity-form">
+      <form method="POST" id="edit-activity-form" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -752,6 +859,17 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Ícone (PNG/JPG)</label>
+          <div class="icon-upload-row">
+            <input type="file" name="icon_image" id="edit-activity-icon-image" accept="image/png,image/webp,image/jpeg" />
+            <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_edit_activity_icon_image" data-icon-clear-emoji-target="clear_edit_activity_icon_emoji" data-icon-clear-file="edit-activity-icon-image" aria-label="Remover ícone atual" title="Remover ícone atual">x</button>
+          </div>
+          <input type="hidden" id="clear_edit_activity_icon_image" name="clear_icon_image" value="" />
+          <input type="hidden" id="clear_edit_activity_icon_emoji" name="clear_icon_emoji" value="" />
+          <div id="edit-activity-icon-preview" class="activity-icon-preview" aria-live="polite"></div>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeEditModal()">
             Cancelar
@@ -777,7 +895,7 @@
 
       <h3 class="modal-title">Nova agenda</h3>
 
-      <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}">
+      <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -793,12 +911,17 @@
         <div class="form-group">
           <label>Cor</label>
           <div class="color-picker-row">
-            <input type="color" name="color" id="schedule-color-input" value="#6366f1">
+            <input type="color" name="color" id="schedule-color-input" value="#59e7ec">
             <div class="color-preview-chip">
               <span class="schedule-color-dot" id="schedule-color-preview" aria-hidden="true"></span>
-              <span id="schedule-color-value">#6366f1</span>
+              <span id="schedule-color-value">#59e7ec</span>
             </div>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ícone da agenda (PNG/JPG)</label>
+          <input type="file" name="icon_image" accept="image/png,image/webp,image/jpeg" />
         </div>
 
         <div class="form-group">
@@ -840,7 +963,7 @@
 
       <h3 class="modal-title">Editar agenda</h3>
 
-      <form method="POST" id="edit-agenda-form">
+      <form method="POST" id="edit-agenda-form" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -856,12 +979,21 @@
         <div class="form-group">
           <label>Cor</label>
           <div class="color-picker-row">
-            <input type="color" name="color" id="edit-schedule-color-input" value="#6366f1">
+            <input type="color" name="color" id="edit-schedule-color-input" value="#59e7ec">
             <div class="color-preview-chip">
               <span class="schedule-color-dot" id="edit-schedule-color-preview" aria-hidden="true"></span>
-              <span id="edit-schedule-color-value">#6366f1</span>
+              <span id="edit-schedule-color-value">#59e7ec</span>
             </div>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ícone da agenda (PNG/JPG)</label>
+          <div class="icon-upload-row">
+            <input type="file" name="icon_image" id="edit-schedule-icon-image" accept="image/png,image/webp,image/jpeg" />
+            <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_edit_schedule_icon_image" data-icon-clear-file="edit-schedule-icon-image" aria-label="Remover imagem atual" title="Remover imagem atual">x</button>
+          </div>
+          <input type="hidden" id="clear_edit_schedule_icon_image" name="clear_icon_image" value="" />
         </div>
 
         <div class="form-group">
@@ -951,7 +1083,10 @@
                 date: "{{ activity.date }}",
                 start_time: "{{ activity.start_time }}",
                 end_time: "{{ activity.end_time }}",
-                color: "{{ activity.color|default:activity.schedule.color|default:'#6366f1' }}"
+                color: "{{ activity.color|default:activity.schedule.color|default:'#59e7ec' }}",
+                icon_emoji: "{{ activity.icon_emoji|escapejs }}",
+                icon_image_url: "{% if activity.icon_image %}{{ activity.icon_image.url|escapejs }}{% elif ui_icons.default_activity_icon_image %}{{ ui_icons.default_activity_icon_image.url|escapejs }}{% endif %}",
+                default_icon_emoji: "{{ ui_icons.default_activity_icon_emoji|escapejs }}"
               }{% if not forloop.last %},{% endif %}
               {% endfor %}
             {% endif %}
@@ -969,6 +1104,13 @@
   <script>
     let createScheduleParticipants = [];
     let editScheduleParticipants = [];
+
+    const defaultActivityIconImageUrl = "{% if ui_icons.default_activity_icon_image %}{{ ui_icons.default_activity_icon_image.url|escapejs }}{% endif %}";
+    const defaultActivityIconEmoji = "{{ ui_icons.default_activity_icon_emoji|escapejs }}";
+
+    function setModalLock(isLocked) {
+      document.body.classList.toggle('modal-open', isLocked);
+    }
 
     function openNewModal() {
       const activeTab = document.querySelector('.tab-btn.active');
@@ -990,7 +1132,7 @@
       const colorInput = document.getElementById('schedule-color-input');
 
       form.reset();
-      colorInput.value = '#6366f1';
+      colorInput.value = '#59e7ec';
       syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
       createScheduleParticipants = [];
       renderScheduleParticipants(
@@ -1001,10 +1143,12 @@
       setParticipantFeedback('schedule-participant-feedback', '');
       document.getElementById('schedule-participant-input').value = '';
       document.getElementById('agenda-modal').classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeAgendaModal() {
       document.getElementById('agenda-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function openEditScheduleModal(scheduleData) {
@@ -1015,7 +1159,9 @@
       form.action = `/schedules/${scheduleData.id}/edit/`;
       document.getElementById('edit-agenda-name').value = scheduleData.name;
       document.getElementById('edit-agenda-description').value = scheduleData.description || '';
-      colorInput.value = scheduleData.color || '#6366f1';
+      colorInput.value = scheduleData.color || '#59e7ec';
+      document.getElementById('clear_edit_schedule_icon_image').value = '';
+      document.querySelector('[data-icon-clear-target="clear_edit_schedule_icon_image"]')?.classList.remove('icon-clear-btn--active');
       syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
       editScheduleParticipants = Array.isArray(scheduleData.participants)
         ? scheduleData.participants
@@ -1033,10 +1179,12 @@
       document.getElementById('edit-schedule-participant-input').value = '';
 
       modal.classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeEditAgendaModal() {
       document.getElementById('edit-agenda-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function openScheduleDetailsModal(buttonElement) {
@@ -1064,7 +1212,7 @@
         ? `Administrador: ${adminParticipant.username}`
         : 'Administrador não identificado';
       document.getElementById('details-schedule-color').style.backgroundColor =
-        buttonElement.dataset.scheduleColor || '#6366f1';
+        buttonElement.dataset.scheduleColor || '#59e7ec';
 
       participantsContainer.innerHTML = '';
 
@@ -1088,10 +1236,12 @@
       }
 
       document.getElementById('schedule-details-modal').classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeScheduleDetailsModal() {
       document.getElementById('schedule-details-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function handleEditScheduleClick(domEvent, buttonElement) {
@@ -1116,7 +1266,9 @@
         id: Number(buttonElement.dataset.scheduleId),
         name: buttonElement.dataset.scheduleName || '',
         description: buttonElement.dataset.scheduleDescription || '',
-        color: buttonElement.dataset.scheduleColor || '#6366f1',
+        color: buttonElement.dataset.scheduleColor || '#59e7ec',
+        icon_emoji: buttonElement.dataset.scheduleIconEmoji || '',
+        icon_image_url: buttonElement.dataset.scheduleIconImageUrl || '',
         participants
       };
 
@@ -1323,16 +1475,19 @@
       }
 
       modal.classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeModal() {
       document.getElementById('modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function openEditActivityModal(activityData) {
       const modal = document.getElementById('edit-modal');
       const form = document.getElementById('edit-activity-form');
       const timeFields = document.getElementById('edit-time-fields');
+      const iconPreview = document.getElementById('edit-activity-icon-preview');
 
       // Set form action to edit URL
       form.action = `/schedules/${activityData.schedule_id}/activity/${activityData.id}/edit/`;
@@ -1346,6 +1501,21 @@
       document.getElementById('edit-date-input').value = activityData.date;
       document.getElementById('edit-start-time').value = activityData.start_time || '';
       document.getElementById('edit-end-time').value = activityData.end_time || '';
+      document.getElementById('clear_edit_activity_icon_image').value = '';
+      document.querySelector('[data-icon-clear-target="clear_edit_activity_icon_image"]')?.classList.remove('icon-clear-btn--active');
+
+      if (iconPreview) {
+        const iconImageUrl = activityData.icon_image_url || defaultActivityIconImageUrl;
+        const iconEmoji = activityData.icon_emoji || defaultActivityIconEmoji;
+
+        if (iconImageUrl) {
+          iconPreview.innerHTML = `<img src="${iconImageUrl}" class="activity-icon-image" alt="" onerror="this.style.display='none'" /><span>Ícone atual</span>`;
+        } else if (iconEmoji) {
+          iconPreview.innerHTML = `<span class="activity-icon-emoji">${iconEmoji}</span><span>Ícone atual</span>`;
+        } else {
+          iconPreview.innerHTML = '<span class="activity-icon-preview__empty">Sem ícone atual</span>';
+        }
+      }
 
       // Show/hide time fields based on kind
       if (activityData.kind === 'task') {
@@ -1355,6 +1525,7 @@
       }
 
       modal.classList.remove('hidden');
+      setModalLock(true);
     }
 
     function handleEditActivityClick(domEvent, activityData) {
@@ -1365,6 +1536,7 @@
 
     function closeEditModal() {
       document.getElementById('edit-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     document.getElementById('new-btn').addEventListener('click', openNewModal);
