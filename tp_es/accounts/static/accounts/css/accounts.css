@@ -702,14 +702,10 @@ form {
 
 .icon-upload-row input[type="file"] {
   flex: 1;
-  width: 100%;
   min-width: 0;
 }
 
 .icon-clear-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 999px;
@@ -722,12 +718,6 @@ form {
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-}
-
-.profile-page .icon-clear-btn {
-  width: 36px;
-  min-width: 36px;
-  flex: 0 0 36px;
 }
 
 .icon-clear-btn:hover {
