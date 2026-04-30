@@ -149,6 +149,15 @@ def main_calendar_view(request):
     
     filter_kinds = request.GET.getlist("kind")
     filter_categories = request.GET.getlist("category")
+
+    if not filter_kinds:
+        filter_kinds = ["event", "task"]
+
+    if not filter_categories:
+        filter_categories = [
+        "class", "exam", "assignment",
+        "study", "meeting", "presentation", "personal"
+        ]
   
     admin_participations = request.user.participations.select_related("schedule").prefetch_related(
         "schedule__participants__user"
