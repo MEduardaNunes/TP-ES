@@ -1,4 +1,5 @@
 const tabs = document.querySelectorAll('.tab-btn');
+const filterBtn = document.querySelector('.action-btn--ghost');
 
 tabs.forEach(tab => tab.addEventListener('click', () => tabClicked(tab)));
 
@@ -14,6 +15,12 @@ const tabClicked = (tab) => {
     const content = document.getElementById(contentId);
     
     content.classList.add('show');
+
+    if (contentId === 'agendas') {
+    filterBtn.style.display = 'none';
+  } else {
+    filterBtn.style.display = 'flex';
+  }
 }
 
 const currentActiveTab = document.querySelector('.tab-btn.active');
