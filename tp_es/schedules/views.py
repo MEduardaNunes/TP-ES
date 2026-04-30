@@ -523,6 +523,8 @@ def quick_create_activity(request):
         if kind == Activity.Kind.EVENT and not date_value:
             messages.error(request, "Eventos precisam de uma data.")
             return redirect("schedules:main_calendar_view")
+        
+        notes = request.POST.get("notes", "").strip()
  
         Activity.objects.create(
             schedule=schedule,
@@ -533,6 +535,7 @@ def quick_create_activity(request):
             date=date_value,
             start_time=request.POST.get("start_time") or None,
             end_time=request.POST.get("end_time") or None,
+            notes=notes,
         )
         messages.success(request, "Atividade criada com sucesso.")
  

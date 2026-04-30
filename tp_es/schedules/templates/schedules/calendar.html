@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load calendar_tags %}
 
 <!DOCTYPE html>
@@ -153,7 +153,7 @@
                 Futuros
                </button>
                <button type="button" class="subtab-btn" onclick="showSubtab('eventos-concluidos', this)">
-               Concluídos
+               Concluí­dos
                </button>
               </div>
             </div>
@@ -168,24 +168,42 @@
                   <span class="list-badge">Evento</span>
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
-                <h3>{{ event.title }}</h3>
+                <div class="list-card__title-with-check">
+                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form checkbox-form">
+                    {% csrf_token %}
+                    <label class="custom-checkbox">
+                      <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" {% if event.id in checked_ids %}checked{% endif %} />
+                      <span class="checkbox-box"></span>
+                    </label>
+                  </form>
+                  <h3>{{ event.title }}</h3>
+                </div>
                 <p>
-                  {{ event.date }}
+                  {{ event.date|date:"d/m/Y" }}
                   {% if event.start_time %}
                     &agrave;s {{ event.start_time }}
                   {% endif %}
                 </p>
                 <div class="list-card__actions">
-                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form">
-                    {% csrf_token %}
-                    <button type="submit" class="text-link">
-                    {% if event.id in checked_ids %}
-                        Realizado
-                    {% else %}
-                        Marcar como realizado
-                   {% endif %}
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    class="text-link"
+                    onclick="openActivityDetailsModal(event, {
+                      schedule_id: {{ event.schedule.id }},
+                      schedule_name: '{{ event.schedule.name|escapejs }}',
+                      color: '{{ event.color|default:event.schedule.color|default:"#6366f1" }}',
+                      title: '{{ event.title|escapejs }}',
+                      kind: '{{ event.kind }}',
+                      activity_type: '{{ event.activity_type }}',
+                      priority: '{{ event.priority }}',
+                      date: '{{ event.date|date:"Y-m-d" }}',
+                      start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
+                      end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                      notes: '{{ event.notes|default_if_none:""|escapejs }}'
+                    })"
+                  >
+                    Detalhes
+                  </button>
                   {% if event.schedule.id in admin_schedule_ids %}
                     <button
                       type="button"
@@ -199,7 +217,8 @@
                         priority: '{{ event.priority }}',
                         date: '{{ event.date|date:"Y-m-d" }}',
                         start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
-                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                        notes: '{{ event.notes|default_if_none:""|escapejs }}'
                       })"
                     >
                       Editar
@@ -229,22 +248,40 @@
 				                    <span class="list-meta">{{ event.schedule.name }}</span>
 				                </div>
 
-				                <h3 class="completed">{{ event.title }}</h3>
+				                <div class="list-card__title-with-check">
+				                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form checkbox-form">
+				                    {% csrf_token %}
+				                    <label class="custom-checkbox">
+				                      <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" checked />
+				                      <span class="checkbox-box"></span>
+				                    </label>
+				                  </form>
+				                  <h3 class="completed">{{ event.title }}</h3>
+				                </div>
 
 				                <p>
-				                    {{ event.date }}
+				                    {{ event.date|date:"d/m/Y" }}
 				                    {% if event.start_time %}
-				                        às {{ event.start_time }}
+				                        Às {{ event.start_time }}
 				                    {% endif %}
 				                </p>
 
 				<div class="list-card__actions">
-				   <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}">
-				      {% csrf_token %}
-				        <button type="submit" class="text-link">
-				             Realizado
-				              </button>
-				                </form>
+                      <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                       schedule_id: {{ event.schedule.id }},
+                       schedule_name: '{{ event.schedule.name|escapejs }}',
+                       color: '{{ event.color|default:event.schedule.color|default:"#6366f1" }}',
+                       title: '{{ event.title|escapejs }}',
+                       kind: '{{ event.kind }}',
+                       activity_type: '{{ event.activity_type }}',
+                       priority: '{{ event.priority }}',
+                       date: '{{ event.date|date:"Y-m-d" }}',
+                       start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
+                       end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                       notes: '{{ event.notes|default_if_none:""|escapejs }}'
+                       })">
+                        Detalhes
+                       </button>
 				             {% if event.schedule.id in admin_schedule_ids %}
 				              <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
 				               id: {{ event.id }},
@@ -252,10 +289,11 @@
 				               title: '{{ event.title|escapejs }}',
 				               kind: '{{ event.kind }}',
 				               activity_type: '{{ event.activity_type }}',
-                        priority: '{{ event.priority }}',
+                       priority: '{{ event.priority }}',
 				               date: '{{ event.date|date:"Y-m-d" }}',
 				               start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
-				                end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+				               end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                       notes: '{{ event.notes|default_if_none:""|escapejs }}'
 				               })">
 				                Editar
 				               </button>
@@ -270,7 +308,7 @@
 				            </div>
 				            </article>
 				        {% empty %}
-				            <p>Nenhum evento concluído</p>
+				            <p>Nenhum evento concluÃ­do</p>
 				        {% endfor %}
 				    </div>
 				</div>
@@ -287,7 +325,7 @@
              </button>
 
             <button type="button" class="subtab-btn" onclick="showSubtab('tarefas-concluidas', this)">
-               Concluídas
+               Concluí­das
             </button>
            </div>
           </div>
@@ -303,17 +341,35 @@
 				          <span class="list-meta">{{ task.schedule.name }}</span>
 				        </div>
 
-				        <h3>{{ task.title }}</h3>
+				        <div class="list-card__title-with-check">
+				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
+				            {% csrf_token %}
+				            <label class="custom-checkbox">
+				              <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" />
+				              <span class="checkbox-box"></span>
+				            </label>
+				          </form>
+				          <h3>{{ task.title }}</h3>
+				        </div>
 
-				        <p>Entrega em {{ task.date }}</p>
+				        <p>Entrega em {{ task.date|date:"d/m/Y" }}</p>
 
 				        <div class="list-card__actions">
-				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
-				            {% csrf_token %}
-				             <button type="submit" class="text-link">
-				              Marcar como concluído
-				            </button>
-				         </form>
+                   <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                     schedule_id: {{ task.schedule.id }},
+                     schedule_name: '{{ task.schedule.name|escapejs }}',
+                     color: '{{ task.color|default:task.schedule.color|default:"#6366f1" }}',
+                     title: '{{ task.title|escapejs }}',
+                     kind: '{{ task.kind }}',
+                     activity_type: '{{ task.activity_type }}',
+                     priority: '{{ task.priority }}',
+                     date: '{{ task.date|date:"Y-m-d" }}',
+                     start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                     end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                     notes: '{{ task.notes|default_if_none:""|escapejs }}'
+                     })">
+                       Detalhes
+                     </button>
 
 				         {% if task.schedule.id in admin_schedule_ids %}
 				           <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
@@ -325,7 +381,8 @@
                      priority: '{{ task.priority }}',
 				             date: '{{ task.date|date:"Y-m-d" }}',
 				             start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-				             end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+				             end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                     notes: '{{ task.notes|default_if_none:""|escapejs }}'
 				             })">
 				               Editar
 				             </button>
@@ -342,7 +399,7 @@
 				    {% empty %}
 				      <div class="empty-state">
 				        <h3>Nenhuma tarefa pendente</h3>
-				        <p>Sua lista está limpa no momento.</p>
+				        <p>Sua lista estÃ¡ limpa no momento.</p>
 				      </div>
 				    {% endfor %}
 				  </div>
@@ -358,17 +415,35 @@
 				            <span class="list-meta">{{ task.schedule.name }}</span>
 				          </div>
 
-				          <h3 class="completed">{{ task.title }}</h3>
+				          <div class="list-card__title-with-check">
+				            <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
+				              {% csrf_token %}
+				              <label class="custom-checkbox">
+				                <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" checked />
+				                <span class="checkbox-box"></span>
+				              </label>
+				            </form>
+				            <h3 class="completed">{{ task.title }}</h3>
+				          </div>
 
-				          <p>Entrega em {{ task.date }}</p>
+				          <p>Entrega em {{ task.date|date:"d/m/Y" }}</p>
 
 				        <div class="list-card__actions">
-				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
-				            {% csrf_token %}
-				            <button type="submit" class="text-link">
-				              Desmarcar como concluído
-				            </button>
-				          </form>
+                    <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                      schedule_id: {{ task.schedule.id }},
+                      schedule_name: '{{ task.schedule.name|escapejs }}',
+                      color: '{{ task.color|default:task.schedule.color|default:"#6366f1" }}',
+                      title: '{{ task.title|escapejs }}',
+                      kind: '{{ task.kind }}',
+                      activity_type: '{{ task.activity_type }}',
+                      priority: '{{ task.priority }}',
+                      date: '{{ task.date|date:"Y-m-d" }}',
+                      start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                      end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                      notes: '{{ task.notes|default_if_none:""|escapejs }}'
+                    })">
+                      Detalhes
+                    </button>
 
 				          {% if task.schedule.id in admin_schedule_ids %}
 				            <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
@@ -380,7 +455,8 @@
                       priority: '{{ task.priority }}',
 				              date: '{{ task.date|date:"Y-m-d" }}',
 				              start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-				              end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+				              end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                      notes: '{{ task.notes|default_if_none:""|escapejs }}'
 				            })">
 				              Editar
 				            </button>
@@ -396,8 +472,8 @@
 				        </article>
 				        {% empty %}
 				        <div class="empty-state">
-				          <h3>Nenhuma tarefa concluída</h3>
-				          <p>Tarefas marcadas como concluídas aparecerão aqui.</p>
+				          <h3>Nenhuma tarefa concluÃ­da</h3>
+				          <p>Tarefas marcadas como concluÃ­das aparecerÃ£o aqui.</p>
 				        </div>
 				      {% endfor %}
 				    </div>
@@ -408,7 +484,7 @@
           <div class="panel-header">
             <div>
               <h1>Matriz de prioridade</h1>
-              <p>Distribua estudos, entregas e provas por urgência e importância.</p>
+              <p>Distribua estudos, entregas e provas por urgÃªncia e importÃ¢ncia.</p>
             </div>
           </div>
 
@@ -428,55 +504,50 @@
                   {% for task in section.tasks %}
                     <article class="priority-card">
                       <div class="list-card__top">
-                        <span class="list-badge">{% if task.kind == 'event' %}📅{% else %}✅{% endif %} {{ task.get_kind_display }}</span>
+                        <span class="list-badge">{{ task.get_kind_display }}</span>
                         <span class="list-badge list-badge--task">{{ task.get_activity_type_display }}</span>
                         <span class="priority-card__badge">{{ task.get_priority_display }}</span>
                       </div>
 
-                      <h3>{{ task.title }}</h3>
-                      <p>
-                        {{ task.schedule.name }}
-                        {% if task.date %}
-                          · {{ task.date }}
-                        {% endif %}
-                      </p>
-
-                      <div class="list-card__actions">
-                        <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
+                      <div class="list-card__title-with-check">
+                        <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
                           {% csrf_token %}
-                          <button type="submit" class="text-link">
-                            ⬜ Marcar como concluído
-                          </button>
+                          <label class="custom-checkbox">
+                            <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" />
+                            <span class="checkbox-box"></span>
+                          </label>
                         </form>
+                        <h3>{{ task.title }}</h3>
+                      </div>
+                      <div class="priority-card__footer">
+                        <p>
+                          {{ task.schedule.name }}
+                          {% if task.date %}
+                            - {{ task.date|date:"d/m/Y" }}
+                          {% endif %}
+                        </p>
 
-                        {% if task.schedule.id in admin_schedule_ids %}
-                          <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
-                            id: {{ task.id }},
-                            schedule_id: {{ task.schedule.id }},
-                            title: '{{ task.title|escapejs }}',
-                            kind: '{{ task.kind }}',
-                            activity_type: '{{ task.activity_type }}',
-                            priority: '{{ task.priority }}',
-                            date: '{{ task.date|date:"Y-m-d" }}',
-                            start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-                            end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
-                          })">
-                            Editar
-                          </button>
-
-                          <form method="post" action="{% url 'schedules:delete_activity' task.schedule.id task.id %}" class="inline-form">
-                            {% csrf_token %}
-                            <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta tarefa?')">
-                              Deletar
-                            </button>
-                          </form>
-                        {% endif %}
+                        <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                          schedule_id: {{ task.schedule.id }},
+                          schedule_name: '{{ task.schedule.name|escapejs }}',
+                          color: '{{ task.color|default:task.schedule.color|default:"#6366f1" }}',
+                          title: '{{ task.title|escapejs }}',
+                          kind: '{{ task.kind }}',
+                          activity_type: '{{ task.activity_type }}',
+                          priority: '{{ task.priority }}',
+                          date: '{{ task.date|date:"Y-m-d" }}',
+                          start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                          end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                          notes: '{{ task.notes|default_if_none:""|escapejs }}'
+                        })">
+                          Detalhes
+                        </button>
                       </div>
                     </article>
                   {% empty %}
                     <div class="empty-state empty-state--matrix">
                       <h3>Nenhuma tarefa nesta categoria</h3>
-                      <p>Crie tarefas com prioridade para visualizar a matriz em ação.</p>
+                      <p>Crie tarefas com prioridade para visualizar a matriz em questão.</p>
                     </div>
                   {% endfor %}
                 </div>
@@ -580,7 +651,7 @@
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Agenda</label>
+          <label>Agenda*</label>
 
           {% if admin_participations %}
             <select name="schedule_id" id="schedule-select" required>
@@ -598,22 +669,21 @@
         </div>
 
         <div class="form-group">
-          <label>T&iacute;tulo</label>
+          <label>T&iacute;tulo*</label>
           <input type="text" name="title" placeholder="Ex: Prova de C&aacute;lculo" required>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Tipo</label>
+            <label>Tipo*</label>
             <select name="kind" id="kind-select">
-              <option value="event">📅 Evento (tem horário)</option>
-              <option value="task">✅ Tarefa (tem prazo)</option>
+              <option value="event">Evento</option>
+              <option value="task">Tarefa</option>
             </select>
-            <small class="form-hint" id="kind-hint">Ambos aparecem na matriz de prioridades</small>
           </div>
 
           <div class="form-group">
-            <label>Categoria</label>
+            <label>Categoria*</label>
             <select name="activity_type" required>
               <option value="class">Aula</option>
               <option value="exam">Prova</option>
@@ -627,31 +697,36 @@
         </div>
 
         <div class="form-group">
-          <label>Prioridade</label>
+          <label>Prioridade*</label>
+          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
           <select name="priority" id="priority-select">
             <option value="urgent_important">Urgente e importante</option>
             <option value="urgent">Urgente</option>
             <option value="important" selected>Importante</option>
-            <option value="not_urgent_not_important">Não urgente e nem importante</option>
+            <option value="not_urgent_not_important">NÃ£o urgente e nem importante</option>
           </select>
-          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
         </div>
 
         <div id="date-field" class="form-group">
-          <label>Data</label>
+          <label>Data*</label>
           <input type="date" name="date" id="date-input" required>
         </div>
 
         <div id="time-fields" class="form-row">
           <div class="form-group">
-            <label>In&iacute;cio</label>
+            <label>In&iacute;cio*</label>
             <input type="time" name="start_time">
           </div>
 
           <div class="form-group">
-            <label>Fim</label>
+            <label>Fim*</label>
             <input type="time" name="end_time">
           </div>
+        </div>
+
+        <div id="notes" class="form-group">
+          <label>Notas adicionais</label>
+          <textarea name="notes" rows="3" placeholder="Ex: Levar c&aacute;lculo, f&oacute;rmulas e caneta azul para a prova"></textarea>
         </div>
 
         <div class="modal-actions">
@@ -685,7 +760,7 @@
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Agenda</label>
+          <label>Agenda*</label>
           <select name="schedule_id" id="edit-schedule-select" required>
             {% for p in admin_participations %}
               <option value="{{ p.schedule.id }}">
@@ -696,22 +771,21 @@
         </div>
 
         <div class="form-group">
-          <label>T&iacute;tulo</label>
+          <label>T&iacute;tulo*</label>
           <input type="text" name="title" id="edit-title" placeholder="Ex: Prova de C&aacute;lculo" required>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Tipo</label>
+            <label>Tipo*</label>
             <select name="kind" id="edit-kind-select">
-              <option value="event">📅 Evento (tem horário)</option>
-              <option value="task">✅ Tarefa (tem prazo)</option>
+              <option value="event">Evento</option>
+              <option value="task">Tarefa</option>
             </select>
-            <small class="form-hint">Ambos aparecem na matriz de prioridades</small>
           </div>
 
           <div class="form-group">
-            <label>Categoria</label>
+            <label>Categoria*</label>
             <select name="activity_type" id="edit-activity-type" required>
               <option value="class">Aula</option>
               <option value="exam">Prova</option>
@@ -725,32 +799,38 @@
         </div>
 
         <div class="form-group">
-          <label>Prioridade</label>
+          <label>Prioridade*</label>
+          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
           <select name="priority" id="edit-priority-select">
             <option value="urgent_important">Urgente e importante</option>
             <option value="urgent">Urgente</option>
             <option value="important">Importante</option>
-            <option value="not_urgent_not_important">Não urgente e nem importante</option>
+            <option value="not_urgent_not_important">NÃ£o urgente e nem importante</option>
           </select>
-          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
         </div>
 
         <div id="edit-date-field" class="form-group">
-          <label>Data</label>
+          <label>Data*</label>
           <input type="date" name="date" id="edit-date-input" required>
         </div>
 
         <div id="edit-time-fields" class="form-row">
           <div class="form-group">
-            <label>In&iacute;cio</label>
+            <label>In&iacute;cio*</label>
             <input type="time" name="start_time" id="edit-start-time">
           </div>
 
           <div class="form-group">
-            <label>Fim</label>
-            <input type="time" name="end_time" id="edit-end-time">
+            <label>Fim*</label>
+            <input type="time" name="end_time" id="edit-end-time" >
           </div>
         </div>
+
+        <div id="edit-notes-textarea" class="form-group">
+          <label>Notas adicionais</label>
+          <textarea name="notes" rows="3" placeholder="Ex: Levar c&aacute;lculo, f&oacute;rmulas e caneta azul para a prova"></textarea>
+        </div>
+
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeEditModal()">
@@ -762,6 +842,73 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="activity-details-modal" class="modal hidden">
+    <div class="modal-content modal-content--activity-details">
+      <button class="close-btn" onclick="closeActivityDetailsModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="details-header">
+        <span class="details-color-dot" id="details-activity-color" aria-hidden="true"></span>
+        <div>
+          <h3 class="modal-title" id="details-title"></h3>
+          <p class="details-admin" id="details-schedule-name"></p>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Informa&ccedil;&otilde;es</h4>
+        <div class="details-info-grid">
+          <div class="details-info-item">
+            <span>Tipo</span>
+            <p id="details-kind"></p>
+          </div>
+          <div class="details-info-item">
+            <span>Categoria</span>
+            <p id="details-activity-type"></p>
+          </div>
+          <div class="details-info-item">
+            <span>Prioridade</span>
+            <p id="details-priority"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Data e hor&aacute;rio</h4>
+        <div class="details-info-grid" id="details-time-fields">
+          <div class="details-info-item">
+            <span>Data</span>
+            <p id="details-date"></p>
+          </div>
+          <div class="details-info-item">
+            <span>In&iacute;cio</span>
+            <p id="details-start-time"></p>
+          </div>
+          <div class="details-info-item">
+            <span>Fim</span>
+            <p id="details-end-time"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Notas adicionais</h4>
+        <p class="details-description" id="details-notes"></p>
+      </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeActivityDetailsModal()">
+            Fechar
+          </button>
+        </div>
     </div>
   </div>
 
@@ -781,7 +928,7 @@
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Nome</label>
+          <label>Nom*</label>
           <input type="text" name="name" placeholder="Nome da agenda" required>
         </div>
 
@@ -844,7 +991,7 @@
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Nome</label>
+          <label>Nome*</label>
           <input type="text" name="name" id="edit-agenda-name" placeholder="Nome da agenda" required>
         </div>
 
@@ -902,21 +1049,21 @@
       </button>
 
       <div class="details-header">
-        <span class="details-color-dot" id="details-schedule-color" aria-hidden="true"></span>
+        <span class="details-color-dot" id="details-agenda-color" aria-hidden="true"></span>
         <div>
-          <h3 class="modal-title" id="details-schedule-name"></h3>
-          <p class="details-admin" id="details-schedule-admin"></p>
+          <h3 class="modal-title" id="details-agenda-name"></h3>
+          <p class="details-admin" id="details-agenda-admin"></p>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Descri&ccedil;&atilde;o</h4>
-        <p id="details-schedule-description" class="details-description"></p>
+        <p id="details-agenda-description" class="details-description"></p>
       </div>
 
       <div class="details-section">
         <h4>Participantes</h4>
-        <div id="details-schedule-participants" class="details-participants-list"></div>
+        <div id="details-agenda-participants" class="details-participants-list"></div>
       </div>
 
       <div class="modal-actions">
@@ -943,14 +1090,16 @@
                 id: {{ activity.id }},
                 is_checked: {% if activity.is_checked_for_user %}true{% else %}false{% endif %},
                 schedule_id: {{ activity.schedule.id }},
+                schedule_name: "{{ activity.schedule.name|escapejs }}",
                 can_manage: {% if activity.schedule.id in admin_schedule_ids %}true{% else %}false{% endif %},
                 title: "{{ activity.title|escapejs }}",
                 kind: "{{ activity.kind }}",
                 activity_type: "{{ activity.activity_type }}",
                 priority: "{{ activity.priority }}",
-                date: "{{ activity.date }}",
+                date: "{{ activity.date|date:'Y-m-d' }}",
                 start_time: "{{ activity.start_time }}",
                 end_time: "{{ activity.end_time }}",
+                notes: "{{ activity.notes|default_if_none:''|escapejs }}",
                 color: "{{ activity.color|default:activity.schedule.color|default:'#6366f1' }}"
               }{% if not forloop.last %},{% endif %}
               {% endfor %}
@@ -1055,15 +1204,15 @@
       }
 
       const adminParticipant = participants.find(participant => participant.is_admin);
-      const participantsContainer = document.getElementById('details-schedule-participants');
+      const participantsContainer = document.getElementById('details-agenda-participants');
 
-      document.getElementById('details-schedule-name').textContent = buttonElement.dataset.scheduleName || '';
-      document.getElementById('details-schedule-description').textContent =
-        buttonElement.dataset.scheduleDescription || 'Sem descrição.';
-      document.getElementById('details-schedule-admin').textContent = adminParticipant
+      document.getElementById('details-agenda-name').textContent = buttonElement.dataset.scheduleName || '';
+      document.getElementById('details-agenda-description').textContent =
+        buttonElement.dataset.scheduleDescription || 'Sem descriÃ§Ã£o.';
+      document.getElementById('details-agenda-admin').textContent = adminParticipant
         ? `Administrador: ${adminParticipant.username}`
-        : 'Administrador não identificado';
-      document.getElementById('details-schedule-color').style.backgroundColor =
+        : 'Administrador nÃ£o identificado';
+      document.getElementById('details-agenda-color').style.backgroundColor =
         buttonElement.dataset.scheduleColor || '#6366f1';
 
       participantsContainer.innerHTML = '';
@@ -1196,7 +1345,7 @@
 
       const typedUsername = input.value.trim();
       if (!typedUsername) {
-        setParticipantFeedback(feedbackId, 'Digite o nome do usuário para adicionar.', 'warning');
+        setParticipantFeedback(feedbackId, 'Digite o nome do usuÃ¡rio para adicionar.', 'warning');
         return;
       }
 
@@ -1205,11 +1354,11 @@
         : editScheduleParticipants;
 
       if (state.some(user => user.username === typedUsername)) {
-        setParticipantFeedback(feedbackId, 'Esse usuário já foi adicionado.', 'warning');
+        setParticipantFeedback(feedbackId, 'Esse usuÃ¡rio jÃ¡ foi adicionado.', 'warning');
         return;
       }
 
-      setParticipantFeedback(feedbackId, 'Validando usuário...', '');
+      setParticipantFeedback(feedbackId, 'Validando usuÃ¡rio...', '');
 
       try {
         const response = await fetch(
@@ -1230,7 +1379,7 @@
         if (!result.valid) {
           setParticipantFeedback(
             feedbackId,
-            result.message || 'Usuário não encontrado. Verifique o nome e tente novamente.',
+            result.message || 'UsuÃ¡rio nÃ£o encontrado. Verifique o nome e tente novamente.',
             result.level || 'warning'
           );
           return;
@@ -1238,7 +1387,7 @@
 
         const validatedUsername = result.username || typedUsername;
         if (state.some(user => user.username === validatedUsername)) {
-          setParticipantFeedback(feedbackId, 'Esse usuário já foi adicionado.', 'warning');
+          setParticipantFeedback(feedbackId, 'Esse usuÃ¡rio jÃ¡ foi adicionado.', 'warning');
           return;
         }
 
@@ -1249,14 +1398,14 @@
         renderScheduleParticipants(listId, inputsId, state);
         setParticipantFeedback(
           feedbackId,
-          result.message || `Usuário "${validatedUsername}" encontrado e adicionado.`,
+          result.message || `UsuÃ¡rio "${validatedUsername}" encontrado e adicionado.`,
           result.level || 'success'
         );
         input.value = '';
       } catch (error) {
         setParticipantFeedback(
           feedbackId,
-          'Não foi possível validar o usuário agora. Tente novamente.',
+          'NÃ£o foi possÃ­vel validar o usuÃ¡rio agora. Tente novamente.',
           'warning'
         );
       }
@@ -1346,6 +1495,7 @@
       document.getElementById('edit-date-input').value = activityData.date;
       document.getElementById('edit-start-time').value = activityData.start_time || '';
       document.getElementById('edit-end-time').value = activityData.end_time || '';
+      document.querySelector('#edit-notes-textarea textarea').value = activityData.notes || '';
 
       // Show/hide time fields based on kind
       if (activityData.kind === 'task') {
@@ -1361,6 +1511,97 @@
       domEvent.preventDefault();
       domEvent.stopPropagation();
       openEditActivityModal(activityData);
+    }
+
+    function openActivityDetailsModal(domEvent, activityData) {
+      if (domEvent) {
+        domEvent.preventDefault();
+        domEvent.stopPropagation();
+      }
+
+      const modal = document.getElementById('activity-details-modal');
+      const timeFields = document.getElementById('details-time-fields');
+      const kindLabels = {
+        event: 'Evento',
+        task: 'Tarefa'
+      };
+      const activityTypeLabels = {
+        class: 'Aula',
+        exam: 'Prova',
+        assignment: 'Trabalho',
+        study: 'Estudo',
+        meeting: 'ReuniÃƒÂ£o',
+        presentation: 'ApresentaÃƒÂ§ÃƒÂ£o',
+        personal: 'Pessoal'
+      };
+      const priorityLabels = {
+        urgent_important: 'Urgente e importante',
+        urgent: 'Urgente',
+        important: 'Importante',
+        not_urgent_not_important: 'NÃƒÂ£o urgente e nem importante'
+      };
+
+      document.getElementById('details-schedule-name').textContent = activityData.schedule_name || 'Agenda nÃƒÂ£o informada';
+      document.getElementById('details-title').textContent = activityData.title || 'Sem tÃƒÂ­tulo';
+      document.getElementById('details-kind').textContent = kindLabels[activityData.kind] || activityData.kind || 'NÃƒÂ£o informado';
+      document.getElementById('details-activity-type').textContent =
+        activityTypeLabels[activityData.activity_type] || activityData.activity_type || 'NÃƒÂ£o informada';
+      document.getElementById('details-priority').textContent =
+        priorityLabels[activityData.priority] || activityData.priority || 'NÃƒÂ£o informada';
+      document.getElementById('details-date').textContent = activityData.date || 'Sem data';
+      document.getElementById('details-start-time').textContent = activityData.start_time || 'Sem inÃƒÂ­cio';
+      document.getElementById('details-end-time').textContent = activityData.end_time || 'Sem fim';
+      document.getElementById('details-notes').textContent = activityData.notes || 'Sem notas adicionais.';
+
+      if (activityData.kind === 'task') {
+        timeFields.style.display = 'none';
+      } else {
+        timeFields.style.display = 'flex';
+      }
+
+      const present = value => value !== undefined && value !== null && String(value).trim() !== '' && String(value).trim() !== 'None';
+      const fallback = (value, message) => present(value) ? value : message;
+      const formatBrazilianDate = value => {
+        if (!present(value)) {
+          return '';
+        }
+
+        const [year, month, day] = String(value).split('-');
+        if (!year || !month || !day) {
+          return value;
+        }
+
+        return `${day}/${month}/${year}`;
+      };
+      const isTask = activityData.kind === 'task';
+
+      document.getElementById('details-activity-color').style.backgroundColor =
+        fallback(activityData.color, '#6366f1');
+      document.getElementById('details-title').textContent =
+        fallback(activityData.title, 'Atividade sem titulo informado.');
+      document.getElementById('details-schedule-name').textContent =
+        `Agenda: ${fallback(activityData.schedule_name, 'nenhuma agenda informada.')}`;
+      document.getElementById('details-kind').textContent =
+        kindLabels[activityData.kind] || fallback(activityData.kind, 'Tipo nao informado.');
+      document.getElementById('details-activity-type').textContent =
+        activityTypeLabels[activityData.activity_type] || fallback(activityData.activity_type, 'Categoria nao informada.');
+      document.getElementById('details-priority').textContent =
+        priorityLabels[activityData.priority] || fallback(activityData.priority, 'Prioridade nao informada.');
+      document.getElementById('details-date').textContent =
+        fallback(formatBrazilianDate(activityData.date), isTask ? 'Esta tarefa ainda nao tem data de entrega.' : 'Este evento ainda nao tem data definida.');
+      document.getElementById('details-start-time').textContent =
+        fallback(activityData.start_time, isTask ? 'Tarefas nao usam horario de inicio.' : 'Horario de inicio nao informado.');
+      document.getElementById('details-end-time').textContent =
+        fallback(activityData.end_time, isTask ? 'Tarefas nao usam horario de fim.' : 'Horario de fim nao informado.');
+      document.getElementById('details-notes').textContent =
+        fallback(activityData.notes, 'Nenhuma nota adicional foi cadastrada para esta atividade.');
+      timeFields.style.display = 'grid';
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeActivityDetailsModal() {
+      document.getElementById('activity-details-modal').classList.add('hidden');
     }
 
     function closeEditModal() {
@@ -1476,12 +1717,12 @@
 
           <label class="filter-option">
             <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
-            <span>Reunião</span>
+            <span>ReuniÃ£o</span>
           </label>
 
           <label class="filter-option">
             <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
-            <span>Apresentação</span>
+            <span>ApresentaÃ§Ã£o</span>
           </label>
 
           <label class="filter-option">

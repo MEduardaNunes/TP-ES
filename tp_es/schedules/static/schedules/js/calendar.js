@@ -76,13 +76,14 @@ function renderEvent(event) {
         ? `<div class="event-time">${event.start_time}</div>`
         : '';
     const isChecked = event.is_checked;
-    const eventColor = isChecked ? '#22c55e' : event.color;
-    const checkIcon = isChecked ? '✅ ' : '';
+    const eventColor = event.color;
 
     return `
-        <div class="event-card"
+        <div class="event-card ${isChecked ? 'event-card--completed' : ''}"
              data-event-id="${event.id}"
              data-schedule-id="${event.schedule_id}"
+             data-schedule-name="${(event.schedule_name || '').replace(/"/g, '&quot;')}"
+             data-color="${event.color || '#6366f1'}"
              data-can-manage="${event.can_manage ? 'true' : 'false'}"
              data-title="${event.title.replace(/"/g, '&quot;')}"
              data-kind="${event.kind}"
@@ -91,9 +92,10 @@ function renderEvent(event) {
              data-date="${event.date}"
              data-start-time="${event.start_time || ''}"
              data-end-time="${event.end_time || ''}"
+             data-notes="${(event.notes || '').replace(/"/g, '&quot;')}"
              style="background-color: ${eventColor};">
             ${timeHtml}
-            <div class="event-title">${checkIcon}${event.title}</div>
+            <div class="event-title">${event.title}</div>
         </div>
     `;
 }
@@ -103,13 +105,14 @@ function renderEvent(event) {
  */
 function renderTask(task) {
     const isChecked = task.is_checked;
-    const color = isChecked ? '#22c55e' : (task.color || '#6366f1');
-    const checkIcon = isChecked ? '✅ ' : '';
+    const color = task.color || '#6366f1';
 
     return `
         <div class="task-item ${isChecked ? 'task-item--completed' : ''}" 
              data-task-id="${task.id}"
              data-schedule-id="${task.schedule_id}"
+             data-schedule-name="${(task.schedule_name || '').replace(/"/g, '&quot;')}"
+             data-color="${task.color || '#6366f1'}"
              data-can-manage="${task.can_manage ? 'true' : 'false'}"
              data-title="${task.title.replace(/"/g, '&quot;')}"
              data-kind="${task.kind}"
@@ -117,9 +120,10 @@ function renderTask(task) {
              data-priority="${task.priority || 'important'}"
              data-date="${task.date}"
              data-start-time="${task.start_time || ''}"
-             data-end-time="${task.end_time || ''}">
+             data-end-time="${task.end_time || ''}"
+            data-notes="${(task.notes || '').replace(/"/g, '&quot;')}">
             <div class="task-dot" style="background-color:${color};"></div>
-            <span class="task-title">${checkIcon}${task.title}</span>
+            <span class="task-title">${task.title}</span>
         </div>
     `;
 }
@@ -224,43 +228,41 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.addEventListener('click', (e) => {
         const eventCard = e.target.closest('.event-card');
         if (eventCard) {
-            if (eventCard.dataset.canManage !== 'true') {
-                return;
-            }
-            // Handle event card click
             const activityData = {
                 id: eventCard.dataset.eventId,
                 schedule_id: eventCard.dataset.scheduleId,
+                schedule_name: eventCard.dataset.scheduleName,
+                color: eventCard.dataset.color,
                 title: eventCard.dataset.title,
                 kind: eventCard.dataset.kind,
                 activity_type: eventCard.dataset.activityType,
                 priority: eventCard.dataset.priority,
                 date: eventCard.dataset.date,
                 start_time: eventCard.dataset.startTime,
-                end_time: eventCard.dataset.endTime
+                end_time: eventCard.dataset.endTime,
+                notes: eventCard.dataset.notes
             };
-            openEditActivityModal(activityData);
+            openActivityDetailsModal(e, activityData);
             return;
         }
 
         const taskItem = e.target.closest('.task-item');
         if (taskItem) {
-            if (taskItem.dataset.canManage !== 'true') {
-                return;
-            }
-            // Handle task item click
             const activityData = {
                 id: taskItem.dataset.taskId,
                 schedule_id: taskItem.dataset.scheduleId,
+                schedule_name: taskItem.dataset.scheduleName,
+                color: taskItem.dataset.color,
                 title: taskItem.dataset.title,
                 kind: taskItem.dataset.kind,
                 activity_type: taskItem.dataset.activityType,
                 priority: taskItem.dataset.priority,
                 date: taskItem.dataset.date,
                 start_time: taskItem.dataset.startTime,
-                end_time: taskItem.dataset.endTime
+                end_time: taskItem.dataset.endTime,
+                notes: taskItem.dataset.notes
             };
-            openEditActivityModal(activityData);
+            openActivityDetailsModal(e, activityData);
             return;
         }
 
