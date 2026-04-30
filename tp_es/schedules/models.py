@@ -15,6 +15,8 @@ class Schedule(models.Model):
     color = models.CharField(max_length=7, default="#59e7ec", validators=[color_validator])
     icon_emoji = models.CharField(max_length=16, blank=True)
     icon_image = models.ImageField(upload_to="schedule_icons/", blank=True, null=True)
+    # Mapping of activity_type -> hex color (e.g. {"exam": "#ef4444", "assignment": "#f59e0b"})
+    activity_type_colors = models.JSONField(blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

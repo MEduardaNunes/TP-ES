@@ -242,7 +242,7 @@ body.auth-page .user-card { /**/
 .profile-page .button,
 .profile-page .button-primary,
 .profile-page .button-danger,
-.profile-page main button {
+.profile-page main button:not(.icon-clear-btn) {
   width: 100%;
   padding: 16px 18px;
   border-radius: 16px;
@@ -700,13 +700,19 @@ form {
   min-width: 0;
 }
 
-.icon-upload-row input[type="file"] {
-  flex: 1;
+.profile-page .icon-upload-row input[type="file"] {
+  flex: 1 1 auto;
+  width: 100%;
   min-width: 0;
 }
 
-.icon-clear-btn {
+.profile-page .icon-upload-row .icon-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 36px;
+  min-width: 36px;
+  max-width: 36px;
   height: 36px;
   border-radius: 999px;
   border: 1px solid var(--line-clr);
@@ -716,15 +722,15 @@ form {
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  flex-shrink: 0;
+  flex: 0 0 36px;
   padding: 0;
 }
 
-.icon-clear-btn:hover {
+.profile-page .icon-upload-row .icon-clear-btn:hover {
   background: color-mix(in srgb, var(--hover-clr) 78%, white);
 }
 
-.icon-clear-btn--active {
+.profile-page .icon-upload-row .icon-clear-btn--active {
   background: var(--accent-clr);
   border-color: var(--accent-clr);
   color: white;

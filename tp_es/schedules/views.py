@@ -13,6 +13,26 @@ from .models import Schedule, Participant, Activity, ActivityCheck
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
 
+ACTIVITY_TYPE_COLOR_KEYS = [
+    Activity.Type.CLASS,
+    Activity.Type.EXAM,
+    Activity.Type.ASSIGNMENT,
+    Activity.Type.STUDY,
+    Activity.Type.MEETING,
+    Activity.Type.PRESENTATION,
+    Activity.Type.PERSONAL,
+]
+
+ACTIVITY_TYPE_COLOR_DEFAULTS = {
+    Activity.Type.CLASS: "#3b82f6",
+    Activity.Type.EXAM: "#ef4444",
+    Activity.Type.ASSIGNMENT: "#f59e0b",
+    Activity.Type.STUDY: "#111827",
+    Activity.Type.MEETING: "#8b5cf6",
+    Activity.Type.PRESENTATION: "#0ea5e9",
+    Activity.Type.PERSONAL: "#64748b",
+}
+
 PRIORITY_MATRIX_SECTIONS = [
     {
         "value": Activity.Priority.URGENT_IMPORTANT,
@@ -45,6 +65,31 @@ def normalize_priority(raw_priority, default=Activity.Priority.IMPORTANT):
     if raw_priority in Activity.Priority.values:
         return raw_priority
     return default
+
+
+def extract_activity_type_colors(post_data):
+    colors = {}
+    for activity_type in ACTIVITY_TYPE_COLOR_KEYS:
+        raw_color = (post_data.get(f"activity_type_color_{activity_type}") or "").strip()
+        if raw_color:
+            colors[activity_type] = raw_color
+    return colors
+
+
+def resolve_activity_color(activity):
+    return (
+        activity.color
+        or (activity.schedule.activity_type_colors or {}).get(activity.activity_type)
+        or activity.schedule.color
+        or "#59e7ec"
+    )
+
+
+def attach_resolved_colors(activities):
+    items = list(activities)
+    for activity in items:
+        activity.resolved_color = resolve_activity_color(activity)
+    return items
 
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
@@ -211,23 +256,24 @@ def main_calendar_view(request):
     activities_by_day = {}
     for activity in activities:
         if activity.date:
+            activity.resolved_color = resolve_activity_color(activity)
             day = activity.date.day
             activities_by_day.setdefault(day, []).append(activity)
  
     # Atividades futuras ou não concluídas para a aba lateral
-    future_events = Activity.objects.filter(
+    future_events = attach_resolved_colors(Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         date__gte=today,
     ).exclude(
         checks__user=request.user
-    ).select_related("schedule").order_by("date", "start_time")
+    ).select_related("schedule").order_by("date", "start_time"))
 
-    completed_events = Activity.objects.filter(
+    completed_events = attach_resolved_colors(Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         checks__user=request.user,
-    ).select_related("schedule").order_by("date", "start_time")
+    ).select_related("schedule").order_by("date", "start_time"))
  
     pending_tasks_base = Activity.objects.filter(
         schedule_id__in=schedule_ids,
@@ -236,7 +282,9 @@ def main_calendar_view(request):
         checks__user=request.user
     ).select_related("schedule")
 
-    pending_tasks = pending_tasks_base.order_by("date", "start_time", "created_at")
+    pending_tasks = attach_resolved_colors(
+        pending_tasks_base.order_by("date", "start_time", "created_at")
+    )
 
     # Matrix shows all unchecked activities (events + tasks) organized by priority
     all_pending_activities = Activity.objects.filter(
@@ -251,8 +299,10 @@ def main_calendar_view(request):
             "title": section["title"],
             "label": section["label"],
             "description": section["description"],
-            "tasks": all_pending_activities.filter(priority=section["value"]).order_by(
-                "date", "start_time", "created_at"
+            "tasks": attach_resolved_colors(
+                all_pending_activities.filter(priority=section["value"]).order_by(
+                    "date", "start_time", "created_at"
+                )
             ),
         }
         for section in PRIORITY_MATRIX_SECTIONS
@@ -263,11 +313,11 @@ def main_calendar_view(request):
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
     
-    completed_tasks = Activity.objects.filter(
+    completed_tasks = attach_resolved_colors(Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.TASK,
         checks__user=request.user,
-    ).select_related("schedule").order_by("date")
+    ).select_related("schedule").order_by("date"))
  
     return render(request, "schedules/calendar.html", {
         "participations": participations,
@@ -292,6 +342,7 @@ def main_calendar_view(request):
         "checked_ids": checked_ids,
         "completed_events": completed_events,
         "completed_tasks": completed_tasks, 
+        "activity_type_color_defaults": ACTIVITY_TYPE_COLOR_DEFAULTS,
     })
     
 @login_required
@@ -312,6 +363,7 @@ def create_schedule(request):
             color=color,
             icon_emoji=request.POST.get("icon_emoji", "").strip(),
             icon_image=request.FILES.get("icon_image"),
+            activity_type_colors=extract_activity_type_colors(request.POST),
         )
         Participant.objects.create(
             schedule=schedule,
@@ -342,6 +394,7 @@ def edit_schedule(request, schedule, participant):
             schedule.icon_image = None
         if request.FILES.get("icon_image"):
             schedule.icon_image = request.FILES["icon_image"]
+        schedule.activity_type_colors = extract_activity_type_colors(request.POST)
         schedule.save()
         missing_usernames = sync_schedule_members(schedule, request.POST.getlist("participant_usernames"))
         if missing_usernames:

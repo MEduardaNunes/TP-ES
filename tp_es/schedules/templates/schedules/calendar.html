@@ -191,9 +191,9 @@
         <div id="eventos-futuros" class="subtab-content">
           <div class="events-list">
             {% for event in future_events %}
-              <article class="list-card">
+              <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
                 <div class="list-card__top">
-                  <span class="list-badge">Evento</span>
+                  <span class="list-badge list-badge--activity">Evento</span>
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
                 <h3>
@@ -264,9 +264,9 @@
 			  <div id="eventos-concluidos" class="subtab-content hidden">
 				    <div class="events-list">
 				        {% for event in completed_events %}
-				            <article class="list-card">
+                    <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
 				                <div class="list-card__top">
-				                    <span class="list-badge">Evento</span>
+                            <span class="list-badge list-badge--activity">Evento</span>
 				                    <span class="list-meta">{{ event.schedule.name }}</span>
 				                </div>
 
@@ -350,9 +350,9 @@
 				<div id="tarefas-pendentes" class="subtab-content">
 				  <div class="tasks-list">
 				    {% for task in pending_tasks %}
-				      <article class="list-card">
+              <article class="list-card list-card--activity" style="--activity-color: {{ task.resolved_color }};">
 				        <div class="list-card__top">
-				          <span class="list-badge list-badge--task">Tarefa</span>
+                  <span class="list-badge list-badge--task list-badge--activity">Tarefa</span>
                   <span class="priority-card__badge">{{ task.get_priority_display }}</span>
 				          <span class="list-meta">{{ task.schedule.name }}</span>
 				        </div>
@@ -418,9 +418,9 @@
           <div id="tarefas-concluidas" class="subtab-content hidden">
 				    <div class="tasks-list">
 				      {% for task in completed_tasks %}
-				        <article class="list-card">
+                <article class="list-card list-card--activity" style="--activity-color: {{ task.resolved_color }};">
 				          <div class="list-card__top">
-				            <span class="list-badge list-badge--task">Tarefa</span>
+                    <span class="list-badge list-badge--task list-badge--activity">Tarefa</span>
                     <span class="priority-card__badge">{{ task.get_priority_display }}</span>
 				            <span class="list-meta">{{ task.schedule.name }}</span>
 				          </div>
@@ -506,10 +506,10 @@
 
                 <div class="priority-list">
                   {% for task in section.tasks %}
-                    <article class="priority-card">
+                    <article class="priority-card" style="--activity-color: {{ task.resolved_color }};">
                       <div class="list-card__top">
-                        <span class="list-badge">{% if task.kind == 'event' %}📅{% else %}✅{% endif %} {{ task.get_kind_display }}</span>
-                        <span class="list-badge list-badge--task">{{ task.get_activity_type_display }}</span>
+                        <span class="list-badge list-badge--activity">{% if task.kind == 'event' %}📅{% else %}✅{% endif %} {{ task.get_kind_display }}</span>
+                        <span class="list-badge list-badge--task list-badge--activity">{{ task.get_activity_type_display }}</span>
                         <span class="priority-card__badge">{{ task.get_priority_display }}</span>
                       </div>
 
@@ -611,6 +611,13 @@
                     data-schedule-color="{{ participation.schedule.color|default:'#59e7ec' }}"
                     data-schedule-icon-emoji="{{ participation.schedule.icon_emoji|escapejs }}"
                     data-schedule-icon-image-url="{% if participation.schedule.icon_image %}{{ participation.schedule.icon_image.url|escapejs }}{% endif %}"
+                    data-activity-type-color-class="{{ participation.schedule.activity_type_colors|get_item:'class' }}"
+                    data-activity-type-color-exam="{{ participation.schedule.activity_type_colors|get_item:'exam' }}"
+                    data-activity-type-color-assignment="{{ participation.schedule.activity_type_colors|get_item:'assignment' }}"
+                    data-activity-type-color-study="{{ participation.schedule.activity_type_colors|get_item:'study' }}"
+                    data-activity-type-color-meeting="{{ participation.schedule.activity_type_colors|get_item:'meeting' }}"
+                    data-activity-type-color-presentation="{{ participation.schedule.activity_type_colors|get_item:'presentation' }}"
+                    data-activity-type-color-personal="{{ participation.schedule.activity_type_colors|get_item:'personal' }}"
                     data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                     onclick="openScheduleDetailsModal(this)"
                   >
@@ -637,6 +644,13 @@
                       data-schedule-color="{{ participation.schedule.color|default:'#59e7ec' }}"
                       data-schedule-icon-emoji="{{ participation.schedule.icon_emoji|escapejs }}"
                       data-schedule-icon-image-url="{% if participation.schedule.icon_image %}{{ participation.schedule.icon_image.url|escapejs }}{% endif %}"
+                      data-activity-type-color-class="{{ participation.schedule.activity_type_colors|get_item:'class' }}"
+                      data-activity-type-color-exam="{{ participation.schedule.activity_type_colors|get_item:'exam' }}"
+                      data-activity-type-color-assignment="{{ participation.schedule.activity_type_colors|get_item:'assignment' }}"
+                      data-activity-type-color-study="{{ participation.schedule.activity_type_colors|get_item:'study' }}"
+                      data-activity-type-color-meeting="{{ participation.schedule.activity_type_colors|get_item:'meeting' }}"
+                      data-activity-type-color-presentation="{{ participation.schedule.activity_type_colors|get_item:'presentation' }}"
+                      data-activity-type-color-personal="{{ participation.schedule.activity_type_colors|get_item:'personal' }}"
                       data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                       onclick="handleEditScheduleClick(event, this)"
                     >
@@ -920,6 +934,19 @@
         </div>
 
         <div class="form-group">
+          <label>Cores por tipo de atividade</label>
+          <div class="activity-type-colors-grid">
+            <label>Aula <input type="color" name="activity_type_color_class" id="schedule-type-color-class" value="{{ activity_type_color_defaults|get_item:'class' }}"></label>
+            <label>Prova <input type="color" name="activity_type_color_exam" id="schedule-type-color-exam" value="{{ activity_type_color_defaults|get_item:'exam' }}"></label>
+            <label>Trabalho <input type="color" name="activity_type_color_assignment" id="schedule-type-color-assignment" value="{{ activity_type_color_defaults|get_item:'assignment' }}"></label>
+            <label>Estudo <input type="color" name="activity_type_color_study" id="schedule-type-color-study" value="{{ activity_type_color_defaults|get_item:'study' }}"></label>
+            <label>Reunião <input type="color" name="activity_type_color_meeting" id="schedule-type-color-meeting" value="{{ activity_type_color_defaults|get_item:'meeting' }}"></label>
+            <label>Apresentação <input type="color" name="activity_type_color_presentation" id="schedule-type-color-presentation" value="{{ activity_type_color_defaults|get_item:'presentation' }}"></label>
+            <label>Pessoal <input type="color" name="activity_type_color_personal" id="schedule-type-color-personal" value="{{ activity_type_color_defaults|get_item:'personal' }}"></label>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label>Ícone da agenda (PNG/JPG)</label>
           <input type="file" name="icon_image" accept="image/png,image/webp,image/jpeg" />
         </div>
@@ -984,6 +1011,19 @@
               <span class="schedule-color-dot" id="edit-schedule-color-preview" aria-hidden="true"></span>
               <span id="edit-schedule-color-value">#59e7ec</span>
             </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cores por tipo de atividade</label>
+          <div class="activity-type-colors-grid">
+            <label>Aula <input type="color" name="activity_type_color_class" id="edit-schedule-type-color-class" value="{{ activity_type_color_defaults|get_item:'class' }}"></label>
+            <label>Prova <input type="color" name="activity_type_color_exam" id="edit-schedule-type-color-exam" value="{{ activity_type_color_defaults|get_item:'exam' }}"></label>
+            <label>Trabalho <input type="color" name="activity_type_color_assignment" id="edit-schedule-type-color-assignment" value="{{ activity_type_color_defaults|get_item:'assignment' }}"></label>
+            <label>Estudo <input type="color" name="activity_type_color_study" id="edit-schedule-type-color-study" value="{{ activity_type_color_defaults|get_item:'study' }}"></label>
+            <label>Reunião <input type="color" name="activity_type_color_meeting" id="edit-schedule-type-color-meeting" value="{{ activity_type_color_defaults|get_item:'meeting' }}"></label>
+            <label>Apresentação <input type="color" name="activity_type_color_presentation" id="edit-schedule-type-color-presentation" value="{{ activity_type_color_defaults|get_item:'presentation' }}"></label>
+            <label>Pessoal <input type="color" name="activity_type_color_personal" id="edit-schedule-type-color-personal" value="{{ activity_type_color_defaults|get_item:'personal' }}"></label>
           </div>
         </div>
 
@@ -1083,7 +1123,7 @@
                 date: "{{ activity.date }}",
                 start_time: "{{ activity.start_time }}",
                 end_time: "{{ activity.end_time }}",
-                color: "{{ activity.color|default:activity.schedule.color|default:'#59e7ec' }}",
+                color: "{{ activity.resolved_color }}",
                 icon_emoji: "{{ activity.icon_emoji|escapejs }}",
                 icon_image_url: "{% if activity.icon_image %}{{ activity.icon_image.url|escapejs }}{% elif ui_icons.default_activity_icon_image %}{{ ui_icons.default_activity_icon_image.url|escapejs }}{% endif %}",
                 default_icon_emoji: "{{ ui_icons.default_activity_icon_emoji|escapejs }}"
@@ -1105,11 +1145,32 @@
     let createScheduleParticipants = [];
     let editScheduleParticipants = [];
 
+    const scheduleTypeColorDefaults = {
+      class: "{{ activity_type_color_defaults|get_item:'class' }}",
+      exam: "{{ activity_type_color_defaults|get_item:'exam' }}",
+      assignment: "{{ activity_type_color_defaults|get_item:'assignment' }}",
+      study: "{{ activity_type_color_defaults|get_item:'study' }}",
+      meeting: "{{ activity_type_color_defaults|get_item:'meeting' }}",
+      presentation: "{{ activity_type_color_defaults|get_item:'presentation' }}",
+      personal: "{{ activity_type_color_defaults|get_item:'personal' }}",
+    };
+
     const defaultActivityIconImageUrl = "{% if ui_icons.default_activity_icon_image %}{{ ui_icons.default_activity_icon_image.url|escapejs }}{% endif %}";
     const defaultActivityIconEmoji = "{{ ui_icons.default_activity_icon_emoji|escapejs }}";
 
     function setModalLock(isLocked) {
       document.body.classList.toggle('modal-open', isLocked);
+    }
+
+    function setScheduleTypeColors(inputPrefix, typeColors) {
+      const palette = typeColors || scheduleTypeColorDefaults;
+      Object.keys(scheduleTypeColorDefaults).forEach(activityType => {
+        const input = document.getElementById(`${inputPrefix}-${activityType}`);
+        if (!input) {
+          return;
+        }
+        input.value = palette[activityType] || scheduleTypeColorDefaults[activityType];
+      });
     }
 
     function openNewModal() {
@@ -1134,6 +1195,7 @@
       form.reset();
       colorInput.value = '#59e7ec';
       syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
+      setScheduleTypeColors('schedule-type-color', scheduleTypeColorDefaults);
       createScheduleParticipants = [];
       renderScheduleParticipants(
         'schedule-participant-list',
@@ -1160,6 +1222,7 @@
       document.getElementById('edit-agenda-name').value = scheduleData.name;
       document.getElementById('edit-agenda-description').value = scheduleData.description || '';
       colorInput.value = scheduleData.color || '#59e7ec';
+      setScheduleTypeColors('edit-schedule-type-color', scheduleData.activity_type_colors);
       document.getElementById('clear_edit_schedule_icon_image').value = '';
       document.querySelector('[data-icon-clear-target="clear_edit_schedule_icon_image"]')?.classList.remove('icon-clear-btn--active');
       syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
@@ -1269,6 +1332,15 @@
         color: buttonElement.dataset.scheduleColor || '#59e7ec',
         icon_emoji: buttonElement.dataset.scheduleIconEmoji || '',
         icon_image_url: buttonElement.dataset.scheduleIconImageUrl || '',
+        activity_type_colors: {
+          class: buttonElement.dataset.activityTypeColorClass || scheduleTypeColorDefaults.class,
+          exam: buttonElement.dataset.activityTypeColorExam || scheduleTypeColorDefaults.exam,
+          assignment: buttonElement.dataset.activityTypeColorAssignment || scheduleTypeColorDefaults.assignment,
+          study: buttonElement.dataset.activityTypeColorStudy || scheduleTypeColorDefaults.study,
+          meeting: buttonElement.dataset.activityTypeColorMeeting || scheduleTypeColorDefaults.meeting,
+          presentation: buttonElement.dataset.activityTypeColorPresentation || scheduleTypeColorDefaults.presentation,
+          personal: buttonElement.dataset.activityTypeColorPersonal || scheduleTypeColorDefaults.personal,
+        },
         participants
       };
 
