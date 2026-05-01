@@ -86,7 +86,6 @@ function renderEvent(event) {
         : '';
     const isChecked = event.is_checked;
     const eventColor = isChecked ? '#22c55e' : event.color;
-    const checkIcon = isChecked ? '✅ ' : '';
     const iconHtml = event.icon_image_url
         ? `<img src="${escapeHtml(event.icon_image_url)}" class="activity-icon-image" alt="" onerror="this.style.display='none'">`
         : (event.icon_emoji || event.default_icon_emoji)
@@ -112,7 +111,7 @@ function renderEvent(event) {
              data-icon-image-url="${event.icon_image_url || ''}"
              style="background-color: ${eventColor};">
             ${timeHtml}
-            <div class="event-title">${iconHtml}${checkIcon}${escapeHtml(event.title)}</div>
+            <div class="event-title">${iconHtml}${escapeHtml(event.title)}</div>
         </div>
     `;
 }
@@ -123,7 +122,6 @@ function renderEvent(event) {
 function renderTask(task) {
     const isChecked = task.is_checked;
     const color = isChecked ? '#22c55e' : (task.color || '#59e7ec');
-    const checkIcon = isChecked ? '✅ ' : '';
     const iconHtml = task.icon_image_url
         ? `<img src="${escapeHtml(task.icon_image_url)}" class="activity-icon-image" alt="" onerror="this.style.display='none'">`
         : (task.icon_emoji || task.default_icon_emoji)
@@ -148,7 +146,7 @@ function renderTask(task) {
              data-icon-image-url="${task.icon_image_url || ''}"
             data-notes="${(task.notes || '').replace(/"/g, '&quot;')}">
             <div class="task-dot" style="background-color:${color};"></div>
-            <span class="task-title">${iconHtml}${checkIcon}${escapeHtml(task.title)}</span>
+            <span class="task-title">${iconHtml}${escapeHtml(task.title)}</span>
         </div>
     `;
 }

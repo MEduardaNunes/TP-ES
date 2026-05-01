@@ -373,7 +373,10 @@
 				            </div>
 				            </article>
 				        {% empty %}
-				            <p>Nenhum evento concluído.</p>
+				          <div class="empty-state">
+                    <h3>Nenhum evento concluído</h3>
+                    <p>Eventos marcados como concluídos aparecerão aqui.</p>
+				          </div>
 				        {% endfor %}
 				    </div>
 				</div>
