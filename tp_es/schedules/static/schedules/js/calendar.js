@@ -79,13 +79,25 @@ function layoutGroup(group) {
     const totalColumns = columns.length;
     return result.map(e => ({ ...e, totalColumns }));
 }
+
+function hexToRgba(hex, alpha) {
+  hex = hex.replace('#', '');
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
  
 function renderEvent(event) {
-    const timeHtml = event.start_time
-        ? `<div class="event-time">${event.start_time}</div>`
-        : '';
+    const timeHtml = event.start_time && 
+                    event.start_time !== "None" && 
+                    event.start_time !== "null"
+    ? `<div class="event-time">${event.start_time}</div>`
+    : '';
     const isChecked = event.is_checked;
-    const eventColor = isChecked ? '#22c55e' : event.color;
+    const eventColor = isChecked ? hexToRgba(event.color, 0.9) : event.color;
     const iconHtml = event.icon_image_url
         ? `<img src="${escapeHtml(event.icon_image_url)}" class="activity-icon-image" alt="" onerror="this.style.display='none'">`
         : (event.icon_emoji || event.default_icon_emoji)
@@ -121,7 +133,7 @@ function renderEvent(event) {
  */
 function renderTask(task) {
     const isChecked = task.is_checked;
-    const color = isChecked ? '#22c55e' : (task.color || '#59e7ec');
+    const color = isChecked ? hexToRgba(task.color, 0.9) : (task.color || '#59e7ec');
     const iconHtml = task.icon_image_url
         ? `<img src="${escapeHtml(task.icon_image_url)}" class="activity-icon-image" alt="" onerror="this.style.display='none'">`
         : (task.icon_emoji || task.default_icon_emoji)
