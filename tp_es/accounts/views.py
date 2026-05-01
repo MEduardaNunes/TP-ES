@@ -64,7 +64,10 @@ def login_user(request):
 
 @login_required      
 def logout_user(request):
-    logout(request)
+    if request.method == "POST":
+        logout(request)
+        messages.success(request, "Você saiu do sistema com sucesso!")
+        return redirect('accounts:login_page')
     return redirect('accounts:login_page')
 
 
@@ -76,12 +79,21 @@ def edit_user(request):
     
     if request.method == "POST":
         username = request.POST.get("username")
-        password = request.POST.get("password")
-        password_confirm = request.POST.get("password_confirm")
+        password = request.POST.get("password", "").strip()
+        password_confirm = request.POST.get("password_confirm", "").strip()
 
         if User.objects.filter(username=username).exclude(id=request.user.id).exists():
             messages.error(request, "Nome de usuário já existe")
             return redirect("accounts:user_space") 
+
+        # Validação de senha: ambas preenchidas ou nenhuma
+        if password and not password_confirm:
+            messages.error(request, "Por favor, confirme a nova senha.")
+            return redirect("accounts:user_space")
+        
+        if not password and password_confirm:
+            messages.error(request, "Por favor, preencha a nova senha.")
+            return redirect("accounts:user_space")
 
         if password != password_confirm:
             messages.error(request, "As senhas não coincidem")
