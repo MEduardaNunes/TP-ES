@@ -582,6 +582,8 @@ def quick_create_activity(request):
         if kind == Activity.Kind.EVENT and not date_value:
             messages.error(request, "Eventos precisam de uma data.")
             return redirect("schedules:main_calendar_view")
+        
+        notes = request.POST.get("notes", "").strip()
  
         preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
         icon_emoji = request.POST.get("icon_emoji", "").strip() or preference.default_activity_icon_emoji
@@ -597,6 +599,7 @@ def quick_create_activity(request):
             end_time=request.POST.get("end_time") or None,
             icon_emoji=icon_emoji,
             icon_image=request.FILES.get("icon_image") or preference.default_activity_icon_image,
+            notes=notes,
         )
         messages.success(request, "Atividade criada com sucesso.")
  
