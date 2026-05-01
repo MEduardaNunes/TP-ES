@@ -12,8 +12,14 @@
   --secondary-danger-clr: #8c0000;
   --secondary-base-clr: #ce9aff;
   --container-background-base: #f3f0fe;
+  --sidebar-gradient-start: #8b5cf6;
+  --sidebar-gradient-end: #60a5fa;
   color-scheme: light;
   font-family: 'Poppins', sans-serif;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 *{
