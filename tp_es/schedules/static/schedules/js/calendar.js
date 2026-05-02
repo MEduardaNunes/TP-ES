@@ -224,6 +224,16 @@ function renderCalendar() {
 function openCreateModal(day) {
     const modal     = document.getElementById('modal');
     const dateInput = document.getElementById('date-input');
+
+    if (!modal) return;
+
+    if (!window.hasAdminSchedules || !dateInput) {
+        modal.classList.remove('hidden');
+        if (typeof setModalLock === 'function') {
+            setModalLock(true);
+        }
+        return;
+    }
  
     const { year, month } = window.calendarData;
  
@@ -318,7 +328,7 @@ function setupDayClick() {
         const dayCell = e.target.closest('.calendar-day');
         if (dayCell && dayCell.dataset.day) {
             if (!window.hasAdminSchedules) {
-                showAlert("Você não é administrador de nenhuma agenda.");
+                openCreateModal(dayCell.dataset.day);
                 return;
             }
             openCreateModal(dayCell.dataset.day);
