@@ -15,6 +15,38 @@ O objetivo do sistema é criar um calendário que permita a organização de ati
 - Banco de dados: sqlite
 - Agentes de IA: GitHub Copilot e Codex
 
+## Como executar o sistema
+### Pré-requisitos
+Antes de começar, certifique-se de ter instalado:
+
+- Python 3.10 ou superior  
+- `make` (Linux/macOS ou WSL no Windows)
+---
+###  Passo a passo
+1. Clone o repositório:
+```bash
+git clone https://github.com/MEduardaNunes/TP-ES.git
+cd TP-ES
+```
+2. Instale as dependências e rode o servidor:
+```bash
+make run
+```
+3. Acesse no navegador:
+```bash
+http://127.0.0.1:8000/
+```
+4. Para parar o servidor, pressione: `Ctrl + C`
+---
+### Observações
+- O comando `make run`:
+    - cria o ambiente virtual automaticamente (se necessário)
+    - instala as dependências
+    - inicia o servidor Django
+
+- O comando `make clean`:
+    - limpa o ambiente venv
+
 ## Histórias de usuário
 1. Como usuário do sistema, eu gostaria de me cadastrar/editar/visualizar/deletar meu usuário no sistema
 2. Como administrador, eu gostaria de cadastrar/editar/visualizar/deletar uma agenda (com nome, descrição, cores e ícones) e suas atividades (eventos ou tarefas).
