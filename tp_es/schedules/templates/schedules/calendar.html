@@ -1714,22 +1714,11 @@
 
     function openActivityModal(kind) {
       const modal = document.getElementById('modal');
-      const form = document.getElementById('activity-form');
       const kindSelect = document.getElementById('kind-select');
       const dateInput = document.getElementById('date-input');
       const timeFields = document.getElementById('time-fields');
 
-      if (!modal || !form) {
-        return;
-      }
-
-      form.reset();
-
-      if (!window.hasAdminSchedules || !kindSelect || !dateInput || !timeFields) {
-        modal.classList.remove('hidden');
-        setModalLock(true);
-        return;
-      }
+      document.getElementById('activity-form').reset();
 
       kindSelect.value = kind;
       dateInput.value = '';
@@ -1899,7 +1888,7 @@
 
     document.getElementById('new-btn').addEventListener('click', openNewModal);
 
-    document.getElementById('kind-select')?.addEventListener('change', function() {
+    document.getElementById('kind-select').addEventListener('change', function() {
       const timeFields = document.getElementById('time-fields');
       if (this.value === 'task') {
         timeFields.style.display = 'none';
@@ -1908,7 +1897,7 @@
       }
     });
 
-    document.getElementById('edit-kind-select')?.addEventListener('change', function() {
+    document.getElementById('edit-kind-select').addEventListener('change', function() {
       const timeFields = document.getElementById('edit-time-fields');
       if (this.value === 'task') {
         timeFields.style.display = 'none';
