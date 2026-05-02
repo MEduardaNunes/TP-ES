@@ -21,7 +21,7 @@ Antes de começar, certifique-se de ter instalado:
 
 - Python 3.10 ou superior  
 - `make` (Linux/macOS ou WSL no Windows)
----
+
 ###  Passo a passo
 1. Clone o repositório:
 ```bash
@@ -37,7 +37,7 @@ make run
 http://127.0.0.1:8000/
 ```
 4. Para parar o servidor, pressione `Ctrl + C` dentro do terminal.
----
+
 ### Observações
 - O comando `make run`:
     - cria o ambiente virtual automaticamente (se necessário)
