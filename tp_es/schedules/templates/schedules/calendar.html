@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load calendar_tags %}
 
 <!DOCTYPE html>
@@ -11,6 +11,22 @@
   <link rel="stylesheet" href="{% static 'schedules/css/calendar.css' %}" />
   <link rel="stylesheet" href="{% static 'tp_es/css/base.css' %}" />
   <script type="text/javascript" src="{% static 'accounts/js/app.js' %}" defer></script>
+  {% if ui_theme %}
+  <style>
+    :root {
+      --base-clr: {{ ui_theme.base_clr }};
+      --line-clr: {{ ui_theme.line_clr }};
+      --hover-clr: {{ ui_theme.hover_clr }};
+      --text-clr: {{ ui_theme.text_clr }};
+      --accent-clr: {{ ui_theme.accent_clr }};
+      --secondary-text-clr: {{ ui_theme.secondary_text_clr }};
+      --container-background-base: {{ ui_theme.container_background_base }};
+      --secondary-base-clr: {{ ui_theme.secondary_base_clr }};
+      --sidebar-gradient-start: {{ ui_theme.sidebar_gradient_start }};
+      --sidebar-gradient-end: {{ ui_theme.sidebar_gradient_end }};
+    }
+  </style>
+  {% endif %}
 </head>
 
 <body class="schedule-page">
@@ -28,9 +44,15 @@
 
       <li class="{% if rota_atual == 'main_calendar_view' %}active{% endif %}">
         <a href="{% url 'schedules:main_calendar_view' %}">
+          {% if ui_icons.agenda_icon_image %}
+            <img src="{{ ui_icons.agenda_icon_image.url }}" class="sidebar-icon-image" alt="" onerror="this.style.display='none'" />
+          {% elif ui_icons.agenda_icon_emoji %}
+            <span class="sidebar-icon-emoji" aria-hidden="true">{{ ui_icons.agenda_icon_emoji }}</span>
+          {% else %}
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
             <path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
           </svg>
+          {% endif %}
           <span>Home</span>
         </a>
       </li>
@@ -49,9 +71,15 @@
 
       <li class="profile-item {% if rota_atual == 'user_space' %}active{% endif %}">
         <a href="{% url 'accounts:user_space' %}">
+          {% if ui_icons.profile_icon_image %}
+            <img src="{{ ui_icons.profile_icon_image.url }}" class="sidebar-icon-image" alt="" onerror="this.style.display='none'" />
+          {% elif ui_icons.profile_icon_emoji %}
+            <span class="sidebar-icon-emoji" aria-hidden="true">{{ ui_icons.profile_icon_emoji }}</span>
+          {% else %}
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
             <path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
           </svg>
+          {% endif %}
           <span>Perfil</span>
         </a>
       </li>
@@ -84,6 +112,10 @@
             Tarefas
           </button>
 
+          <button class="tab-btn" content-id="matriz">
+            Matriz
+          </button>
+
           <button class="tab-btn" content-id="agendas">
             Agendas
           </button>
@@ -97,7 +129,7 @@
             Novo
           </button>
 
-          <button class="action-btn action-btn--ghost" type="button">
+          <button class="action-btn action-btn--ghost" type="button" onclick="openFilterModal()">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
               <path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z" />
             </svg>
@@ -149,7 +181,7 @@
                 Futuros
                </button>
                <button type="button" class="subtab-btn" onclick="showSubtab('eventos-concluidos', this)">
-               Concluídos
+               Concluí­dos
                </button>
               </div>
             </div>
@@ -159,29 +191,58 @@
         <div id="eventos-futuros" class="subtab-content">
           <div class="events-list">
             {% for event in future_events %}
-              <article class="list-card">
+              <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
                 <div class="list-card__top">
-                  <span class="list-badge">Evento</span>
+                  <span class="list-badge list-badge--activity">Evento</span>
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
-                <h3>{{ event.title }}</h3>
+                <div class="list-card__title-with-check">
+                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form checkbox-form">
+                    {% csrf_token %}
+                    <label class="custom-checkbox">
+                      <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" {% if event.id in checked_ids %}checked{% endif %} />
+                      <span class="checkbox-box"></span>
+                    </label>
+                  </form>
+                  <h3>
+                  {% if event.icon_image %}
+                    <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                  {% elif event.icon_emoji %}
+                    <span class="activity-icon-emoji">{{ event.icon_emoji }}</span>
+                  {% elif ui_icons.default_activity_icon_image %}
+                    <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                  {% elif ui_icons.default_activity_icon_emoji %}
+                    <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                  {% endif %}
+                  {{ event.title }}
+                </h3>
+                </div>
                 <p>
-                  {{ event.date }}
+                  {{ event.date|date:"d/m/Y" }}
                   {% if event.start_time %}
                     &agrave;s {{ event.start_time }}
                   {% endif %}
                 </p>
                 <div class="list-card__actions">
-                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form">
-                    {% csrf_token %}
-                    <button type="submit" class="text-link">
-                    {% if event.id in checked_ids %}
-                         ✅ Realizado
-                    {% else %}
-                        ⬜ Marcar como realizado
-                   {% endif %}
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    class="text-link"
+                    onclick="openActivityDetailsModal(event, {
+                      schedule_id: {{ event.schedule.id }},
+                      schedule_name: '{{ event.schedule.name|escapejs }}',
+                      color: '{{ event.color|default:event.schedule.color|default:"#6366f1" }}',
+                      title: '{{ event.title|escapejs }}',
+                      kind: '{{ event.kind }}',
+                      activity_type: '{{ event.activity_type }}',
+                      priority: '{{ event.priority }}',
+                      date: '{{ event.date|date:"Y-m-d" }}',
+                      start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
+                      end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                      notes: '{{ event.notes|default_if_none:""|escapejs }}'
+                    })"
+                  >
+                    Detalhes
+                  </button>
                   {% if event.schedule.id in admin_schedule_ids %}
                     <button
                       type="button"
@@ -192,9 +253,12 @@
                         title: '{{ event.title|escapejs }}',
                         kind: '{{ event.kind }}',
                         activity_type: '{{ event.activity_type }}',
+                        priority: '{{ event.priority }}',
                         date: '{{ event.date|date:"Y-m-d" }}',
                         start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
-                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                        icon_emoji: '{{ event.icon_emoji|escapejs }}',
+                        icon_image_url: '{% if event.icon_image %}{{ event.icon_image.url|escapejs }}{% endif %}'
                       })"
                     >
                       Editar
@@ -218,28 +282,70 @@
 			  <div id="eventos-concluidos" class="subtab-content hidden">
 				    <div class="events-list">
 				        {% for event in completed_events %}
-				            <article class="list-card">
+                    <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
 				                <div class="list-card__top">
-				                    <span class="list-badge">Evento</span>
+                            <span class="list-badge list-badge--activity">Evento</span>
 				                    <span class="list-meta">{{ event.schedule.name }}</span>
 				                </div>
 
-				                <h3 class="completed">{{ event.title }}</h3>
+                        <div class="list-card__title-with-check">
+                          <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form checkbox-form">
+                            {% csrf_token %}
+                            <label class="custom-checkbox">
+                              <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" {% if event.id in checked_ids %}checked{% endif %} />
+                              <span class="checkbox-box"></span>
+                            </label>
+                          </form>
+                          <h3>
+                          {% if event.icon_image %}
+                            <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif event.icon_emoji %}
+                            <span class="activity-icon-emoji">{{ event.icon_emoji }}</span>
+                          {% elif ui_icons.default_activity_icon_image %}
+                            <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif ui_icons.default_activity_icon_emoji %}
+                            <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                          {% endif %}
+                          {{ event.title }}
+                        </h3>
+                        </div>
+
+                        <h3 class="completed">
+                          {% if event.icon_image %}
+                            <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif event.icon_emoji %}
+                            <span class="activity-icon-emoji">{{ event.icon_emoji }}</span>
+                          {% elif ui_icons.default_activity_icon_image %}
+                            <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif ui_icons.default_activity_icon_emoji %}
+                            <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                          {% endif %}
+                          {{ event.title }}
+                        </h3>
 
 				                <p>
-				                    {{ event.date }}
+				                    {{ event.date|date:"d/m/Y" }}
 				                    {% if event.start_time %}
-				                        às {{ event.start_time }}
+				                        Às {{ event.start_time }}
 				                    {% endif %}
 				                </p>
 
 				<div class="list-card__actions">
-				   <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}">
-				      {% csrf_token %}
-				        <button type="submit" class="text-link">
-				            ✅ Realizado
-				              </button>
-				                </form>
+                      <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                       schedule_id: {{ event.schedule.id }},
+                       schedule_name: '{{ event.schedule.name|escapejs }}',
+                       color: '{{ event.color|default:event.schedule.color|default:"#6366f1" }}',
+                       title: '{{ event.title|escapejs }}',
+                       kind: '{{ event.kind }}',
+                       activity_type: '{{ event.activity_type }}',
+                       priority: '{{ event.priority }}',
+                       date: '{{ event.date|date:"Y-m-d" }}',
+                       start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
+                       end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                       notes: '{{ event.notes|default_if_none:""|escapejs }}'
+                       })">
+                        Detalhes
+                       </button>
 				             {% if event.schedule.id in admin_schedule_ids %}
 				              <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
 				               id: {{ event.id }},
@@ -247,9 +353,12 @@
 				               title: '{{ event.title|escapejs }}',
 				               kind: '{{ event.kind }}',
 				               activity_type: '{{ event.activity_type }}',
+                       priority: '{{ event.priority }}',
 				               date: '{{ event.date|date:"Y-m-d" }}',
 				               start_time: '{{ event.start_time|default_if_none:""|time:"H:i" }}',
-				                end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}'
+                        end_time: '{{ event.end_time|default_if_none:""|time:"H:i" }}',
+                          icon_emoji: '{{ event.icon_emoji|escapejs }}',
+                          icon_image_url: '{% if event.icon_image %}{{ event.icon_image.url|escapejs }}{% endif %}'
 				               })">
 				                Editar
 				               </button>
@@ -264,7 +373,10 @@
 				            </div>
 				            </article>
 				        {% empty %}
-				            <p>Nenhum evento concluído</p>
+				          <div class="empty-state">
+                    <h3>Nenhum evento concluído</h3>
+                    <p>Eventos marcados como concluídos aparecerão aqui.</p>
+				          </div>
 				        {% endfor %}
 				    </div>
 				</div>
@@ -281,7 +393,7 @@
              </button>
 
             <button type="button" class="subtab-btn" onclick="showSubtab('tarefas-concluidas', this)">
-               Concluídas
+               Concluí­das
             </button>
            </div>
           </div>
@@ -290,23 +402,53 @@
 				<div id="tarefas-pendentes" class="subtab-content">
 				  <div class="tasks-list">
 				    {% for task in pending_tasks %}
-				      <article class="list-card">
+              <article class="list-card list-card--activity" style="--activity-color: {{ task.resolved_color }};">
 				        <div class="list-card__top">
-				          <span class="list-badge list-badge--task">Tarefa</span>
+                  <span class="list-badge list-badge--task list-badge--activity">Tarefa</span>
+                  <span class="priority-card__badge">{{ task.get_priority_display }}</span>
 				          <span class="list-meta">{{ task.schedule.name }}</span>
 				        </div>
 
-				        <h3>{{ task.title }}</h3>
+				        <div class="list-card__title-with-check">
+				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
+				            {% csrf_token %}
+				            <label class="custom-checkbox">
+				              <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" />
+				              <span class="checkbox-box"></span>
+				            </label>
+				          </form>
+  			          <h3>
+                    {% if task.icon_image %}
+                      <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                    {% elif task.icon_emoji %}
+                      <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                    {% elif ui_icons.default_activity_icon_image %}
+                      <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                    {% elif ui_icons.default_activity_icon_emoji %}
+                      <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                    {% endif %}
+                    {{ task.title }}
+                  </h3>
+				        </div>
 
-				        <p>Entrega em {{ task.date }}</p>
+				        <p>Entrega em {{ task.date|date:"d/m/Y" }}</p>
 
 				        <div class="list-card__actions">
-				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
-				            {% csrf_token %}
-				             <button type="submit" class="text-link">
-				              ⬜ Marcar como concluído
-				            </button>
-				         </form>
+                   <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                     schedule_id: {{ task.schedule.id }},
+                     schedule_name: '{{ task.schedule.name|escapejs }}',
+                     color: '{{ task.color|default:task.schedule.color|default:"#6366f1" }}',
+                     title: '{{ task.title|escapejs }}',
+                     kind: '{{ task.kind }}',
+                     activity_type: '{{ task.activity_type }}',
+                     priority: '{{ task.priority }}',
+                     date: '{{ task.date|date:"Y-m-d" }}',
+                     start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                     end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                     notes: '{{ task.notes|default_if_none:""|escapejs }}'
+                     })">
+                       Detalhes
+                     </button>
 
 				         {% if task.schedule.id in admin_schedule_ids %}
 				           <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
@@ -315,9 +457,12 @@
 				             title: '{{ task.title|escapejs }}',
 				             kind: '{{ task.kind }}',
 				             activity_type: '{{ task.activity_type }}',
+                     priority: '{{ task.priority }}',
 				             date: '{{ task.date|date:"Y-m-d" }}',
 				             start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-				             end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                     end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                       icon_emoji: '{{ task.icon_emoji|escapejs }}',
+                       icon_image_url: '{% if task.icon_image %}{{ task.icon_image.url|escapejs }}{% endif %}'
 				             })">
 				               Editar
 				             </button>
@@ -343,23 +488,53 @@
           <div id="tarefas-concluidas" class="subtab-content hidden">
 				    <div class="tasks-list">
 				      {% for task in completed_tasks %}
-				        <article class="list-card">
+                <article class="list-card list-card--activity" style="--activity-color: {{ task.resolved_color }};">
 				          <div class="list-card__top">
-				            <span class="list-badge list-badge--task">Tarefa</span>
+                    <span class="list-badge list-badge--task list-badge--activity">Tarefa</span>
+                    <span class="priority-card__badge">{{ task.get_priority_display }}</span>
 				            <span class="list-meta">{{ task.schedule.name }}</span>
 				          </div>
 
-				          <h3 class="completed">{{ task.title }}</h3>
+				          <div class="list-card__title-with-check">
+				            <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
+				              {% csrf_token %}
+				              <label class="custom-checkbox">
+				                <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" checked />
+				                <span class="checkbox-box"></span>
+				              </label>
+				            </form>
+  			            <h3 class="completed">
+                      {% if task.icon_image %}
+                        <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                      {% elif task.icon_emoji %}
+                        <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                      {% elif ui_icons.default_activity_icon_image %}
+                        <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                      {% elif ui_icons.default_activity_icon_emoji %}
+                        <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                      {% endif %}
+                      {{ task.title }}
+                    </h3>
+				          </div>
 
-				          <p>Entrega em {{ task.date }}</p>
+				          <p>Entrega em {{ task.date|date:"d/m/Y" }}</p>
 
 				        <div class="list-card__actions">
-				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form">
-				            {% csrf_token %}
-				            <button type="submit" class="text-link">
-				              ✅ Concluída
-				            </button>
-				          </form>
+                    <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                      schedule_id: {{ task.schedule.id }},
+                      schedule_name: '{{ task.schedule.name|escapejs }}',
+                      color: '{{ task.color|default:task.schedule.color|default:"#6366f1" }}',
+                      title: '{{ task.title|escapejs }}',
+                      kind: '{{ task.kind }}',
+                      activity_type: '{{ task.activity_type }}',
+                      priority: '{{ task.priority }}',
+                      date: '{{ task.date|date:"Y-m-d" }}',
+                      start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                      end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                      notes: '{{ task.notes|default_if_none:""|escapejs }}'
+                    })">
+                      Detalhes
+                    </button>
 
 				          {% if task.schedule.id in admin_schedule_ids %}
 				            <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
@@ -368,9 +543,12 @@
 				              title: '{{ task.title|escapejs }}',
 				              kind: '{{ task.kind }}',
 				              activity_type: '{{ task.activity_type }}',
+                      priority: '{{ task.priority }}',
 				              date: '{{ task.date|date:"Y-m-d" }}',
 				              start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
-				              end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}'
+                      end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                        icon_emoji: '{{ task.icon_emoji|escapejs }}',
+                        icon_image_url: '{% if task.icon_image %}{{ task.icon_image.url|escapejs }}{% endif %}'
 				            })">
 				              Editar
 				            </button>
@@ -386,13 +564,102 @@
 				        </article>
 				        {% empty %}
 				        <div class="empty-state">
-				          <h3>Nenhuma tarefa concluída</h3>
+				          <h3>Nenhuma tarefa concluí­da</h3>
 				          <p>Tarefas marcadas como concluídas aparecerão aqui.</p>
 				        </div>
 				      {% endfor %}
 				    </div>
 				  </div>
 				</div>
+
+        <div class="content" id="matriz">
+          <div class="panel-header">
+            <div>
+              <h1>Matriz de prioridade</h1>
+              <p>Distribua estudos, entregas e provas por urgência e importância.</p>
+            </div>
+          </div>
+
+          <div class="priority-matrix">
+            {% for section in priority_sections %}
+              <section class="priority-quadrant">
+                <div class="priority-quadrant__header">
+                  <div>
+                    <span class="priority-quadrant__label">{{ section.label }}</span>
+                    <h2>{{ section.title }}</h2>
+                  </div>
+                  <span class="priority-quadrant__count">{{ section.tasks|length }}</span>
+                </div>
+                <p class="priority-quadrant__description">{{ section.description }}</p>
+
+                <div class="priority-list">
+                  {% for task in section.tasks %}
+                    <article class="priority-card" style="--activity-color: {{ task.resolved_color }};">
+                      <div class="list-card__top">
+                        <span class="list-badge list-badge--activity">{{ task.get_kind_display }}</span>
+                        <span class="list-badge list-badge--task list-badge--activity">{{ task.get_activity_type_display }}</span>
+                        <span class="priority-card__badge">{{ task.get_priority_display }}</span>
+                      </div>
+
+                      <div class="list-card__title-with-check">
+                        <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
+                          {% csrf_token %}
+                          <label class="custom-checkbox">
+                            <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" />
+                            <span class="checkbox-box"></span>
+                          </label>
+                        </form>
+                        <h3>
+                        {% if task.icon_image %}
+                          <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                        {% elif task.icon_emoji %}
+                          <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                        {% elif ui_icons.default_activity_icon_image %}
+                          <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                        {% elif ui_icons.default_activity_icon_emoji %}
+                          <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                        {% endif %}
+                        {{ task.title }}
+                      </h3>
+                      </div>
+                      <div class="priority-card__footer">
+                        <p>
+                          {{ task.schedule.name }}
+                          {% if task.date %}
+                            - {{ task.date|date:"d/m/Y" }}
+                          {% endif %}
+                        </p>
+
+                        <button type="button" class="text-link" onclick="openActivityDetailsModal(event, {
+                          schedule_id: {{ task.schedule.id }},
+                          schedule_name: '{{ task.schedule.name|escapejs }}',
+                          color: '{{ task.color|default:task.schedule.color|default:"#6366f1" }}',
+                          title: '{{ task.title|escapejs }}',
+                          kind: '{{ task.kind }}',
+                          activity_type: '{{ task.activity_type }}',
+                          priority: '{{ task.priority }}',
+                          date: '{{ task.date|date:"Y-m-d" }}',
+                          start_time: '{{ task.start_time|default_if_none:""|time:"H:i" }}',
+                          end_time: '{{ task.end_time|default_if_none:""|time:"H:i" }}',
+                          notes: '{{ task.notes|default_if_none:""|escapejs }}',
+                            icon_emoji: '{{ task.icon_emoji|escapejs }}',
+                            icon_image_url: '{% if task.icon_image %}{{ task.icon_image.url|escapejs }}{% endif %}'
+                        })">
+                          Detalhes
+                        </button>
+                      </div>
+                    </article>
+                  {% empty %}
+                    <div class="empty-state empty-state--matrix">
+                      <h3>Nenhuma tarefa nesta categoria</h3>
+                      <p>Crie tarefas com prioridade para visualizar a matriz em questão.</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              </section>
+            {% endfor %}
+          </div>
+        </div>
 
           <div class="content" id="agendas">
             <div class="panel-header">
@@ -403,7 +670,7 @@
 
           <div class="schedules-list">
             {% for participation in participations %}
-              <article class="list-card list-card--schedule" style="--schedule-color: {{ participation.schedule.color|default:'#6366f1' }};">
+              <article class="list-card list-card--schedule" style="--schedule-color: {{ participation.schedule.color|default:'#59e7ec' }};">
                 <div class="list-card__top">
                   <span class="list-badge list-badge--schedule">
                     <span class="schedule-color-dot" aria-hidden="true"></span>
@@ -411,6 +678,11 @@
                   </span>
                 </div>
                 <h3>{{ participation.schedule.name }}</h3>
+                {% if participation.schedule.icon_image %}
+                  <p><img src="{{ participation.schedule.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" /></p>
+                {% elif participation.schedule.icon_emoji %}
+                  <p><span class="activity-icon-emoji">{{ participation.schedule.icon_emoji }}</span></p>
+                {% endif %}
                 <p>{{ participation.schedule.description|default:"Sem descri&ccedil;&atilde;o" }}</p>
                 <div class="list-card__actions">
                   <button
@@ -419,7 +691,16 @@
                     data-schedule-id="{{ participation.schedule.id }}"
                     data-schedule-name="{{ participation.schedule.name|escapejs }}"
                     data-schedule-description="{{ participation.schedule.description|default_if_none:''|escapejs }}"
-                    data-schedule-color="{{ participation.schedule.color|default:'#6366f1' }}"
+                    data-schedule-color="{{ participation.schedule.color|default:'#59e7ec' }}"
+                    data-schedule-icon-emoji="{{ participation.schedule.icon_emoji|escapejs }}"
+                    data-schedule-icon-image-url="{% if participation.schedule.icon_image %}{{ participation.schedule.icon_image.url|escapejs }}{% endif %}"
+                    data-activity-type-color-class="{{ participation.schedule.activity_type_colors|get_item:'class' }}"
+                    data-activity-type-color-exam="{{ participation.schedule.activity_type_colors|get_item:'exam' }}"
+                    data-activity-type-color-assignment="{{ participation.schedule.activity_type_colors|get_item:'assignment' }}"
+                    data-activity-type-color-study="{{ participation.schedule.activity_type_colors|get_item:'study' }}"
+                    data-activity-type-color-meeting="{{ participation.schedule.activity_type_colors|get_item:'meeting' }}"
+                    data-activity-type-color-presentation="{{ participation.schedule.activity_type_colors|get_item:'presentation' }}"
+                    data-activity-type-color-personal="{{ participation.schedule.activity_type_colors|get_item:'personal' }}"
                     data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                     onclick="openScheduleDetailsModal(this)"
                   >
@@ -443,7 +724,16 @@
                       data-schedule-id="{{ participation.schedule.id }}"
                       data-schedule-name="{{ participation.schedule.name|escapejs }}"
                       data-schedule-description="{{ participation.schedule.description|default_if_none:''|escapejs }}"
-                      data-schedule-color="{{ participation.schedule.color|default:'#6366f1' }}"
+                      data-schedule-color="{{ participation.schedule.color|default:'#59e7ec' }}"
+                      data-schedule-icon-emoji="{{ participation.schedule.icon_emoji|escapejs }}"
+                      data-schedule-icon-image-url="{% if participation.schedule.icon_image %}{{ participation.schedule.icon_image.url|escapejs }}{% endif %}"
+                      data-activity-type-color-class="{{ participation.schedule.activity_type_colors|get_item:'class' }}"
+                      data-activity-type-color-exam="{{ participation.schedule.activity_type_colors|get_item:'exam' }}"
+                      data-activity-type-color-assignment="{{ participation.schedule.activity_type_colors|get_item:'assignment' }}"
+                      data-activity-type-color-study="{{ participation.schedule.activity_type_colors|get_item:'study' }}"
+                      data-activity-type-color-meeting="{{ participation.schedule.activity_type_colors|get_item:'meeting' }}"
+                      data-activity-type-color-presentation="{{ participation.schedule.activity_type_colors|get_item:'presentation' }}"
+                      data-activity-type-color-personal="{{ participation.schedule.activity_type_colors|get_item:'personal' }}"
                       data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                       onclick="handleEditScheduleClick(event, this)"
                     >
@@ -485,11 +775,11 @@
 
       <h3 class="modal-title">Nova atividade</h3>
 
-      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}">
+      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Agenda</label>
+          <label>Agenda*</label>
 
           {% if admin_participations %}
             <select name="schedule_id" id="schedule-select" required>
@@ -507,13 +797,13 @@
         </div>
 
         <div class="form-group">
-          <label>T&iacute;tulo</label>
+          <label>T&iacute;tulo*</label>
           <input type="text" name="title" placeholder="Ex: Prova de C&aacute;lculo" required>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Tipo</label>
+            <label>Tipo*</label>
             <select name="kind" id="kind-select">
               <option value="event">Evento</option>
               <option value="task">Tarefa</option>
@@ -521,7 +811,7 @@
           </div>
 
           <div class="form-group">
-            <label>Categoria</label>
+            <label>Categoria*</label>
             <select name="activity_type" required>
               <option value="class">Aula</option>
               <option value="exam">Prova</option>
@@ -534,21 +824,37 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Prioridade*</label>
+          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
+          <select name="priority" id="priority-select">
+            <option value="urgent_important">Urgente e importante</option>
+            <option value="urgent">Urgente</option>
+            <option value="important" selected>Importante</option>
+            <option value="not_urgent_not_important">NÃ£o urgente e nem importante</option>
+          </select>
+        </div>
+
         <div id="date-field" class="form-group">
-          <label>Data</label>
+          <label>Data*</label>
           <input type="date" name="date" id="date-input" required>
         </div>
 
         <div id="time-fields" class="form-row">
           <div class="form-group">
-            <label>In&iacute;cio</label>
+            <label>In&iacute;cio*</label>
             <input type="time" name="start_time">
           </div>
 
           <div class="form-group">
-            <label>Fim</label>
+            <label>Fim*</label>
             <input type="time" name="end_time">
           </div>
+        </div>
+
+        <div id="notes" class="form-group">
+          <label>Notas adicionais</label>
+          <textarea name="notes" rows="3" placeholder="Ex: Levar c&aacute;lculo, f&oacute;rmulas e caneta azul para a prova"></textarea>
         </div>
 
         <div class="modal-actions">
@@ -578,11 +884,11 @@
 
       <h3 class="modal-title">Editar atividade</h3>
 
-      <form method="POST" id="edit-activity-form">
+      <form method="POST" id="edit-activity-form" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Agenda</label>
+          <label>Agenda*</label>
           <select name="schedule_id" id="edit-schedule-select" required>
             {% for p in admin_participations %}
               <option value="{{ p.schedule.id }}">
@@ -593,13 +899,13 @@
         </div>
 
         <div class="form-group">
-          <label>T&iacute;tulo</label>
+          <label>T&iacute;tulo*</label>
           <input type="text" name="title" id="edit-title" placeholder="Ex: Prova de C&aacute;lculo" required>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Tipo</label>
+            <label>Tipo*</label>
             <select name="kind" id="edit-kind-select">
               <option value="event">Evento</option>
               <option value="task">Tarefa</option>
@@ -607,7 +913,7 @@
           </div>
 
           <div class="form-group">
-            <label>Categoria</label>
+            <label>Categoria*</label>
             <select name="activity_type" id="edit-activity-type" required>
               <option value="class">Aula</option>
               <option value="exam">Prova</option>
@@ -620,21 +926,49 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Prioridade*</label>
+          <small class="form-hint">Organize seus estudos e entregas pela matriz de Eisenhower</small>
+          <select name="priority" id="edit-priority-select">
+            <option value="urgent_important">Urgente e importante</option>
+            <option value="urgent">Urgente</option>
+            <option value="important">Importante</option>
+            <option value="not_urgent_not_important">NÃ£o urgente e nem importante</option>
+          </select>
+        </div>
+
         <div id="edit-date-field" class="form-group">
-          <label>Data</label>
+          <label>Data*</label>
           <input type="date" name="date" id="edit-date-input" required>
         </div>
 
         <div id="edit-time-fields" class="form-row">
           <div class="form-group">
-            <label>In&iacute;cio</label>
+            <label>In&iacute;cio*</label>
             <input type="time" name="start_time" id="edit-start-time">
           </div>
 
           <div class="form-group">
-            <label>Fim</label>
-            <input type="time" name="end_time" id="edit-end-time">
+            <label>Fim*</label>
+            <input type="time" name="end_time" id="edit-end-time" >
           </div>
+        </div>
+
+        <div id="edit-notes-textarea" class="form-group">
+          <label>Notas adicionais</label>
+          <textarea name="notes" rows="3" placeholder="Ex: Levar c&aacute;lculo, f&oacute;rmulas e caneta azul para a prova"></textarea>
+        </div>
+
+
+        <div class="form-group">
+          <label>Ícone (PNG/JPG)</label>
+          <div class="icon-upload-row">
+            <input type="file" name="icon_image" id="edit-activity-icon-image" accept="image/png,image/webp,image/jpeg" />
+            <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_edit_activity_icon_image" data-icon-clear-emoji-target="clear_edit_activity_icon_emoji" data-icon-clear-file="edit-activity-icon-image" aria-label="Remover ícone atual" title="Remover ícone atual">x</button>
+          </div>
+          <input type="hidden" id="clear_edit_activity_icon_image" name="clear_icon_image" value="" />
+          <input type="hidden" id="clear_edit_activity_icon_emoji" name="clear_icon_emoji" value="" />
+          <div id="edit-activity-icon-preview" class="activity-icon-preview" aria-live="polite"></div>
         </div>
 
         <div class="modal-actions">
@@ -650,6 +984,73 @@
     </div>
   </div>
 
+  <div id="activity-details-modal" class="modal hidden">
+    <div class="modal-content modal-content--activity-details">
+      <button class="close-btn" onclick="closeActivityDetailsModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="details-header">
+        <span class="details-color-dot" id="details-activity-color" aria-hidden="true"></span>
+        <div>
+          <h3 class="modal-title" id="details-title"></h3>
+          <p class="details-admin" id="details-schedule-name"></p>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Informa&ccedil;&otilde;es</h4>
+        <div class="details-info-grid">
+          <div class="details-info-item">
+            <span>Tipo</span>
+            <p id="details-kind"></p>
+          </div>
+          <div class="details-info-item">
+            <span>Categoria</span>
+            <p id="details-activity-type"></p>
+          </div>
+          <div class="details-info-item">
+            <span>Prioridade</span>
+            <p id="details-priority"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Data e hor&aacute;rio</h4>
+        <div class="details-info-grid" id="details-time-fields">
+          <div class="details-info-item">
+            <span>Data</span>
+            <p id="details-date"></p>
+          </div>
+          <div class="details-info-item">
+            <span>In&iacute;cio</span>
+            <p id="details-start-time"></p>
+          </div>
+          <div class="details-info-item">
+            <span>Fim</span>
+            <p id="details-end-time"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-section">
+        <h4>Notas adicionais</h4>
+        <p class="details-description" id="details-notes"></p>
+      </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeActivityDetailsModal()">
+            Fechar
+          </button>
+        </div>
+    </div>
+  </div>
+
   <div id="agenda-modal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" onclick="closeAgendaModal()">
@@ -662,11 +1063,11 @@
 
       <h3 class="modal-title">Nova agenda</h3>
 
-      <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}">
+      <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Nome</label>
+          <label>Nome*</label>
           <input type="text" name="name" placeholder="Nome da agenda" required>
         </div>
 
@@ -678,12 +1079,30 @@
         <div class="form-group">
           <label>Cor</label>
           <div class="color-picker-row">
-            <input type="color" name="color" id="schedule-color-input" value="#6366f1">
+            <input type="color" name="color" id="schedule-color-input" value="#59e7ec">
             <div class="color-preview-chip">
               <span class="schedule-color-dot" id="schedule-color-preview" aria-hidden="true"></span>
-              <span id="schedule-color-value">#6366f1</span>
+              <span id="schedule-color-value">#59e7ec</span>
             </div>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cores por tipo de atividade</label>
+          <div class="activity-type-colors-grid">
+            <label>Aula <input type="color" name="activity_type_color_class" id="schedule-type-color-class" value="{{ activity_type_color_defaults|get_item:'class' }}"></label>
+            <label>Prova <input type="color" name="activity_type_color_exam" id="schedule-type-color-exam" value="{{ activity_type_color_defaults|get_item:'exam' }}"></label>
+            <label>Trabalho <input type="color" name="activity_type_color_assignment" id="schedule-type-color-assignment" value="{{ activity_type_color_defaults|get_item:'assignment' }}"></label>
+            <label>Estudo <input type="color" name="activity_type_color_study" id="schedule-type-color-study" value="{{ activity_type_color_defaults|get_item:'study' }}"></label>
+            <label>Reunião <input type="color" name="activity_type_color_meeting" id="schedule-type-color-meeting" value="{{ activity_type_color_defaults|get_item:'meeting' }}"></label>
+            <label>Apresentação <input type="color" name="activity_type_color_presentation" id="schedule-type-color-presentation" value="{{ activity_type_color_defaults|get_item:'presentation' }}"></label>
+            <label>Pessoal <input type="color" name="activity_type_color_personal" id="schedule-type-color-personal" value="{{ activity_type_color_defaults|get_item:'personal' }}"></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ícone da agenda (PNG/JPG)</label>
+          <input type="file" name="icon_image" accept="image/png,image/webp,image/jpeg" />
         </div>
 
         <div class="form-group">
@@ -725,11 +1144,11 @@
 
       <h3 class="modal-title">Editar agenda</h3>
 
-      <form method="POST" id="edit-agenda-form">
+      <form method="POST" id="edit-agenda-form" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
-          <label>Nome</label>
+          <label>Nome*</label>
           <input type="text" name="name" id="edit-agenda-name" placeholder="Nome da agenda" required>
         </div>
 
@@ -741,12 +1160,34 @@
         <div class="form-group">
           <label>Cor</label>
           <div class="color-picker-row">
-            <input type="color" name="color" id="edit-schedule-color-input" value="#6366f1">
+            <input type="color" name="color" id="edit-schedule-color-input" value="#59e7ec">
             <div class="color-preview-chip">
               <span class="schedule-color-dot" id="edit-schedule-color-preview" aria-hidden="true"></span>
-              <span id="edit-schedule-color-value">#6366f1</span>
+              <span id="edit-schedule-color-value">#59e7ec</span>
             </div>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cores por tipo de atividade</label>
+          <div class="activity-type-colors-grid">
+            <label>Aula <input type="color" name="activity_type_color_class" id="edit-schedule-type-color-class" value="{{ activity_type_color_defaults|get_item:'class' }}"></label>
+            <label>Prova <input type="color" name="activity_type_color_exam" id="edit-schedule-type-color-exam" value="{{ activity_type_color_defaults|get_item:'exam' }}"></label>
+            <label>Trabalho <input type="color" name="activity_type_color_assignment" id="edit-schedule-type-color-assignment" value="{{ activity_type_color_defaults|get_item:'assignment' }}"></label>
+            <label>Estudo <input type="color" name="activity_type_color_study" id="edit-schedule-type-color-study" value="{{ activity_type_color_defaults|get_item:'study' }}"></label>
+            <label>Reunião <input type="color" name="activity_type_color_meeting" id="edit-schedule-type-color-meeting" value="{{ activity_type_color_defaults|get_item:'meeting' }}"></label>
+            <label>Apresentação <input type="color" name="activity_type_color_presentation" id="edit-schedule-type-color-presentation" value="{{ activity_type_color_defaults|get_item:'presentation' }}"></label>
+            <label>Pessoal <input type="color" name="activity_type_color_personal" id="edit-schedule-type-color-personal" value="{{ activity_type_color_defaults|get_item:'personal' }}"></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ícone da agenda (PNG/JPG)</label>
+          <div class="icon-upload-row">
+            <input type="file" name="icon_image" id="edit-schedule-icon-image" accept="image/png,image/webp,image/jpeg" />
+            <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_edit_schedule_icon_image" data-icon-clear-file="edit-schedule-icon-image" aria-label="Remover imagem atual" title="Remover imagem atual">x</button>
+          </div>
+          <input type="hidden" id="clear_edit_schedule_icon_image" name="clear_icon_image" value="" />
         </div>
 
         <div class="form-group">
@@ -787,21 +1228,21 @@
       </button>
 
       <div class="details-header">
-        <span class="details-color-dot" id="details-schedule-color" aria-hidden="true"></span>
+        <span class="details-color-dot" id="details-agenda-color" aria-hidden="true"></span>
         <div>
-          <h3 class="modal-title" id="details-schedule-name"></h3>
-          <p class="details-admin" id="details-schedule-admin"></p>
+          <h3 class="modal-title" id="details-agenda-name"></h3>
+          <p class="details-admin" id="details-agenda-admin"></p>
         </div>
       </div>
 
       <div class="details-section">
         <h4>Descri&ccedil;&atilde;o</h4>
-        <p id="details-schedule-description" class="details-description"></p>
+        <p id="details-agenda-description" class="details-description"></p>
       </div>
 
       <div class="details-section">
         <h4>Participantes</h4>
-        <div id="details-schedule-participants" class="details-participants-list"></div>
+        <div id="details-agenda-participants" class="details-participants-list"></div>
       </div>
 
       <div class="modal-actions">
@@ -828,14 +1269,20 @@
                 id: {{ activity.id }},
                 is_checked: {% if activity.is_checked_for_user %}true{% else %}false{% endif %},
                 schedule_id: {{ activity.schedule.id }},
+                schedule_name: "{{ activity.schedule.name|escapejs }}",
                 can_manage: {% if activity.schedule.id in admin_schedule_ids %}true{% else %}false{% endif %},
                 title: "{{ activity.title|escapejs }}",
                 kind: "{{ activity.kind }}",
                 activity_type: "{{ activity.activity_type }}",
-                date: "{{ activity.date }}",
+                priority: "{{ activity.priority }}",
+                date: "{{ activity.date|date:'Y-m-d' }}",
                 start_time: "{{ activity.start_time }}",
                 end_time: "{{ activity.end_time }}",
-                color: "{{ activity.color|default:activity.schedule.color|default:'#6366f1' }}"
+                notes: "{{ activity.notes|default_if_none:''|escapejs }}",
+                color: "{{ activity.resolved_color }}",
+                icon_emoji: "{{ activity.icon_emoji|escapejs }}",
+                icon_image_url: "{% if activity.icon_image %}{{ activity.icon_image.url|escapejs }}{% elif ui_icons.default_activity_icon_image %}{{ ui_icons.default_activity_icon_image.url|escapejs }}{% endif %}",
+                default_icon_emoji: "{{ ui_icons.default_activity_icon_emoji|escapejs }}"
               }{% if not forloop.last %},{% endif %}
               {% endfor %}
             {% endif %}
@@ -853,6 +1300,34 @@
   <script>
     let createScheduleParticipants = [];
     let editScheduleParticipants = [];
+
+    const scheduleTypeColorDefaults = {
+      class: "{{ activity_type_color_defaults|get_item:'class' }}",
+      exam: "{{ activity_type_color_defaults|get_item:'exam' }}",
+      assignment: "{{ activity_type_color_defaults|get_item:'assignment' }}",
+      study: "{{ activity_type_color_defaults|get_item:'study' }}",
+      meeting: "{{ activity_type_color_defaults|get_item:'meeting' }}",
+      presentation: "{{ activity_type_color_defaults|get_item:'presentation' }}",
+      personal: "{{ activity_type_color_defaults|get_item:'personal' }}",
+    };
+
+    const defaultActivityIconImageUrl = "{% if ui_icons.default_activity_icon_image %}{{ ui_icons.default_activity_icon_image.url|escapejs }}{% endif %}";
+    const defaultActivityIconEmoji = "{{ ui_icons.default_activity_icon_emoji|escapejs }}";
+
+    function setModalLock(isLocked) {
+      document.body.classList.toggle('modal-open', isLocked);
+    }
+
+    function setScheduleTypeColors(inputPrefix, typeColors) {
+      const palette = typeColors || scheduleTypeColorDefaults;
+      Object.keys(scheduleTypeColorDefaults).forEach(activityType => {
+        const input = document.getElementById(`${inputPrefix}-${activityType}`);
+        if (!input) {
+          return;
+        }
+        input.value = palette[activityType] || scheduleTypeColorDefaults[activityType];
+      });
+    }
 
     function openNewModal() {
       const activeTab = document.querySelector('.tab-btn.active');
@@ -874,8 +1349,9 @@
       const colorInput = document.getElementById('schedule-color-input');
 
       form.reset();
-      colorInput.value = '#6366f1';
+      colorInput.value = '#59e7ec';
       syncColorPreview('schedule-color-input', 'schedule-color-preview', 'schedule-color-value');
+      setScheduleTypeColors('schedule-type-color', scheduleTypeColorDefaults);
       createScheduleParticipants = [];
       renderScheduleParticipants(
         'schedule-participant-list',
@@ -885,10 +1361,12 @@
       setParticipantFeedback('schedule-participant-feedback', '');
       document.getElementById('schedule-participant-input').value = '';
       document.getElementById('agenda-modal').classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeAgendaModal() {
       document.getElementById('agenda-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function openEditScheduleModal(scheduleData) {
@@ -899,7 +1377,10 @@
       form.action = `/schedules/${scheduleData.id}/edit/`;
       document.getElementById('edit-agenda-name').value = scheduleData.name;
       document.getElementById('edit-agenda-description').value = scheduleData.description || '';
-      colorInput.value = scheduleData.color || '#6366f1';
+      colorInput.value = scheduleData.color || '#59e7ec';
+      setScheduleTypeColors('edit-schedule-type-color', scheduleData.activity_type_colors);
+      document.getElementById('clear_edit_schedule_icon_image').value = '';
+      document.querySelector('[data-icon-clear-target="clear_edit_schedule_icon_image"]')?.classList.remove('icon-clear-btn--active');
       syncColorPreview('edit-schedule-color-input', 'edit-schedule-color-preview', 'edit-schedule-color-value');
       editScheduleParticipants = Array.isArray(scheduleData.participants)
         ? scheduleData.participants
@@ -917,10 +1398,12 @@
       document.getElementById('edit-schedule-participant-input').value = '';
 
       modal.classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeEditAgendaModal() {
       document.getElementById('edit-agenda-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function openScheduleDetailsModal(buttonElement) {
@@ -939,16 +1422,16 @@
       }
 
       const adminParticipant = participants.find(participant => participant.is_admin);
-      const participantsContainer = document.getElementById('details-schedule-participants');
+      const participantsContainer = document.getElementById('details-agenda-participants');
 
-      document.getElementById('details-schedule-name').textContent = buttonElement.dataset.scheduleName || '';
-      document.getElementById('details-schedule-description').textContent =
-        buttonElement.dataset.scheduleDescription || 'Sem descrição.';
-      document.getElementById('details-schedule-admin').textContent = adminParticipant
+      document.getElementById('details-agenda-name').textContent = buttonElement.dataset.scheduleName || '';
+      document.getElementById('details-agenda-description').textContent =
+        buttonElement.dataset.scheduleDescription || 'Sem descriÃ§Ã£o.';
+      document.getElementById('details-agenda-admin').textContent = adminParticipant
         ? `Administrador: ${adminParticipant.username}`
-        : 'Administrador não identificado';
-      document.getElementById('details-schedule-color').style.backgroundColor =
-        buttonElement.dataset.scheduleColor || '#6366f1';
+        : 'Administrador nÃ£o identificado';
+      document.getElementById('details-agenda-color').style.backgroundColor =
+        buttonElement.dataset.scheduleColor || '#59e7ec';
 
       participantsContainer.innerHTML = '';
 
@@ -972,10 +1455,12 @@
       }
 
       document.getElementById('schedule-details-modal').classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeScheduleDetailsModal() {
       document.getElementById('schedule-details-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function handleEditScheduleClick(domEvent, buttonElement) {
@@ -1000,7 +1485,18 @@
         id: Number(buttonElement.dataset.scheduleId),
         name: buttonElement.dataset.scheduleName || '',
         description: buttonElement.dataset.scheduleDescription || '',
-        color: buttonElement.dataset.scheduleColor || '#6366f1',
+        color: buttonElement.dataset.scheduleColor || '#59e7ec',
+        icon_emoji: buttonElement.dataset.scheduleIconEmoji || '',
+        icon_image_url: buttonElement.dataset.scheduleIconImageUrl || '',
+        activity_type_colors: {
+          class: buttonElement.dataset.activityTypeColorClass || scheduleTypeColorDefaults.class,
+          exam: buttonElement.dataset.activityTypeColorExam || scheduleTypeColorDefaults.exam,
+          assignment: buttonElement.dataset.activityTypeColorAssignment || scheduleTypeColorDefaults.assignment,
+          study: buttonElement.dataset.activityTypeColorStudy || scheduleTypeColorDefaults.study,
+          meeting: buttonElement.dataset.activityTypeColorMeeting || scheduleTypeColorDefaults.meeting,
+          presentation: buttonElement.dataset.activityTypeColorPresentation || scheduleTypeColorDefaults.presentation,
+          personal: buttonElement.dataset.activityTypeColorPersonal || scheduleTypeColorDefaults.personal,
+        },
         participants
       };
 
@@ -1080,7 +1576,7 @@
 
       const typedUsername = input.value.trim();
       if (!typedUsername) {
-        setParticipantFeedback(feedbackId, 'Digite o nome do usuário para adicionar.', 'warning');
+        setParticipantFeedback(feedbackId, 'Digite o nome do usuÃ¡rio para adicionar.', 'warning');
         return;
       }
 
@@ -1089,11 +1585,11 @@
         : editScheduleParticipants;
 
       if (state.some(user => user.username === typedUsername)) {
-        setParticipantFeedback(feedbackId, 'Esse usuário já foi adicionado.', 'warning');
+        setParticipantFeedback(feedbackId, 'Esse usuÃ¡rio jÃ¡ foi adicionado.', 'warning');
         return;
       }
 
-      setParticipantFeedback(feedbackId, 'Validando usuário...', '');
+      setParticipantFeedback(feedbackId, 'Validando usuÃ¡rio...', '');
 
       try {
         const response = await fetch(
@@ -1114,7 +1610,7 @@
         if (!result.valid) {
           setParticipantFeedback(
             feedbackId,
-            result.message || 'Usuário não encontrado. Verifique o nome e tente novamente.',
+            result.message || 'UsuÃ¡rio nÃ£o encontrado. Verifique o nome e tente novamente.',
             result.level || 'warning'
           );
           return;
@@ -1122,7 +1618,7 @@
 
         const validatedUsername = result.username || typedUsername;
         if (state.some(user => user.username === validatedUsername)) {
-          setParticipantFeedback(feedbackId, 'Esse usuário já foi adicionado.', 'warning');
+          setParticipantFeedback(feedbackId, 'Esse usuÃ¡rio jÃ¡ foi adicionado.', 'warning');
           return;
         }
 
@@ -1133,14 +1629,14 @@
         renderScheduleParticipants(listId, inputsId, state);
         setParticipantFeedback(
           feedbackId,
-          result.message || `Usuário "${validatedUsername}" encontrado e adicionado.`,
+          result.message || `UsuÃ¡rio "${validatedUsername}" encontrado e adicionado.`,
           result.level || 'success'
         );
         input.value = '';
       } catch (error) {
         setParticipantFeedback(
           feedbackId,
-          'Não foi possível validar o usuário agora. Tente novamente.',
+          'NÃ£o foi possÃ­vel validar o usuÃ¡rio agora. Tente novamente.',
           'warning'
         );
       }
@@ -1207,15 +1703,19 @@
       }
 
       modal.classList.remove('hidden');
+      setModalLock(true);
     }
 
     function closeModal() {
       document.getElementById('modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     function openEditActivityModal(activityData) {
       const modal = document.getElementById('edit-modal');
       const form = document.getElementById('edit-activity-form');
+      const timeFields = document.getElementById('edit-time-fields');
+      const iconPreview = document.getElementById('edit-activity-icon-preview');
 
       // Set form action to edit URL
       form.action = `/schedules/${activityData.schedule_id}/activity/${activityData.id}/edit/`;
@@ -1225,12 +1725,28 @@
       document.getElementById('edit-title').value = activityData.title;
       document.getElementById('edit-kind-select').value = activityData.kind;
       document.getElementById('edit-activity-type').value = activityData.activity_type;
+      document.getElementById('edit-priority-select').value = activityData.priority || 'important';
       document.getElementById('edit-date-input').value = activityData.date;
       document.getElementById('edit-start-time').value = activityData.start_time || '';
       document.getElementById('edit-end-time').value = activityData.end_time || '';
+      document.querySelector('#edit-notes-textarea textarea').value = activityData.notes || '';
+      document.getElementById('clear_edit_activity_icon_image').value = '';
+      document.querySelector('[data-icon-clear-target="clear_edit_activity_icon_image"]')?.classList.remove('icon-clear-btn--active');
+
+      if (iconPreview) {
+        const iconImageUrl = activityData.icon_image_url || defaultActivityIconImageUrl;
+        const iconEmoji = activityData.icon_emoji || defaultActivityIconEmoji;
+
+        if (iconImageUrl) {
+          iconPreview.innerHTML = `<img src="${iconImageUrl}" class="activity-icon-image" alt="" onerror="this.style.display='none'" /><span>Ícone atual</span>`;
+        } else if (iconEmoji) {
+          iconPreview.innerHTML = `<span class="activity-icon-emoji">${iconEmoji}</span><span>Ícone atual</span>`;
+        } else {
+          iconPreview.innerHTML = '<span class="activity-icon-preview__empty">Sem ícone atual</span>';
+        }
+      }
 
       // Show/hide time fields based on kind
-      const timeFields = document.getElementById('edit-time-fields');
       if (activityData.kind === 'task') {
         timeFields.style.display = 'none';
       } else {
@@ -1238,6 +1754,7 @@
       }
 
       modal.classList.remove('hidden');
+      setModalLock(true);
     }
 
     function handleEditActivityClick(domEvent, activityData) {
@@ -1246,8 +1763,100 @@
       openEditActivityModal(activityData);
     }
 
+    function openActivityDetailsModal(domEvent, activityData) {
+      if (domEvent) {
+        domEvent.preventDefault();
+        domEvent.stopPropagation();
+      }
+
+      const modal = document.getElementById('activity-details-modal');
+      const timeFields = document.getElementById('details-time-fields');
+      const kindLabels = {
+        event: 'Evento',
+        task: 'Tarefa'
+      };
+      const activityTypeLabels = {
+        class: 'Aula',
+        exam: 'Prova',
+        assignment: 'Trabalho',
+        study: 'Estudo',
+        meeting: 'ReuniÃƒÂ£o',
+        presentation: 'ApresentaÃƒÂ§ÃƒÂ£o',
+        personal: 'Pessoal'
+      };
+      const priorityLabels = {
+        urgent_important: 'Urgente e importante',
+        urgent: 'Urgente',
+        important: 'Importante',
+        not_urgent_not_important: 'NÃƒÂ£o urgente e nem importante'
+      };
+
+      document.getElementById('details-schedule-name').textContent = activityData.schedule_name || 'Agenda nÃƒÂ£o informada';
+      document.getElementById('details-title').textContent = activityData.title || 'Sem tÃƒÂ­tulo';
+      document.getElementById('details-kind').textContent = kindLabels[activityData.kind] || activityData.kind || 'NÃƒÂ£o informado';
+      document.getElementById('details-activity-type').textContent =
+        activityTypeLabels[activityData.activity_type] || activityData.activity_type || 'NÃƒÂ£o informada';
+      document.getElementById('details-priority').textContent =
+        priorityLabels[activityData.priority] || activityData.priority || 'NÃƒÂ£o informada';
+      document.getElementById('details-date').textContent = activityData.date || 'Sem data';
+      document.getElementById('details-start-time').textContent = activityData.start_time || 'Sem inÃƒÂ­cio';
+      document.getElementById('details-end-time').textContent = activityData.end_time || 'Sem fim';
+      document.getElementById('details-notes').textContent = activityData.notes || 'Sem notas adicionais.';
+
+      if (activityData.kind === 'task') {
+        timeFields.style.display = 'none';
+      } else {
+        timeFields.style.display = 'flex';
+      }
+
+      const present = value => value !== undefined && value !== null && String(value).trim() !== '' && String(value).trim() !== 'None';
+      const fallback = (value, message) => present(value) ? value : message;
+      const formatBrazilianDate = value => {
+        if (!present(value)) {
+          return '';
+        }
+
+        const [year, month, day] = String(value).split('-');
+        if (!year || !month || !day) {
+          return value;
+        }
+
+        return `${day}/${month}/${year}`;
+      };
+      const isTask = activityData.kind === 'task';
+
+      document.getElementById('details-activity-color').style.backgroundColor =
+        fallback(activityData.color, '#6366f1');
+      document.getElementById('details-title').textContent =
+        fallback(activityData.title, 'Atividade sem titulo informado.');
+      document.getElementById('details-schedule-name').textContent =
+        `Agenda: ${fallback(activityData.schedule_name, 'nenhuma agenda informada.')}`;
+      document.getElementById('details-kind').textContent =
+        kindLabels[activityData.kind] || fallback(activityData.kind, 'Tipo nao informado.');
+      document.getElementById('details-activity-type').textContent =
+        activityTypeLabels[activityData.activity_type] || fallback(activityData.activity_type, 'Categoria nao informada.');
+      document.getElementById('details-priority').textContent =
+        priorityLabels[activityData.priority] || fallback(activityData.priority, 'Prioridade nao informada.');
+      document.getElementById('details-date').textContent =
+        fallback(formatBrazilianDate(activityData.date), isTask ? 'Esta tarefa ainda nao tem data de entrega.' : 'Este evento ainda nao tem data definida.');
+      document.getElementById('details-start-time').textContent =
+        fallback(activityData.start_time, isTask ? 'Tarefas nao usam horario de inicio.' : 'Horario de inicio nao informado.');
+      document.getElementById('details-end-time').textContent =
+        fallback(activityData.end_time, isTask ? 'Tarefas nao usam horario de fim.' : 'Horario de fim nao informado.');
+      document.getElementById('details-notes').textContent =
+        fallback(activityData.notes, 'Nenhuma nota adicional foi cadastrada para esta atividade.');
+      timeFields.style.display = 'grid';
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeActivityDetailsModal() {
+      document.getElementById('activity-details-modal').classList.add('hidden');
+    }
+
     function closeEditModal() {
       document.getElementById('edit-modal').classList.add('hidden');
+      setModalLock(false);
     }
 
     document.getElementById('new-btn').addEventListener('click', openNewModal);
@@ -1308,6 +1917,87 @@
     button.classList.add('active');
     }
   </script>
+
+  <div id="filter-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeFilterModal()">X</button>
+
+      <h3 class="modal-title">Filtrar atividades</h3>
+
+      <form method="GET">
+        <input type="hidden" name="mes" value="{{ month }}">
+        <input type="hidden" name="ano" value="{{ year }}">
+
+        <div class="form-group">
+          <label>Tipo</label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
+            <span>Eventos</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
+            <span>Tarefas</span>
+          </label>
+        </div>
+
+
+        <div class="form-group">
+          <label>Categorias</label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
+            <span>Aula</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
+            <span>Prova</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
+            <span>Trabalho</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
+            <span>Estudo</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
+            <span>ReuniÃ£o</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
+            <span>ApresentaÃ§Ã£o</span>
+          </label>
+
+          <label class="filter-option">
+            <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
+            <span>Pessoal</span>
+          </label>
+        </div>  
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Aplicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+  function openFilterModal() {
+    document.getElementById('filter-modal').classList.remove('hidden');
+  }
+
+  function closeFilterModal() {
+    document.getElementById('filter-modal').classList.add('hidden');
+  }
+</script>
 </body>
 
 </html>

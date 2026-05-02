@@ -12,7 +12,11 @@ color_validator = RegexValidator(
 class Schedule(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    color = models.CharField(max_length=7, default="#6366f1", validators=[color_validator])
+    color = models.CharField(max_length=7, default="#59e7ec", validators=[color_validator])
+    icon_emoji = models.CharField(max_length=16, blank=True)
+    icon_image = models.ImageField(upload_to="schedule_icons/", blank=True, null=True)
+    # Mapping of activity_type -> hex color (e.g. {"exam": "#ef4444", "assignment": "#f59e0b"})
+    activity_type_colors = models.JSONField(blank=True, default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -52,6 +56,12 @@ class Activity(models.Model):
     class Kind(models.TextChoices):
         EVENT = "event", "Evento"   # tem horário, acontece em um momento
         TASK = "task",  "Tarefa"   # tem prazo, pode ser concluída
+
+    class Priority(models.TextChoices):
+        URGENT_IMPORTANT = "urgent_important", "Urgente e importante"
+        URGENT = "urgent", "Urgente"
+        IMPORTANT = "important", "Importante"
+        NOT_URGENT_NOT_IMPORTANT = "not_urgent_not_important", "Não urgente e nem importante"
         
     class Type(models.TextChoices):
         CLASS = "class", "Aula"
@@ -72,11 +82,18 @@ class Activity(models.Model):
     title = models.CharField(max_length=200)
     kind = models.CharField(max_length=10, choices=Kind.choices)
     activity_type = models.CharField(max_length=20, choices=Type.choices)
+    priority = models.CharField(
+        max_length=40,
+        choices=Priority.choices,
+        default=Priority.IMPORTANT,
+    )
     date = models.DateField(null=True, blank=True) # opcional para tarefas
     start_time = models.TimeField(null=True, blank=True)  # eventos
     end_time = models.TimeField(null=True, blank=True) # eventos
     notes = models.TextField(blank=True)
     color = models.CharField(max_length=7, blank=True, validators=[color_validator])
+    icon_emoji = models.CharField(max_length=16, blank=True)
+    icon_image = models.ImageField(upload_to="activity_icons/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def clean(self):

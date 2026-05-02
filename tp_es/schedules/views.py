@@ -8,9 +8,88 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
 from functools import wraps
 import calendar
+from accounts.models import UserThemePreference
 from .models import Schedule, Participant, Activity, ActivityCheck
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
+
+ACTIVITY_TYPE_COLOR_KEYS = [
+    Activity.Type.CLASS,
+    Activity.Type.EXAM,
+    Activity.Type.ASSIGNMENT,
+    Activity.Type.STUDY,
+    Activity.Type.MEETING,
+    Activity.Type.PRESENTATION,
+    Activity.Type.PERSONAL,
+]
+
+ACTIVITY_TYPE_COLOR_DEFAULTS = {
+    Activity.Type.CLASS: "#3b82f6",
+    Activity.Type.EXAM: "#ef4444",
+    Activity.Type.ASSIGNMENT: "#f59e0b",
+    Activity.Type.STUDY: "#111827",
+    Activity.Type.MEETING: "#8b5cf6",
+    Activity.Type.PRESENTATION: "#0ea5e9",
+    Activity.Type.PERSONAL: "#64748b",
+}
+
+PRIORITY_MATRIX_SECTIONS = [
+    {
+        "value": Activity.Priority.URGENT_IMPORTANT,
+        "title": "Fazer agora",
+        "label": "Urgente e importante",
+        "description": "Entregas e provas que precisam de atenção imediata.",
+    },
+    {
+        "value": Activity.Priority.URGENT,
+        "title": "Resolver em breve",
+        "label": "Urgente",
+        "description": "Pendências com prazo curto que podem ser delegadas ou aceleradas.",
+    },
+    {
+        "value": Activity.Priority.IMPORTANT,
+        "title": "Planejar com foco",
+        "label": "Importante",
+        "description": "Estudos e preparações que movem seu desempenho, mas não exigem pressa.",
+    },
+    {
+        "value": Activity.Priority.NOT_URGENT_NOT_IMPORTANT,
+        "title": "Baixa prioridade",
+        "label": "Não urgente e nem importante",
+        "description": "Atividades que podem esperar ou ser revisadas depois.",
+    },
+]
+
+
+def normalize_priority(raw_priority, default=Activity.Priority.IMPORTANT):
+    if raw_priority in Activity.Priority.values:
+        return raw_priority
+    return default
+
+
+def extract_activity_type_colors(post_data):
+    colors = {}
+    for activity_type in ACTIVITY_TYPE_COLOR_KEYS:
+        raw_color = (post_data.get(f"activity_type_color_{activity_type}") or "").strip()
+        if raw_color:
+            colors[activity_type] = raw_color
+    return colors
+
+
+def resolve_activity_color(activity):
+    return (
+        activity.color
+        or (activity.schedule.activity_type_colors or {}).get(activity.activity_type)
+        or activity.schedule.color
+        or "#59e7ec"
+    )
+
+
+def attach_resolved_colors(activities):
+    items = list(activities)
+    for activity in items:
+        activity.resolved_color = resolve_activity_color(activity)
+    return items
 
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
@@ -146,6 +225,18 @@ def main_calendar_view(request):
         "schedule__participants__user"
     ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
+    
+    filter_kinds = request.GET.getlist("kind")
+    filter_categories = request.GET.getlist("category")
+
+    if not filter_kinds:
+        filter_kinds = ["event", "task"]
+
+    if not filter_categories:
+        filter_categories = [
+        "class", "exam", "assignment",
+        "study", "meeting", "presentation", "personal"
+        ]
   
     admin_participations = request.user.participations.select_related("schedule").prefetch_related(
         "schedule__participants__user"
@@ -167,6 +258,11 @@ def main_calendar_view(request):
         is_checked_for_user=Exists(user_checks)
     ).select_related("schedule").order_by("start_time")
     
+    if filter_kinds:
+        activities = activities.filter(kind__in=filter_kinds)
+    if filter_categories:   
+        activities = activities.filter(activity_type__in=filter_categories)
+    
     checked_ids = set(
     ActivityCheck.objects.filter(
         user=request.user,
@@ -176,45 +272,73 @@ def main_calendar_view(request):
  
     activities_by_day = {}
     for activity in activities:
-        day = activity.date.day
-        activities_by_day.setdefault(day, []).append(activity)
+        if activity.date:
+            activity.resolved_color = resolve_activity_color(activity)
+            day = activity.date.day
+            activities_by_day.setdefault(day, []).append(activity)
  
     # Atividades futuras ou não concluídas para a aba lateral
-    future_events = Activity.objects.filter(
+    future_events = attach_resolved_colors(Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         date__gte=today,
     ).exclude(
         checks__user=request.user
-    ).select_related("schedule").order_by("date", "start_time")
+    ).select_related("schedule").order_by("date", "start_time"))
 
-    completed_events = Activity.objects.filter(
+    completed_events = attach_resolved_colors(Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         checks__user=request.user,
-    ).select_related("schedule").order_by("date", "start_time")
+    ).select_related("schedule").order_by("date", "start_time"))
  
-    pending_tasks = Activity.objects.filter(
+    pending_tasks_base = Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.TASK,
     ).exclude(
         checks__user=request.user
-    ).select_related("schedule").order_by("date")
+    ).select_related("schedule")
+
+    pending_tasks = attach_resolved_colors(
+        pending_tasks_base.order_by("date", "start_time", "created_at")
+    )
+
+    # Matrix shows all unchecked activities (events + tasks) organized by priority
+    all_pending_activities = Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+    ).exclude(
+        checks__user=request.user
+    ).select_related("schedule")
+
+    priority_sections = [
+        {
+            "value": section["value"],
+            "title": section["title"],
+            "label": section["label"],
+            "description": section["description"],
+            "tasks": attach_resolved_colors(
+                all_pending_activities.filter(priority=section["value"]).order_by(
+                    "date", "start_time", "created_at"
+                )
+            ),
+        }
+        for section in PRIORITY_MATRIX_SECTIONS
+    ]
  
     month_names = [
         "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
     
-    completed_tasks = Activity.objects.filter(
+    completed_tasks = attach_resolved_colors(Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.TASK,
         checks__user=request.user,
-    ).select_related("schedule").order_by("date")
+    ).select_related("schedule").order_by("date"))
  
     return render(request, "schedules/calendar.html", {
         "participations": participations,
-        "admin_participations": admin_participations,  # NOVO: apenas agendas onde é admin, para o modal
+        "admin_participations": admin_participations,
         "calendar_days": calendar_days,
         "activities_by_day": activities_by_day,
         "total_activities": activities.count(),
@@ -230,6 +354,7 @@ def main_calendar_view(request):
         "today_year": today.year,
         "future_events": future_events,
         "pending_tasks": pending_tasks,
+        "priority_sections": priority_sections,
         "admin_schedule_ids": admin_schedule_ids,
         "checked_ids": checked_ids,
         "completed_events": completed_events,
@@ -242,7 +367,7 @@ def create_schedule(request):
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description", "").strip()
-        color = request.POST.get("color", "#6366f1")
+        color = request.POST.get("color", "#59e7ec")
  
         if not name:
             messages.error(request, "Preencha o nome da agenda.")
@@ -252,6 +377,9 @@ def create_schedule(request):
             name=name,
             description=description,
             color=color,
+            icon_emoji=request.POST.get("icon_emoji", "").strip(),
+            icon_image=request.FILES.get("icon_image"),
+            activity_type_colors=extract_activity_type_colors(request.POST),
         )
         Participant.objects.create(
             schedule=schedule,
@@ -262,7 +390,7 @@ def create_schedule(request):
         if missing_usernames:
             messages.warning(
                 request,
-                "Alguns usuÃ¡rios nÃ£o foram adicionados porque nÃ£o existem: "
+                "Alguns usuários não foram adicionados porque não existem: "
                 + ", ".join(missing_usernames)
             )
         messages.success(request, "Agenda criada com sucesso.")
@@ -276,12 +404,19 @@ def edit_schedule(request, schedule, participant):
         schedule.name = request.POST.get("name", schedule.name)
         schedule.description = request.POST.get("description", schedule.description).strip()
         schedule.color = request.POST.get("color", schedule.color)
+        schedule.icon_emoji = request.POST.get("icon_emoji", schedule.icon_emoji).strip()
+        if request.POST.get("clear_icon_image") == "1" and schedule.icon_image:
+            schedule.icon_image.delete(save=False)
+            schedule.icon_image = None
+        if request.FILES.get("icon_image"):
+            schedule.icon_image = request.FILES["icon_image"]
+        schedule.activity_type_colors = extract_activity_type_colors(request.POST)
         schedule.save()
         missing_usernames = sync_schedule_members(schedule, request.POST.getlist("participant_usernames"))
         if missing_usernames:
             messages.warning(
                 request,
-                "Alguns usuÃ¡rios nÃ£o foram adicionados porque nÃ£o existem: "
+                "Alguns usuários não foram adicionados porque não existem: "
                 + ", ".join(missing_usernames)
             )
         messages.success(request, "Agenda atualizada com sucesso.")
@@ -295,6 +430,14 @@ def delete_schedule(request, schedule, participant):
     schedule.delete()
     messages.success(request, "Agenda deletada com sucesso.")
     return redirect(reverse('schedules:main_calendar_view') + '?tab=agendas')
+
+
+@require_POST
+@login_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Você saiu do sistema com sucesso!")
+    return redirect('accounts:login_page')
 
 @participant_required
 def view_schedule(request, schedule, participant):
@@ -380,16 +523,22 @@ def create_activity(request, schedule, participant):
             #return redirect("schedules:create_activity", schedule_id=schedule.id)
             return redirect("schedules:main_calendar_view")
  
+        preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
+        icon_emoji = request.POST.get("icon_emoji", "").strip() or preference.default_activity_icon_emoji
+
         Activity.objects.create(
             schedule=schedule,
             title=title,
             kind=kind,
             activity_type=activity_type_value,
+            priority=normalize_priority(request.POST.get("priority")),
             date=date_value,
             start_time=request.POST.get("start_time") or None,
             end_time=request.POST.get("end_time") or None,
             notes=request.POST.get("notes", ""),
             color=request.POST.get("color", ""),
+            icon_emoji=icon_emoji,
+            icon_image=request.FILES.get("icon_image") or preference.default_activity_icon_image,
         )
         messages.success(request, "Atividade criada com sucesso.")
         return redirect("schedules:main_calendar_view")
@@ -433,15 +582,24 @@ def quick_create_activity(request):
         if kind == Activity.Kind.EVENT and not date_value:
             messages.error(request, "Eventos precisam de uma data.")
             return redirect("schedules:main_calendar_view")
+        
+        notes = request.POST.get("notes", "").strip()
  
+        preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
+        icon_emoji = request.POST.get("icon_emoji", "").strip() or preference.default_activity_icon_emoji
+
         Activity.objects.create(
             schedule=schedule,
             title=title,
             kind=kind,
             activity_type=activity_type_value,  
+            priority=normalize_priority(request.POST.get("priority")),
             date=date_value,
             start_time=request.POST.get("start_time") or None,
             end_time=request.POST.get("end_time") or None,
+            icon_emoji=icon_emoji,
+            icon_image=request.FILES.get("icon_image") or preference.default_activity_icon_image,
+            notes=notes,
         )
         messages.success(request, "Atividade criada com sucesso.")
  
@@ -455,11 +613,20 @@ def edit_activity(request, schedule, participant, activity_id):
         activity.title = request.POST.get("title", activity.title)
         activity.kind = request.POST.get("kind", activity.kind)
         activity.activity_type = request.POST.get("activity_type", activity.activity_type)
+        activity.priority = normalize_priority(request.POST.get("priority"), activity.priority)
         activity.date = request.POST.get("date") or None
         activity.start_time = request.POST.get("start_time") or None
         activity.end_time = request.POST.get("end_time") or None
         activity.notes = request.POST.get("notes", activity.notes)
         activity.color = request.POST.get("color", activity.color)
+        activity.icon_emoji = request.POST.get("icon_emoji", activity.icon_emoji).strip()
+        if request.POST.get("clear_icon_image") == "1" and activity.icon_image:
+            activity.icon_image.delete(save=False)
+            activity.icon_image = None
+        if request.POST.get("clear_icon_emoji") == "1":
+            activity.icon_emoji = ""
+        if request.FILES.get("icon_image"):
+            activity.icon_image = request.FILES["icon_image"]
         activity.save()
         messages.success(request, "Atividade atualizada com sucesso.")
         tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
@@ -502,9 +669,3 @@ def toggle_check(request, schedule, participant, activity_id):
 
     tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
     return redirect(reverse("schedules:main_calendar_view") + f"?tab={tab}")
- 
- 
-def logout_view(request):
-    logout(request)
-    messages.success(request, "Você saiu do sistema com sucesso!")
-    return redirect('accounts:login')
