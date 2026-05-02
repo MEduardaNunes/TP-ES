@@ -17,14 +17,118 @@ O objetivo do sistema é criar um calendário que permita a organização de ati
 
 ## Histórias de usuário
 1. Como usuário do sistema, eu gostaria de me cadastrar/editar/visualizar/deletar meu usuário no sistema
-2. Como administrador, eu gostaria de cadastrar/editar/visualizar/deletar uma agenda, com um nome, os dias da semana, o horário e seus eventos (aulas, provas, trabalhos, reuniões, etc)
-3. Como administrador, eu gostaria de cadastrar/editar/visualizar/deletar eventos da agenda
+2. Como administrador, eu gostaria de cadastrar/editar/visualizar/deletar uma agenda (com nome, descrição, cores e ícones) e suas atividades (eventos ou tarefas).
+3. Como administrador, eu gostaria de cadastrar/editar/visualizar/deletar atividades da agenda.
 4. Como administrador, eu gostaria de cadastrar/visualizar/deletar participantes de uma agenda
-5. Como participante, eu gostaria de visualizar minhas agendas e seus eventos
-6. Como participante, eu gostaria de dar check em eventos já realizados/estudados, como provas, listas e trabalhos
-7. Como participante, eu gostaria de criar filtros para os meus eventos, como agenda, tipo (aula, trabalho, prova, reunião, etc.) e status (com check ou sem check)
-8. Como participante, eu gostaria de filtrar meus eventos com base nos filtros definidos, para visualizar apenas as atividades relevantes
-9. Como participante, eu gostaria de conseguir organizar meus estudos para disciplinas, entregas de trabalho e provas em matrizes de prioridade (urgente e importante/ urgente / importante / não urgente e nem importante)
-10. Como usuário, para me motivar gostaria de personalizar a interface do sistema para ser mais de acordo com minha personalidade (poder alterar paleta de cores e adicionar meus próprios ícones)
-11. Como usuário, eu quero que as listas de atividades tenham um campo de notas, para que eu possa registrar links, ideias ou informações necessárias para a execução da tarefa.
-12. Como usuário, eu quero que, ao focar em uma disciplina, os itens internos ganhem cores específicas (ex: Prova = Vermelho, Lista = Laranja, Trabalho = Cinza, Estudo = Preto), para diferenciar as prioridades acadêmicas visualmente.
+5. Como participante, eu gostaria de visualizar minhas agendas e suas atividades.
+6. Como participante, eu gostaria de dar check em tarefas já realizadas/estudadas, como provas, listas e trabalhos.
+7. Como participante, eu gostaria de filtrar meus eventos com base nos filtros definidos, como agenda, tipo (tarefa/evento) e status (com check ou sem check), para visualizar apenas as atividades relevantes.
+8. Como participante, eu gostaria de conseguir organizar meus estudos para disciplinas, entregas de trabalho e provas em matrizes de prioridade (urgente e importante/ urgente / importante / não urgente e nem importante)
+9. Como usuário, para me motivar gostaria de personalizar a interface do sistema para ser mais de acordo com minha personalidade (poder alterar paleta de cores e adicionar meus próprios ícones)
+10. Como usuário, eu quero que as listas de atividades tenham um campo de notas, para que eu possa registrar links, ideias ou informações necessárias para a execução da tarefa.
+11. Como usuário, eu quero que, ao focar em uma disciplina, os itens internos ganhem cores específicas (ex: Prova = Vermelho, Lista = Laranja, Trabalho = Cinza, Estudo = Preto), para diferenciar as prioridades acadêmicas visualmente.
+
+## Documentação do Sistema (UML)
+
+### Diagrama de Classes
+Este diagrama ilustra a estrutura de domínio do sistema, o que foi útil para compreender a modelagem dos dados e guiar a criação dos *models* no Django. Ele destaca:
+- O controle de acesso e participação, onde a associação entre `User` e `Schedule` é mapeada pela classe `Participant` (definindo papéis de *admin* ou *member*).
+- A composição das agendas, que abrigam múltiplas atividades (`Activity`), separadas logicamente entre eventos com datas fixas e tarefas concluíveis.
+- O rastreamento de progresso individual, modelado pela classe associativa `ActivityCheck`, que permite que vários usuários marquem de forma independente a conclusão de uma mesma atividade.
+```mermaid
+classDiagram
+    class User {
+        +id
+        +name
+        +email
+    }
+
+    class Schedule {
+        +id
+        +name
+        +description
+        +color
+        +iconEmoji
+        +iconImage
+        +activityTypeColors
+    }
+
+    class Participant {
+        +role ParticipantRole
+        +joinedAt DateTime
+    }
+
+    class ParticipantRole {
+        <<enumeration>>
+        admin
+        member
+    }
+
+    class Activity {
+        +id
+        +title
+        +kind ActivityKind
+        +activityType
+        +priority
+        +date
+        +startTime
+        +endTime
+        +notes
+        +color
+        +iconEmoji
+        +iconImage
+    }
+
+    note for Activity "kind = event:<br>date é obrigatória<br><br>kind = task:<br>atividade pode ser concluída<br>individualmente por usuários"
+
+    class ActivityKind {
+        <<enumeration>>
+        event
+        task
+    }
+
+    class ActivityCheck {
+        +checkedAt DateTime
+    }
+
+    User "1" --> "0..*" Participant : participates via
+    Schedule "1" --> "0..*" Participant : has participants
+    Participant "0..*" --> "1" User : user
+    Participant "0..*" --> "1" Schedule : schedule
+
+    Schedule "1" --> "0..*" Activity : contains
+    Activity "0..*" --> "1" Schedule : belongs to
+
+    User "1" --> "0..*" ActivityCheck : marks
+    Activity "1" --> "0..*" ActivityCheck : checked by
+    ActivityCheck "0..*" --> "1" User : user
+    ActivityCheck "0..*" --> "1" Activity : activity
+
+### Diagrama de Sequência (Fluxo de ActivityCheck)
+Este diagrama dinâmico ilustra o comportamento do sistema durante a marcação de uma atividade como concluída (História de Usuário 6). Útil para guiar a implementação da história no backend em Django, de forma a evidenciar as etapas de validação de permissões (verificar se o usuário é `Participant` do `Schedule`) antes de instanciar e persistir a classe `ActivityCheck` no banco de dados SQLite.
+```mermaid
+sequenceDiagram
+    actor U as Usuário
+    participant F as Frontend
+    participant API as Backend (Django)
+    participant DB as SQLite
+
+    U->>F: Clica para concluir uma Activity
+    F->>API: POST /api/activities/{id}/check/
+    
+    API->>DB: Consulta a Activity e seu Schedule
+    DB-->>API: Retorna dados da Activity
+    
+    API->>DB: Verifica se Usuário é Participant do Schedule
+    
+    alt Usuário não é participante
+        DB-->>API: Retorna falso
+        API-->>F: 403 Forbidden (Acesso negado)
+        F-->>U: Exibe erro de permissão
+    else Usuário é participante
+        DB-->>API: Retorna verdadeiro
+        API->>DB: Cria registro de ActivityCheck (checkedAt = now)
+        DB-->>API: Confirma persistência
+        API-->>F: 201 Created (Check salvo)
+        F-->>U: Atualiza interface da Activity (marcada)
+    end
