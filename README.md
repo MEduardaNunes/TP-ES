@@ -36,7 +36,7 @@ make run
 ```bash
 http://127.0.0.1:8000/
 ```
-4. Para parar o servidor, pressione: `Ctrl + C`
+4. Para parar o servidor, pressione `Ctrl + C` dentro do terminal.
 ---
 ### Observações
 - O comando `make run`:
