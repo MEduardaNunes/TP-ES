@@ -90,8 +90,6 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function openActivityDetailsModal(e, data) { console.log("Detalhes:", data); }
-function handleEditActivityClick(e, data) { console.log("Editar:", data); }
  
 function renderEvent(event) {
     const timeHtml = event.start_time && 
