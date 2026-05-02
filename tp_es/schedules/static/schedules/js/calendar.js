@@ -89,6 +89,9 @@ function hexToRgba(hex, alpha) {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+function openActivityDetailsModal(e, data) { console.log("Detalhes:", data); }
+function handleEditActivityClick(e, data) { console.log("Editar:", data); }
  
 function renderEvent(event) {
     const timeHtml = event.start_time && 
@@ -191,8 +194,14 @@ function renderDayCell(dayData, isToday) {
  */
 function renderCalendar() {
     const grid = document.getElementById('calendar-grid');
+
+    if (!window.calendarData) {
+        console.error("calendarData não carregado");
+        return;
+    }
+
     const { year, month, days } = window.calendarData;
- 
+    
     const today = new Date();
  
     const html = days.map(dayData => {
@@ -214,7 +223,7 @@ function renderCalendar() {
 // modal de criação de eventos/tarefas
 function openCreateModal(day) {
     const modal     = document.getElementById('modal');
-    const dateInput = document.getElementById('modal-date');
+    const dateInput = document.getElementById('date-input');
  
     const { year, month } = window.calendarData;
  
@@ -257,8 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
  
- function setupDayClick() {
+function setupDayClick() {
     const grid = document.getElementById('calendar-grid');
+    if (!grid) return;
  
     grid.addEventListener('click', (e) => {
         const eventCard = e.target.closest('.event-card');
@@ -304,26 +314,34 @@ document.addEventListener('DOMContentLoaded', () => {
             openActivityDetailsModal(e, activityData);
             return;
         }
-
+        
         const dayCell = e.target.closest('.calendar-day');
+        if (dayCell && dayCell.dataset.day) {
+            if (!window.hasAdminSchedules) {
+                showAlert("Você não é administrador de nenhuma agenda.");
+                return;
+            }
+            openCreateModal(dayCell.dataset.day);
+        }
+
         if (!dayCell) return;
 
         const day = dayCell.dataset.day;
         if (!day) return;
-
-        openCreateModal(day);
     });
 }
 
-const kindSelect = document.getElementById("kind-select");
-const timeFields = document.getElementById("time-fields");
+function showAlert(message) {
+    const alertBox = document.getElementById("ui-alert");
+    if (!alertBox) return;
 
-kindSelect.addEventListener("change", () => {
-  if (kindSelect.value === "task") {
-    timeFields.style.display = "none";
-  } else {
-    timeFields.style.display = "flex";
-  }
-});
+    alertBox.textContent = message;
+    alertBox.classList.remove("hidden");
+
+    setTimeout(() => {
+        alertBox.classList.add("hidden");
+    }, 3000);
+}
+
 
 

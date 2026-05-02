@@ -27,7 +27,7 @@
   {% endif %}
 </head>
 
-<body class="profile-page">
+<body class="app-page profile-page">
   <nav id="sidebar">
     {% with rota_atual=request.resolver_match.url_name %}
     <ul>
@@ -55,6 +55,19 @@
           {% endif %}
 
             <span>Home</span>
+        </a>
+      </li>
+
+      <li class="{% if rota_atual == 'settings' %}active{% endif %}">
+        <a href="{% url 'accounts:settings_page' %}">
+          {% if ui_icons.agenda_icon_image %}
+            <img src="{{ ui_icons.agenda_icon_image.url }}" class="sidebar-icon-image" alt="" onerror="this.style.display='none'" />
+          {% elif ui_icons.agenda_icon_emoji %}
+            <span class="sidebar-icon-emoji" aria-hidden="true">{{ ui_icons.agenda_icon_emoji }}</span>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
+          {% endif %}
+          <span>Configurações</span>
         </a>
       </li>
 
@@ -133,87 +146,6 @@
             <button type="submit" class="button-danger">Excluir usuário</button>
           </form>
         </div>
-      </form>
-    </section>
-
-    <section class="container profile-theme">
-      <h2>Personalização da Interface</h2>
-      <form method="post" action="{% url 'accounts:update_preferences' %}" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <div class="theme-grid">
-          <div>
-            <label for="base-clr">Cor de fundo</label>
-            <input type="color" id="base-clr" name="base_clr" value="{{ preference.base_clr }}" />
-          </div>
-          <div>
-            <label for="line-clr">Cor das bordas</label>
-            <input type="color" id="line-clr" name="line_clr" value="{{ preference.line_clr }}" />
-          </div>
-          <div>
-            <label for="hover-clr">Cor de hover</label>
-            <input type="color" id="hover-clr" name="hover_clr" value="{{ preference.hover_clr }}" />
-          </div>
-          <div>
-            <label for="accent-clr">Cor de destaque</label>
-            <input type="color" id="accent-clr" name="accent_clr" value="{{ preference.accent_clr }}" />
-          </div>
-          <div>
-            <label for="text-clr">Cor de texto da barra lateral</label>
-            <input type="color" id="text-clr" name="text_clr" value="{{ preference.text_clr }}" />
-          </div>
-          <div>
-            <label for="secondary-text-clr">Cor de texto principal</label>
-            <input type="color" id="secondary-text-clr" name="secondary_text_clr" value="{{ preference.secondary_text_clr }}" />
-          </div>
-          <div>
-            <label for="container-background-base">Cor dos cards</label>
-            <input type="color" id="container-background-base" name="container_background_base" value="{{ preference.container_background_base }}" />
-          </div>
-          <div>
-            <label for="secondary-base-clr">Cor secundária dos blocos</label>
-            <input type="color" id="secondary-base-clr" name="secondary_base_clr" value="{{ preference.secondary_base_clr }}" />
-          </div>
-          <div>
-            <label for="sidebar-gradient-start">Gradiente da barra lateral (início)</label>
-            <input type="color" id="sidebar-gradient-start" name="sidebar_gradient_start" value="{{ preference.sidebar_gradient_start }}" />
-          </div>
-          <div>
-            <label for="sidebar-gradient-end">Gradiente da barra lateral (fim)</label>
-            <input type="color" id="sidebar-gradient-end" name="sidebar_gradient_end" value="{{ preference.sidebar_gradient_end }}" />
-          </div>
-        </div>
-
-        <h3>Ícones</h3>
-
-        <div class="theme-grid">
-          <div>
-            <label for="profile-icon-image">Ícone do perfil (PNG)</label>
-            <div class="icon-upload-row">
-              <input type="file" id="profile-icon-image" name="profile_icon_image" accept="image/png,image/webp,image/jpeg" />
-              <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_profile_icon_image" data-icon-clear-file="profile-icon-image" data-icon-clear-submit="1" aria-label="Remover ícone do perfil" title="Remover ícone do perfil">x</button>
-            </div>
-            <input type="hidden" id="clear_profile_icon_image" name="clear_profile_icon_image" value="" />
-          </div>
-          <div>
-            <label for="agenda-icon-image">Ícone da agenda/home (PNG)</label>
-            <div class="icon-upload-row">
-              <input type="file" id="agenda-icon-image" name="agenda_icon_image" accept="image/png,image/webp,image/jpeg" />
-              <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_agenda_icon_image" data-icon-clear-file="agenda-icon-image" data-icon-clear-submit="1" aria-label="Remover ícone da agenda" title="Remover ícone da agenda">x</button>
-            </div>
-            <input type="hidden" id="clear_agenda_icon_image" name="clear_agenda_icon_image" value="" />
-          </div>
-          <div>
-            <label for="default-activity-icon-image">Ícone padrão de evento/tarefa (PNG)</label>
-            <div class="icon-upload-row">
-              <input type="file" id="default-activity-icon-image" name="default_activity_icon_image" accept="image/png,image/webp,image/jpeg" />
-              <button type="button" class="icon-clear-btn" data-icon-clear-target="clear_default_activity_icon_image" data-icon-clear-file="default-activity-icon-image" data-icon-clear-submit="1" aria-label="Remover ícone padrão" title="Remover ícone padrão">x</button>
-            </div>
-            <input type="hidden" id="clear_default_activity_icon_image" name="clear_default_activity_icon_image" value="" />
-          </div>
-        </div>
-
-        <button type="submit" class="button-primary">Salvar personalização visual</button>
       </form>
     </section>
   </main>

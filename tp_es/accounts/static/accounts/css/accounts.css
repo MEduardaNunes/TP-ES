@@ -108,25 +108,25 @@ body.auth-page .user-card { /**/
   margin-bottom: 26px;
 } 
 
-.profile-page {
+.app-page {
   display: grid;
   grid-template-columns: auto 1fr;
+  background: radial-gradient(circle at top, #ffffff 0%, #eef4fb 45%, #dfe8f4 100%);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.profile-page main {
+.app-page main {
   padding: 40px;
-  background: radial-gradient(circle at top, #ffffff 0%, #eef4fb 45%, #dfe8f4 100%);
   min-height: 100dvh;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   position: relative;
 }
 
-.profile-page main > * {
+.app-page main > * {
   position: relative;
   z-index: 1;
 }
 
-.profile-page main::before {
+.app-page main::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -137,14 +137,14 @@ body.auth-page .user-card { /**/
   z-index: 0;
 }
 
-.profile-page main header {
+.app-page main header {
   text-align: center;
   margin-bottom: 36px;
   position: relative;
   z-index: 1;
 }
 
-.profile-page main header h1 {
+.app-page main header h1 {
   margin: 0;
   font-size: clamp(2rem, 2.5vw, 3rem);
   letter-spacing: -0.04em;
@@ -152,14 +152,14 @@ body.auth-page .user-card { /**/
   font-weight: 700;
 }
 
-.profile-page main header p {
+.app-page main header p {
   margin: 16px auto 0;
   max-width: 680px;
   color: #475569;
   line-height: 1.7;
 }
 
-.profile-page .container {
+.app-page .container {
   padding: 28px;
   border-radius: 26px;
   border: 1px solid rgba(148, 163, 184, 0.16);
@@ -170,7 +170,7 @@ body.auth-page .user-card { /**/
   z-index: 1;
 }
 
-.profile-page .container h2 {
+.app-page .container h2 {
   margin-bottom: 24px;
   font-size: 1.3rem;
   color: #1e293b;
@@ -178,14 +178,14 @@ body.auth-page .user-card { /**/
   letter-spacing: -0.02em;
 }
 
-.profile-page .profile-edit form,
-.profile-page .profile-danger {
+.app-page .profile-edit form,
+.app-page .profile-danger {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.profile-page .profile-info .outlined-box {
+.app-page .profile-info .outlined-box {
   padding: 16px 18px;
   border: 1px solid var(--line-clr);
   border-radius: 16px;
@@ -193,14 +193,14 @@ body.auth-page .user-card { /**/
   margin-bottom: 16px;
 }
 
-.profile-page .profile-info .outlined-box dt {
+.app-page .profile-info .outlined-box dt {
   font-weight: 600;
   color: #475569;
   margin-bottom: 8px;
   font-size: 0.875rem;
 }
 
-.profile-page .profile-info .outlined-box dd {
+.app-page .profile-info .outlined-box dd {
   margin: 0;
   font-size: 1rem;
   padding: 0;
@@ -210,7 +210,7 @@ body.auth-page .user-card { /**/
   width: 100%;
 }
 
-.profile-page label {
+.app-page label{
   display: block;
   font-weight: 600;
   color: #334155;
@@ -218,8 +218,8 @@ body.auth-page .user-card { /**/
   font-size: 0.95rem;
 }
 
-.profile-page input,
-.profile-page textarea {
+.app-page  input,
+.app-page textarea {
   width: 100%;
   padding: 16px 18px;
   border: 1px solid #d1d5db;
@@ -232,17 +232,17 @@ body.auth-page .user-card { /**/
   font-family: inherit;
 }
 
-.profile-page input:focus,
-.profile-page textarea:focus {
+.app-page input:focus,
+.app-page textarea:focus {
   outline: none;
   border-color: var(--accent-clr);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-clr) 10%, white);
 }
 
-.profile-page .button,
-.profile-page .button-primary,
-.profile-page .button-danger,
-.profile-page main button:not(.icon-clear-btn) {
+.app-page .button,
+.app-page .button-primary,
+.app-page .button-danger,
+.app-page main button:not(.icon-clear-btn) {
   width: 100%;
   padding: 16px 18px;
   border-radius: 16px;
@@ -255,34 +255,34 @@ body.auth-page .user-card { /**/
   font-size: 1rem;
 }
 
-.profile-page .button-primary {
+.app-page .button-primary {
   background: linear-gradient(135deg, var(--accent-clr) 0%, var(--secondary-base-clr) 100%);
   box-shadow: 0 12px 24px color-mix(in srgb, var(--accent-clr) 18%, transparent);
 }
 
-.profile-page .button-primary:hover {
+.app-page .button-primary:hover {
   transform: translateY(-1px);
   opacity: 0.95;
 }
 
-.profile-page .button-danger {
+.app-page .button-danger {
   background-color: #dc2626;
   box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18);
 }
 
-.profile-page .button-danger:hover {
+.app-page .button-danger:hover {
   transform: translateY(-1px);
   opacity: 0.95;
   background-color: #b91c1c;
 }
 
-.profile-page .profile-danger {
+.app-page .profile-danger {
   justify-content: center;
   align-items: center;
 }
 
 /* Toast messages */
-.profile-page .toast {
+.app-page .toast {
   position: fixed;
   top: 20px;
   left: 50%;
@@ -297,31 +297,31 @@ body.auth-page .user-card { /**/
   transition: opacity 0.5s ease;
 }
 
-.profile-page .toast.success {
+.app-page .toast.success {
   background: color-mix(in srgb, #22c55e 82%, white);
 }
 
-.profile-page .toast.error {
+.app-page .toast.error {
   background: color-mix(in srgb, #ef4444 82%, white);
 }
 
-.profile-page .toast.warning {
+.app-page .toast.warning {
   background: color-mix(in srgb, #f59e0b 82%, white);
 }
 
-.profile-page .form-actions {
+.app-page .form-actions {
   display: flex;
   gap: 16px;
   width: 100%;
 }
 
-.profile-page .form-actions button,
-.profile-page .form-actions .delete-form button {
+.app-page .form-actions button,
+.app-page .form-actions .delete-form button {
   flex: 1;
   width: auto;
 }
 
-.profile-page .delete-form {
+.app-page .delete-form {
   flex: 1;
   margin: 0;
   padding: 0;
@@ -329,7 +329,7 @@ body.auth-page .user-card { /**/
   background: none;
 }
 
-.profile-page .delete-form button {
+.app-page .delete-form button {
   width: 100%;
   padding: 16px 18px;
   border-radius: 16px;
@@ -344,7 +344,7 @@ body.auth-page .user-card { /**/
   box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18);
 }
 
-.profile-page .delete-form button:hover {
+.app-page .delete-form button:hover {
   transform: translateY(-1px);
   opacity: 0.95;
   background-color: #b91c1c;
@@ -361,7 +361,7 @@ body.auth-page .user-card { /**/
   }
 }
 
-.profile-page .profile-edit .outlined-box input {
+.app-page .profile-edit .outlined-box input {
   border: none; 
   padding: 0.2em 0;  
   color: #334155;
@@ -373,16 +373,16 @@ body.auth-page .user-card { /**/
   font-size: 1.1rem;
 }
 
-.profile-page .profile-edit .outlined-box:focus-within {
+.app-page .profile-edit .outlined-box:focus-within {
   border-color: var(--accent-clr); 
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-clr) 14%, white); 
 }
 
-.profile-page .container.profile-danger {
+.app-page .container.profile-danger {
   background-color: var(--base-clr);
 }
 
-.profile-page a {
+.app-page a {
   text-decoration: none;  
   color: inherit;         
 }
@@ -427,7 +427,7 @@ header {
   left: 0;
 }
 
-.profile-page h1 {
+.app-page h1 {
   margin: 0;
   font-size: clamp(2rem, 2.5vw, 3rem);
   letter-spacing: -0.04em;
@@ -620,7 +620,7 @@ body.auth-page .hint {
   }
 }
 
-.profile-page .forms-grid {
+.app-page .forms-grid {
   display: grid;
   gap: 24px;
   grid-template-columns: 1fr;
@@ -660,19 +660,19 @@ form {
   text-align: center;
 }
 
-.profile-page .profile-theme h3 {
+.app-page .profile-theme h3 {
   margin-top: 8px;
   margin-bottom: 8px;
   color: #334155;
 }
 
-.profile-page .theme-grid {
+.app-page .theme-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 14px;
 }
 
-.profile-page .theme-grid > div {
+.app-page .theme-grid > div {
   background: color-mix(in srgb, var(--base-clr) 92%, white);
   border: 1px solid var(--line-clr);
   border-radius: 14px;
@@ -683,12 +683,12 @@ form {
   min-width: 0;
 }
 
-.profile-page .theme-grid > div > label {
+.app-page .theme-grid > div > label {
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
-.profile-page .theme-grid input[type="color"] {
+.app-page .theme-grid input[type="color"] {
   height: 44px;
   padding: 6px;
 }
@@ -700,13 +700,13 @@ form {
   min-width: 0;
 }
 
-.profile-page .icon-upload-row input[type="file"] {
+.app-page .icon-upload-row input[type="file"] {
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
 }
 
-.profile-page .icon-upload-row .icon-clear-btn {
+.app-page .icon-upload-row .icon-clear-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -726,11 +726,11 @@ form {
   padding: 0;
 }
 
-.profile-page .icon-upload-row .icon-clear-btn:hover {
+.app-page .icon-upload-row .icon-clear-btn:hover {
   background: color-mix(in srgb, var(--hover-clr) 78%, white);
 }
 
-.profile-page .icon-upload-row .icon-clear-btn--active {
+.app-page .icon-upload-row .icon-clear-btn--active {
   background: var(--accent-clr);
   border-color: var(--accent-clr);
   color: white;
@@ -741,7 +741,7 @@ form {
 }
 
 @media (max-width: 800px) {
-  .profile-page .theme-grid {
+  .app-page .theme-grid {
     grid-template-columns: 1fr;
   }
 }
