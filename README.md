@@ -21,7 +21,7 @@ O objetivo do sistema é criar um calendário que permita a organização de ati
 3. Como administrador, eu gostaria de cadastrar/editar/visualizar/deletar atividades da agenda.
 4. Como administrador, eu gostaria de cadastrar/visualizar/deletar participantes de uma agenda
 5. Como participante, eu gostaria de visualizar minhas agendas e suas atividades.
-6. Como participante, eu gostaria de dar check em tarefas já realizadas/estudadas, como provas, listas e trabalhos.
+6. Como participante, eu gostaria de dar check em atividades já realizadas/estudadas, como provas, listas e trabalhos.
 7. Como participante, eu gostaria de filtrar meus eventos com base nos filtros definidos, como agenda, tipo (tarefa/evento) e status (com check ou sem check), para visualizar apenas as atividades relevantes.
 8. Como participante, eu gostaria de conseguir organizar meus estudos para disciplinas, entregas de trabalho e provas em matrizes de prioridade (urgente e importante/ urgente / importante / não urgente e nem importante)
 9. Como usuário, para me motivar gostaria de personalizar a interface do sistema para ser mais de acordo com minha personalidade (poder alterar paleta de cores e adicionar meus próprios ícones)
@@ -103,32 +103,34 @@ classDiagram
     Activity "1" --> "0..*" ActivityCheck : checked by
     ActivityCheck "0..*" --> "1" User : user
     ActivityCheck "0..*" --> "1" Activity : activity
+```
 
 ### Diagrama de Sequência (Fluxo de ActivityCheck)
 Este diagrama dinâmico ilustra o comportamento do sistema durante a marcação de uma atividade como concluída (História de Usuário 6). Útil para guiar a implementação da história no backend em Django, de forma a evidenciar as etapas de validação de permissões (verificar se o usuário é `Participant` do `Schedule`) antes de instanciar e persistir a classe `ActivityCheck` no banco de dados SQLite.
-```mermaid
-sequenceDiagram
-    actor U as Usuário
-    participant F as Frontend
-    participant API as Backend (Django)
-    participant DB as SQLite
 
-    U->>F: Clica para concluir uma Activity
-    F->>API: POST /api/activities/{id}/check/
+```mermaid
+%%{init: {'themeVariables': {'activationBkgColor': '#fcd34d', 'activationBorderColor': '#b45309'}}}%%
+sequenceDiagram
+    participant U as :User
+    participant UI as :View
+    participant C as :ActivityController
+    participant DB as :Database
+
+    U->>+UI: concluirAtividade()
+    UI->>+C: checkActivity(userId, activityId)
     
-    API->>DB: Consulta a Activity e seu Schedule
-    DB-->>API: Retorna dados da Activity
+    C->>+DB: getSchedule(activityId)
+    DB-->>-C: schedule
     
-    API->>DB: Verifica se Usuário é Participant do Schedule
+    C->>C: verificarParticipante(userId)
     
-    alt Usuário não é participante
-        DB-->>API: Retorna falso
-        API-->>F: 403 Forbidden (Acesso negado)
-        F-->>U: Exibe erro de permissão
-    else Usuário é participante
-        DB-->>API: Retorna verdadeiro
-        API->>DB: Cria registro de ActivityCheck (checkedAt = now)
-        DB-->>API: Confirma persistência
-        API-->>F: 201 Created (Check salvo)
-        F-->>U: Atualiza interface da Activity (marcada)
+    alt isParticipant == false
+        C-->>UI: return erro
+    else isParticipant == true
+        C->>+DB: save(ActivityCheck)
+        DB-->>-C: return
+        C-->>-UI: return sucesso
     end
+    
+    UI-->>-U: atualiza interface
+```
