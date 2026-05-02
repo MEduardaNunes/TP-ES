@@ -843,7 +843,7 @@
               <option value="urgent_important">Urgente e importante</option>
               <option value="urgent">Urgente</option>
               <option value="important" selected>Importante</option>
-              <option value="not_urgent_not_important">NÃ£o urgente e nem importante</option>
+              <option value="not_urgent_not_important">Não urgente e nem importante</option>
             </select>
           </div>
 
@@ -959,7 +959,7 @@
               <option value="urgent_important">Urgente e importante</option>
               <option value="urgent">Urgente</option>
               <option value="important">Importante</option>
-              <option value="not_urgent_not_important">NÃ£o urgente e nem importante</option>
+              <option value="not_urgent_not_important">Não urgente e nem importante</option>
             </select>
           </div>
 
@@ -1824,18 +1824,18 @@
         urgent_important: 'Urgente e importante',
         urgent: 'Urgente',
         important: 'Importante',
-        not_urgent_not_important: 'NÃƒÂ£o urgente e nem importante'
+        not_urgent_not_important: 'Não urgente e nem importante'
       };
 
-      document.getElementById('details-schedule-name').textContent = activityData.schedule_name || 'Agenda nÃƒÂ£o informada';
-      document.getElementById('details-title').textContent = activityData.title || 'Sem tÃƒÂ­tulo';
-      document.getElementById('details-kind').textContent = kindLabels[activityData.kind] || activityData.kind || 'NÃƒÂ£o informado';
+      document.getElementById('details-schedule-name').textContent = activityData.schedule_name || 'Agenda não informada';
+      document.getElementById('details-title').textContent = activityData.title || 'Sem título informado';
+      document.getElementById('details-kind').textContent = kindLabels[activityData.kind] || activityData.kind || 'Não informado';
       document.getElementById('details-activity-type').textContent =
-        activityTypeLabels[activityData.activity_type] || activityData.activity_type || 'NÃƒÂ£o informada';
+        activityTypeLabels[activityData.activity_type] || activityData.activity_type || 'Não informada';
       document.getElementById('details-priority').textContent =
-        priorityLabels[activityData.priority] || activityData.priority || 'NÃƒÂ£o informada';
+        priorityLabels[activityData.priority] || activityData.priority || 'Não informada';
       document.getElementById('details-date').textContent = activityData.date || 'Sem data';
-      document.getElementById('details-start-time').textContent = activityData.start_time || 'Sem inÃƒÂ­cio';
+      document.getElementById('details-start-time').textContent = activityData.start_time || 'Sem início';
       document.getElementById('details-end-time').textContent = activityData.end_time || 'Sem fim';
       document.getElementById('details-notes').textContent = activityData.notes || 'Sem notas adicionais.';
 
