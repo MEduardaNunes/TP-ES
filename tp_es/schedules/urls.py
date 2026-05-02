@@ -9,6 +9,7 @@ urlpatterns = [
     path("conta/", include("accounts.urls")),
     path("main_calendar_view/", views.main_calendar_view, name="main_calendar_view"),
     path('logout/', views.logout_view, name='logout'),
+    path('settings/', include("accounts.urls")),
     path("quick_create_activity/", views.quick_create_activity, name="quick_create_activity"),
     path("validate_participant_username/", views.validate_participant_username, name="validate_participant_username"),
     path("create/", views.create_schedule, name="create_schedule"),

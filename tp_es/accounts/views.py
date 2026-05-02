@@ -9,15 +9,15 @@ from .models import UserThemePreference
 def login_page(request):
     if request.user.is_authenticated:
         return redirect("schedules:main_calendar_view")
-    return render(request, "login.html")
+    return render(request, "accounts/login.html")
 
 @login_required
 def user_space(request):
     preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
-    return render(request, "user.html", {"preference": preference})
+    return render(request, "accounts/user.html", {"preference": preference})
 
 def sign_up(request):
-    return render(request, "sign_up.html")
+    return render(request, "accounts/sign_up.html")
 
 def register(request):
     if request.user.is_authenticated:
@@ -128,7 +128,7 @@ def delete_user(request):
 @login_required
 def update_preferences(request):
     if request.method != "POST":
-        return redirect("accounts:user_space")
+        return redirect("accounts:settings_page")
 
     preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
 
@@ -178,4 +178,26 @@ def update_preferences(request):
 
     preference.save()
     messages.success(request, "Preferências visuais atualizadas com sucesso.")
-    return redirect("accounts:user_space")
+    return redirect("accounts:settings_page")
+
+@login_required
+def reset_preferences(request):
+    """Restaura as preferências visuais para o padrão do sistema."""
+    if request.method == "POST":
+        try:
+            preference = UserThemePreference.objects.get(user=request.user)
+            preference.delete()
+            messages.success(request, "Configurações visuais restauradas para o padrão.")
+        except UserThemePreference.DoesNotExist:
+            pass
+            
+    return redirect("accounts:settings_page")
+
+def settings_page(request):
+    
+    preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
+    
+    context = {
+        'preference': preference,
+    }
+    return render(request, "accounts/settings.html", context)

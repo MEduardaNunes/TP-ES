@@ -669,3 +669,12 @@ def toggle_check(request, schedule, participant, activity_id):
 
     tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
     return redirect(reverse("schedules:main_calendar_view") + f"?tab={tab}")
+
+def settings_page(request):
+    # Adapte com a lógica que você já tem para carregar as preferências e ícones
+    context = {
+        'preference': request.user.preferences, # Exemplo
+        'ui_theme': ..., 
+        'ui_icons': ...
+    }
+    return render(request, 'accounts/settings.html', context)

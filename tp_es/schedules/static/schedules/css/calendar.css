@@ -1,6 +1,6 @@
 body {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: auto 1fr;
   gap: 10px;
 }
 
@@ -59,6 +59,11 @@ body {
 #sidebar a span, #sidebar .dropdown-btn span, .logout-btn span {
   flex-grow: 1;
   font-size: 1.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 1.5;
+  padding-bottom: 1px;
+  text-overflow: ellipsis;
 }
 
 .logout-btn {
@@ -114,7 +119,7 @@ main p {
   box-sizing: border-box;
   background: linear-gradient(135deg, var(--sidebar-gradient-start, #0ea5e9) 0%, var(--sidebar-gradient-end, #22d3ee) 100%);
   height: calc(100vh - 20px);
-  width: 240px;
+  width: 280px;
   padding: min(30px, 7%);
   border-radius: .9em;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -709,7 +714,7 @@ main p {
   #sidebar {
     height: 100vh;
     display: flex;
-    width: 100%;
+    width: 300px;
     margin: 0;
     top: 0;
     border-right: none;
@@ -1230,7 +1235,7 @@ main p {
 }
 
 body.schedule-page {
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: auto 1fr;
   gap: 10px;
   background: radial-gradient(circle at top, #ffffff 0%, #eef4fb 45%, #dfe8f4 100%);
   color: #1e293b;
@@ -2206,5 +2211,28 @@ body.schedule-page .checkbox-input:checked + .checkbox-box::after {
 }
 
 body.schedule-page .checkbox-label {
+  display: none;
+}
+
+body > .ui-alert {
+  position: fixed;
+}
+
+.ui-alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #ef4444; 
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 9999;
+  font-size: 14px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.ui-alert.hidden {
   display: none;
 }

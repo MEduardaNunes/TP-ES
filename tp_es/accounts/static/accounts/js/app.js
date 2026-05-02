@@ -93,4 +93,39 @@ function bindIconClearButtons() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', bindIconClearButtons);
+function hideToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    if (toasts.length > 0) {
+        setTimeout(() => {
+            toasts.forEach(el => {
+                el.style.opacity = "0";
+                setTimeout(() => el.remove(), 400);
+            });
+        }, 2000);
+    }
+}
+
+function bindIconClearButtons() {
+    document.querySelectorAll('[data-icon-clear-target]').forEach((button) => {
+        const targetId = button.getAttribute('data-icon-clear-target');
+        const hiddenInput = document.getElementById(targetId);
+        if (!hiddenInput) return;
+
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            hiddenInput.value = '1';
+            
+            // Se for envio imediato (ex: perfil)
+            if (button.getAttribute('data-icon-clear-submit') === '1') {
+                button.closest('form')?.submit();
+            } else {
+                button.classList.add('icon-clear-btn--active');
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    hideToasts();
+    bindIconClearButtons();
+});
