@@ -4,9 +4,9 @@
   --base-clr: #f8f9ff; /*fundo principal*/
   --line-clr: #42434a; /*bordas e divisórias*/
   --sidebar-clr: #f8f9ff;
-  --hover-clr: #f8f9ff; 
+  --hover-clr: #e2d6ff; 
   --text-clr: #ffffff; /*texto e ícones*/
-  --accent-clr: #59e7ec; /*destaque*/
+  --accent-clr: #6344ab; /*destaque*/
   --secondary-text-clr: #000000; /*texto secundário*/
   --danger-clr: #aa0505;
   --secondary-danger-clr: #8c0000;
