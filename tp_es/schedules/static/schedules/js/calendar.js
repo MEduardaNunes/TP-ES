@@ -106,23 +106,23 @@ function renderEvent(event) {
             : '';
 
     return `
-        <div class="event-card ${isChecked ? 'event-card--completed' : ''}"
-             data-event-id="${event.id}"
-             data-schedule-id="${event.schedule_id}"
-             data-schedule-name="${(event.schedule_name || '').replace(/"/g, '&quot;')}"
-             data-color="${event.color || '#6366f1'}"
-             data-can-manage="${event.can_manage ? 'true' : 'false'}"
-             data-title="${event.title.replace(/"/g, '&quot;')}"
-             data-kind="${event.kind}"
-             data-activity-type="${event.activity_type}"
-             data-priority="${event.priority || 'important'}"
-             data-date="${event.date}"
-             data-start-time="${event.start_time || ''}"
-             data-end-time="${event.end_time || ''}"
-             data-notes="${(event.notes || '').replace(/"/g, '&quot;')}"
-             data-icon-emoji="${event.icon_emoji || ''}"
-             data-icon-image-url="${event.icon_image_url || ''}"
-             style="background-color: ${eventColor};">
+           <div class="event-card ${isChecked ? 'event-card--completed' : ''}"
+               data-event-id="${escapeHtml(String(event.id || ''))}"
+               data-schedule-id="${escapeHtml(String(event.schedule_id || ''))}"
+               data-schedule-name="${escapeHtml(event.schedule_name || '')}"
+               data-color="${escapeHtml(event.color || '#6366f1')}"
+               data-can-manage="${escapeHtml(event.can_manage ? 'true' : 'false')}"
+               data-title="${escapeHtml(event.title || '')}"
+               data-kind="${escapeHtml(event.kind || '')}"
+               data-activity-type="${escapeHtml(event.activity_type || '')}"
+               data-priority="${escapeHtml(event.priority || 'important')}"
+               data-date="${escapeHtml(event.date || '')}"
+               data-start-time="${escapeHtml(event.start_time || '')}"
+               data-end-time="${escapeHtml(event.end_time || '')}"
+               data-notes="${escapeHtml(event.notes || '')}"
+               data-icon-emoji="${escapeHtml(event.icon_emoji || '')}"
+               data-icon-image-url="${escapeHtml(event.icon_image_url || '')}"
+               style="background-color: ${escapeHtml(eventColor)};">
             ${timeHtml}
             <div class="event-title">${iconHtml}${escapeHtml(event.title)}</div>
         </div>
@@ -142,22 +142,22 @@ function renderTask(task) {
             : '';
 
     return `
-        <div class="task-item ${isChecked ? 'task-item--completed' : ''}" 
-             data-task-id="${task.id}"
-             data-schedule-id="${task.schedule_id}"
-             data-schedule-name="${(task.schedule_name || '').replace(/"/g, '&quot;')}"
-             data-color="${task.color || '#6366f1'}"
-             data-can-manage="${task.can_manage ? 'true' : 'false'}"
-             data-title="${task.title.replace(/"/g, '&quot;')}"
-             data-kind="${task.kind}"
-             data-activity-type="${task.activity_type}"
-             data-priority="${task.priority || 'important'}"
-             data-date="${task.date}"
-             data-start-time="${task.start_time || ''}"
-             data-end-time="${task.end_time || ''}"
-             data-icon-emoji="${task.icon_emoji || ''}"
-             data-icon-image-url="${task.icon_image_url || ''}"
-            data-notes="${(task.notes || '').replace(/"/g, '&quot;')}">
+           <div class="task-item ${isChecked ? 'task-item--completed' : ''}" 
+               data-task-id="${escapeHtml(String(task.id || ''))}"
+               data-schedule-id="${escapeHtml(String(task.schedule_id || ''))}"
+               data-schedule-name="${escapeHtml(task.schedule_name || '')}"
+               data-color="${escapeHtml(task.color || '#6366f1')}"
+               data-can-manage="${escapeHtml(task.can_manage ? 'true' : 'false')}"
+               data-title="${escapeHtml(task.title || '')}"
+               data-kind="${escapeHtml(task.kind || '')}"
+               data-activity-type="${escapeHtml(task.activity_type || '')}"
+               data-priority="${escapeHtml(task.priority || 'important')}"
+               data-date="${escapeHtml(task.date || '')}"
+               data-start-time="${escapeHtml(task.start_time || '')}"
+               data-end-time="${escapeHtml(task.end_time || '')}"
+               data-icon-emoji="${escapeHtml(task.icon_emoji || '')}"
+               data-icon-image-url="${escapeHtml(task.icon_image_url || '')}"
+              data-notes="${escapeHtml(task.notes || '')}">
             <div class="task-dot" style="background-color:${color};"></div>
             <span class="task-title">${iconHtml}${escapeHtml(task.title)}</span>
         </div>
