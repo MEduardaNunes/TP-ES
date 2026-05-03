@@ -10,7 +10,7 @@ from functools import wraps
 import calendar
 from urllib.parse import urlparse, parse_qs
 from accounts.models import UserThemePreference
-from .models import Schedule, Participant, Activity, ActivityCheck
+from .models import Schedule, Participant, Activity, ActivityCheck, DEFAULT_ACTIVITY_TYPE_COLORS
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
 
@@ -25,13 +25,13 @@ ACTIVITY_TYPE_COLOR_KEYS = [
 ]
 
 ACTIVITY_TYPE_COLOR_DEFAULTS = {
-    Activity.Type.CLASS: "#3b82f6",
-    Activity.Type.EXAM: "#ef4444",
-    Activity.Type.ASSIGNMENT: "#f59e0b",
-    Activity.Type.STUDY: "#111827",
-    Activity.Type.MEETING: "#8b5cf6",
-    Activity.Type.PRESENTATION: "#0ea5e9",
-    Activity.Type.PERSONAL: "#64748b",
+    Activity.Type.CLASS: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.CLASS],
+    Activity.Type.EXAM: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.EXAM],
+    Activity.Type.ASSIGNMENT: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.ASSIGNMENT],
+    Activity.Type.STUDY: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.STUDY],
+    Activity.Type.MEETING: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.MEETING],
+    Activity.Type.PRESENTATION: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.PRESENTATION],
+    Activity.Type.PERSONAL: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.PERSONAL],
 }
 
 PRIORITY_MATRIX_SECTIONS = [
@@ -90,15 +90,16 @@ def extract_activity_type_colors(post_data):
     colors = {}
     for activity_type in ACTIVITY_TYPE_COLOR_KEYS:
         raw_color = (post_data.get(f"activity_type_color_{activity_type}") or "").strip()
-        if raw_color:
-            colors[activity_type] = raw_color
+        colors[activity_type] = raw_color or ACTIVITY_TYPE_COLOR_DEFAULTS[activity_type]
     return colors
 
 
 def resolve_activity_color(activity):
+    schedule_type_colors = activity.schedule.activity_type_colors or {}
     return (
         activity.color
-        or (activity.schedule.activity_type_colors or {}).get(activity.activity_type)
+        or schedule_type_colors.get(activity.activity_type)
+        or ACTIVITY_TYPE_COLOR_DEFAULTS.get(activity.activity_type)
         or activity.schedule.color
         or "#59e7ec"
     )
@@ -380,6 +381,7 @@ def main_calendar_view(request):
         "checked_ids": checked_ids,
         "completed_events": completed_events,
         "completed_tasks": completed_tasks,
+        "activity_type_color_defaults": ACTIVITY_TYPE_COLOR_DEFAULTS,
         "active_tab": active_tab,
     })
     
