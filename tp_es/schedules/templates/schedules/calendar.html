@@ -118,23 +118,23 @@
     <div class="tabs-header">
       <div class="tabs-topbar">
         <div class="tab-buttons">
-          <button class="tab-btn active" content-id="calendario">
+          <button class="tab-btn {% if active_tab == 'calendario' %}active{% endif %}" content-id="calendario">
             Calend&aacute;rio
           </button>
 
-          <button class="tab-btn" content-id="eventos">
+          <button class="tab-btn {% if active_tab == 'eventos' %}active{% endif %}" content-id="eventos">
             Eventos
           </button>
 
-          <button class="tab-btn" content-id="tarefas">
+          <button class="tab-btn {% if active_tab == 'tarefas' %}active{% endif %}" content-id="tarefas">
             Tarefas
           </button>
 
-          <button class="tab-btn" content-id="matriz">
+          <button class="tab-btn {% if active_tab == 'matriz' %}active{% endif %}" content-id="matriz">
             Matriz
           </button>
 
-          <button class="tab-btn" content-id="agendas">
+          <button class="tab-btn {% if active_tab == 'agendas' %}active{% endif %}" content-id="agendas">
             Agendas
           </button>
         </div>
@@ -157,18 +157,18 @@
       </div>
 
       <div class="tab-contents">
-        <div class="content" id="calendario">
+        <div class="content {% if active_tab == 'calendario' %}show{% endif %}" id="calendario">
           <div class="calendar-header">
             <div class="calendar-left">
               <h2>{{ month_name }} {{ year }}</h2>
-              <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
+              <a href="?mes={{ prev_month }}&ano={{ prev_year }}&tab={{ active_tab }}" class="calendar-nav-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </a>
 
-              <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
+              <a href="?mes={{ next_month }}&ano={{ next_year }}&tab={{ active_tab }}" class="calendar-nav-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="9 18 15 12 9 6"></polyline>
@@ -190,7 +190,7 @@
           <div class="calendar-grid" id="calendar-grid"></div>
         </div>
 
-        <div class="content" id="eventos">
+        <div class="content {% if active_tab == 'eventos' %}show{% endif %}" id="eventos">
           <div class="panel-header">
             <div>
               <h1>Eventos futuros</h1>
@@ -400,7 +400,7 @@
 				</div>
       </div>
 
-        <div class="content" id="tarefas">
+        <div class="content {% if active_tab == 'tarefas' %}show{% endif %}" id="tarefas">
            <div class="panel-header">
             <div>
              <h1>Tarefas</h1>
@@ -590,7 +590,7 @@
 				  </div>
 				</div>
 
-        <div class="content" id="matriz">
+        <div class="content {% if active_tab == 'matriz' %}show{% endif %}" id="matriz">
           <div class="panel-header">
             <div>
               <h1>Matriz de prioridade</h1>
@@ -679,7 +679,7 @@
           </div>
         </div>
 
-          <div class="content" id="agendas">
+          <div class="content {% if active_tab == 'agendas' %}show{% endif %}" id="agendas">
             <div class="panel-header">
            <div>
              <h1>Agendas</h1>
@@ -1327,7 +1327,7 @@
       ]
     };
   </script>
-  <script src="{% static 'schedules/js/tabs.js' %}" defer></script>
+  <script src="{% static 'schedules/js/tabs.js' %}?v=20260503" defer></script>
   <script src="{% static 'schedules/js/sidebar.js' %}" defer></script>
   <script src="{% static 'schedules/js/calendar.js' %}" defer></script>
 
