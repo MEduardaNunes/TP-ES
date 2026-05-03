@@ -313,6 +313,25 @@ body.auth-page .user-card { /**/
   display: flex;
   gap: 16px;
   width: 100%;
+  margin-bottom: 18px !important;
+}
+
+/* When two .form-actions are stacked, add spacing between them */
+.app-page .form-actions + .form-actions {
+  margin-top: 8px !important;
+}
+
+/* Ensure delete-form has a small top margin when placed after another actions block */
+.app-page .form-actions .delete-form {
+  margin-top: 8px !important;
+}
+
+/* Stronger selectors inside profile-edit to avoid overrides */
+.app-page .profile-edit .form-actions {
+  margin-bottom: 18px !important;
+}
+.app-page .profile-edit .form-actions + .form-actions {
+  margin-top: 12px !important;
 }
 
 .app-page .form-actions button,

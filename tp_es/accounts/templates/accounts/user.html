@@ -141,12 +141,15 @@
         
         <div class="form-actions">
           <button type="submit" class="button-primary">Salvar alterações</button>
-          <form method="post" action="{% url 'accounts:delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Essa ação é irreversível.')" class="delete-form">
-            {% csrf_token %}
-            <button type="submit" class="button-danger">Excluir usuário</button>
-          </form>
         </div>
       </form>
+
+      <div class="form-actions">
+        <form method="post" action="{% url 'accounts:delete_user' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Essa ação é irreversível.')" class="delete-form">
+          {% csrf_token %}
+          <button type="submit" class="button-danger">Excluir usuário</button>
+        </form>
+      </div>
     </section>
   </main>
 
