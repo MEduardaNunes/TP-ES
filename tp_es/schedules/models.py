@@ -9,6 +9,20 @@ color_validator = RegexValidator(
     code='invalid_color'
 )
 
+DEFAULT_ACTIVITY_TYPE_COLORS = {
+    "class": "#3b82f6",
+    "exam": "#ef4444",
+    "assignment": "#f59e0b",
+    "study": "#7c3aed",
+    "meeting": "#06b6d4",
+    "presentation": "#4f46e5",
+    "personal": "#14b8a6",
+}
+
+
+def default_activity_type_colors():
+    return DEFAULT_ACTIVITY_TYPE_COLORS.copy()
+
 class Schedule(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -16,7 +30,7 @@ class Schedule(models.Model):
     icon_emoji = models.CharField(max_length=16, blank=True)
     icon_image = models.ImageField(upload_to="schedule_icons/", blank=True, null=True)
     # Mapping of activity_type -> hex color (e.g. {"exam": "#ef4444", "assignment": "#f59e0b"})
-    activity_type_colors = models.JSONField(blank=True, default=dict)
+    activity_type_colors = models.JSONField(blank=True, default=default_activity_type_colors)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

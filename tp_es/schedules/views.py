@@ -8,8 +8,9 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
 from functools import wraps
 import calendar
+from urllib.parse import urlparse, parse_qs
 from accounts.models import UserThemePreference
-from .models import Schedule, Participant, Activity, ActivityCheck
+from .models import Schedule, Participant, Activity, ActivityCheck, DEFAULT_ACTIVITY_TYPE_COLORS
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
 
@@ -24,13 +25,13 @@ ACTIVITY_TYPE_COLOR_KEYS = [
 ]
 
 ACTIVITY_TYPE_COLOR_DEFAULTS = {
-    Activity.Type.CLASS: "#3b82f6",
-    Activity.Type.EXAM: "#ef4444",
-    Activity.Type.ASSIGNMENT: "#f59e0b",
-    Activity.Type.STUDY: "#111827",
-    Activity.Type.MEETING: "#8b5cf6",
-    Activity.Type.PRESENTATION: "#0ea5e9",
-    Activity.Type.PERSONAL: "#64748b",
+    Activity.Type.CLASS: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.CLASS],
+    Activity.Type.EXAM: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.EXAM],
+    Activity.Type.ASSIGNMENT: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.ASSIGNMENT],
+    Activity.Type.STUDY: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.STUDY],
+    Activity.Type.MEETING: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.MEETING],
+    Activity.Type.PRESENTATION: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.PRESENTATION],
+    Activity.Type.PERSONAL: DEFAULT_ACTIVITY_TYPE_COLORS[Activity.Type.PERSONAL],
 }
 
 PRIORITY_MATRIX_SECTIONS = [
@@ -60,6 +61,24 @@ PRIORITY_MATRIX_SECTIONS = [
     },
 ]
 
+VALID_MAIN_TABS = {"calendario", "eventos", "tarefas", "matriz", "agendas"}
+
+
+def resolve_main_tab(request, fallback="calendario"):
+    referer_tab = ""
+    referer = request.META.get("HTTP_REFERER", "")
+    if referer:
+        parsed = urlparse(referer)
+        referer_tab = (parse_qs(parsed.query).get("tab") or [""])[0]
+
+    tab = (request.POST.get("tab") or request.GET.get("tab") or referer_tab or fallback or "calendario").strip()
+    return tab if tab in VALID_MAIN_TABS else fallback
+
+
+def redirect_main_calendar_with_tab(request, fallback="calendario"):
+    tab = resolve_main_tab(request, fallback=fallback)
+    return redirect(reverse("schedules:main_calendar_view") + f"?tab={tab}")
+
 
 def normalize_priority(raw_priority, default=Activity.Priority.IMPORTANT):
     if raw_priority in Activity.Priority.values:
@@ -71,15 +90,16 @@ def extract_activity_type_colors(post_data):
     colors = {}
     for activity_type in ACTIVITY_TYPE_COLOR_KEYS:
         raw_color = (post_data.get(f"activity_type_color_{activity_type}") or "").strip()
-        if raw_color:
-            colors[activity_type] = raw_color
+        colors[activity_type] = raw_color or ACTIVITY_TYPE_COLOR_DEFAULTS[activity_type]
     return colors
 
 
 def resolve_activity_color(activity):
+    schedule_type_colors = activity.schedule.activity_type_colors or {}
     return (
         activity.color
-        or (activity.schedule.activity_type_colors or {}).get(activity.activity_type)
+        or schedule_type_colors.get(activity.activity_type)
+        or ACTIVITY_TYPE_COLOR_DEFAULTS.get(activity.activity_type)
         or activity.schedule.color
         or "#59e7ec"
     )
@@ -182,7 +202,7 @@ def participant_required(view_func):
         participant = get_participant(request.user, schedule)
         if not participant:
             messages.error(request, "Você não tem acesso a essa agenda.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
         return view_func(request, schedule, participant, *args, **kwargs)
     return wrapper
 
@@ -195,7 +215,7 @@ def admin_required(view_func):
         participant = get_participant(request.user, schedule)
         if not participant or not participant.is_admin:
             messages.error(request, "Você não tem permissão para isso.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
         return view_func(request, schedule, participant, *args, **kwargs)
     return wrapper
 
@@ -207,6 +227,8 @@ def main_calendar_view(request):
     """
     today = date.today()
  
+    active_tab = resolve_main_tab(request)
+
     try:
         month = int(request.GET.get("mes", today.month))
         year = int(request.GET.get("ano", today.year))
@@ -358,7 +380,9 @@ def main_calendar_view(request):
         "admin_schedule_ids": admin_schedule_ids,
         "checked_ids": checked_ids,
         "completed_events": completed_events,
-        "completed_tasks": completed_tasks, 
+        "completed_tasks": completed_tasks,
+        "activity_type_color_defaults": ACTIVITY_TYPE_COLOR_DEFAULTS,
+        "active_tab": active_tab,
     })
     
 @login_required
@@ -396,7 +420,7 @@ def create_schedule(request):
         messages.success(request, "Agenda criada com sucesso.")
         return redirect(reverse("schedules:main_calendar_view") + "?tab=agendas")
  
-    return redirect("schedules:main_calendar_view")
+    return redirect_main_calendar_with_tab(request, fallback="agendas")
 
 @admin_required
 def edit_schedule(request, schedule, participant):
@@ -422,7 +446,7 @@ def edit_schedule(request, schedule, participant):
         messages.success(request, "Agenda atualizada com sucesso.")
         return redirect(reverse("schedules:main_calendar_view") + "?tab=agendas")
  
-    return redirect("schedules:main_calendar_view")
+    return redirect_main_calendar_with_tab(request, fallback="agendas")
 
 @admin_required
 @require_POST
@@ -451,7 +475,7 @@ def view_schedule(request, schedule, participant):
         ).values_list("activity_id", flat=True)
     )
  
-    return redirect("schedules:main_calendar_view")
+    return redirect_main_calendar_with_tab(request, fallback="agendas")
     
 @admin_required
 def add_participant(request, schedule, participant):
@@ -514,14 +538,12 @@ def create_activity(request, schedule, participant):
  
         if not title or not kind or not activity_type_value:
             messages.error(request, "Preencha todos os campos obrigatórios.")
-            #return redirect("schedules:create_activity", schedule_id=schedule.id)
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
  
         date_value = request.POST.get("date") or None
         if kind == Activity.Kind.EVENT and not date_value:
             messages.error(request, "Eventos precisam de uma data.")
-            #return redirect("schedules:create_activity", schedule_id=schedule.id)
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request, fallback="eventos")
  
         preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
         icon_emoji = request.POST.get("icon_emoji", "").strip() or preference.default_activity_icon_emoji
@@ -541,10 +563,11 @@ def create_activity(request, schedule, participant):
             icon_image=request.FILES.get("icon_image") or preference.default_activity_icon_image,
         )
         messages.success(request, "Atividade criada com sucesso.")
-        return redirect("schedules:main_calendar_view")
+        tab_fallback = "eventos" if kind == Activity.Kind.EVENT else "tarefas"
+        return redirect_main_calendar_with_tab(request, fallback=tab_fallback)
         # return redirect("schedules:view_schedule", schedule_id=schedule.id)
  
-    return redirect("schedules:main_calendar_view")
+    return redirect_main_calendar_with_tab(request)
     
 @login_required
 def quick_create_activity(request):
@@ -555,11 +578,11 @@ def quick_create_activity(request):
         participant = get_participant(request.user, schedule)
         if not participant:
             messages.error(request, "Você não tem acesso a essa agenda.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
  
         if not participant.is_admin:
             messages.error(request, "Você não tem permissão para criar atividades nessa agenda.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
  
         title = request.POST.get("title")
         kind = request.POST.get("kind")
@@ -567,21 +590,21 @@ def quick_create_activity(request):
  
         if not title:
             messages.error(request, "O título é obrigatório.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
  
         if not kind:
             messages.error(request, "O tipo da atividade é obrigatório.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
  
         if not activity_type_value:
             messages.error(request, "A categoria da atividade é obrigatória.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request)
  
         date_value = request.POST.get("date") or None
  
         if kind == Activity.Kind.EVENT and not date_value:
             messages.error(request, "Eventos precisam de uma data.")
-            return redirect("schedules:main_calendar_view")
+            return redirect_main_calendar_with_tab(request, fallback="eventos")
         
         notes = request.POST.get("notes", "").strip()
  
@@ -602,8 +625,10 @@ def quick_create_activity(request):
             notes=notes,
         )
         messages.success(request, "Atividade criada com sucesso.")
- 
-    return redirect("schedules:main_calendar_view")
+        tab_fallback = "eventos" if kind == Activity.Kind.EVENT else "tarefas"
+        return redirect_main_calendar_with_tab(request, fallback=tab_fallback)
+
+    return redirect_main_calendar_with_tab(request)
     
 @admin_required
 def edit_activity(request, schedule, participant, activity_id):
@@ -630,9 +655,9 @@ def edit_activity(request, schedule, participant, activity_id):
         activity.save()
         messages.success(request, "Atividade atualizada com sucesso.")
         tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
-        return redirect(reverse('schedules:main_calendar_view') + f'?tab={tab}')
+        return redirect_main_calendar_with_tab(request, fallback=tab)
  
-    return redirect("schedules:main_calendar_view")
+    return redirect_main_calendar_with_tab(request)
 
     
 @admin_required
@@ -642,13 +667,13 @@ def delete_activity(request, schedule, participant, activity_id):
         activity = Activity.objects.get(id=activity_id, schedule=schedule)
     except Activity.DoesNotExist:
         messages.error(request, "Atividade não encontrada.")
-        return redirect("schedules:main_calendar_view")
+        return redirect_main_calendar_with_tab(request)
     
     activity_kind = activity.kind
     activity.delete()
     messages.success(request, "Atividade deletada com sucesso.")
     tab = "eventos" if activity_kind == Activity.Kind.EVENT else "tarefas"
-    return redirect(reverse('schedules:main_calendar_view') + f'?tab={tab}')
+    return redirect_main_calendar_with_tab(request, fallback=tab)
 
 @participant_required
 @require_POST
@@ -668,7 +693,7 @@ def toggle_check(request, schedule, participant, activity_id):
         messages.success(request, "Atividade marcada como realizada/estudada.")
 
     tab = "eventos" if activity.kind == Activity.Kind.EVENT else "tarefas"
-    return redirect(reverse("schedules:main_calendar_view") + f"?tab={tab}")
+    return redirect_main_calendar_with_tab(request, fallback=tab)
 
 def settings_page(request):
     # Adapte com a lógica que você já tem para carregar as preferências e ícones
