@@ -4,6 +4,27 @@ const TAB_STORAGE_KEY = 'planify.activeCalendarTab';
 
 tabs.forEach(tab => tab.addEventListener('click', () => tabClicked(tab)));
 
+const updateCalendarNavLinks = () => {
+  const navBtns = document.querySelectorAll('.calendar-nav-btn');
+  navBtns.forEach(btn => {
+    try {
+      const rawHref = btn.getAttribute('href') || '';
+      const url = new URL(rawHref, window.location.origin);
+      url.searchParams.delete('tab');
+      const active = getActiveTabId();
+      if (active && active !== 'calendario') {
+        url.searchParams.set('tab', active);
+      }
+      let newHref = url.pathname + url.search + url.hash;
+      if (rawHref.startsWith('?')) {
+        newHref = url.search + url.hash;
+      }
+      btn.setAttribute('href', newHref);
+    } catch (e) {
+    }
+  });
+};
+
 const tabClicked = (tab) => {
   if (!tab) return;
 
@@ -19,9 +40,8 @@ const tabClicked = (tab) => {
     if (!content) return;
 
     content.classList.add('show');
-
-    // Keep the current tab between page reloads/navigation.
     localStorage.setItem(TAB_STORAGE_KEY, contentId);
+    updateCalendarNavLinks();
 
     if (contentId === 'agendas') {
       if (filterBtn) filterBtn.style.display = 'none';
@@ -86,3 +106,4 @@ if (!window.__planifyPatchedFormSubmit) {
   const initialTabId = getInitialTab();
   const initialTab = document.querySelector(`.tab-btn[content-id="${initialTabId}"]`) || document.querySelector('.tab-btn.active') || tabs[0];
   tabClicked(initialTab);
+  updateCalendarNavLinks();
