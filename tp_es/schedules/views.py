@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from datetime import date
+from datetime import date, datetime, time
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse
@@ -13,6 +14,7 @@ from accounts.models import UserThemePreference
 from .models import Schedule, Participant, Activity, ActivityCheck, DEFAULT_ACTIVITY_TYPE_COLORS
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
+
 
 ACTIVITY_TYPE_COLOR_KEYS = [
     Activity.Type.CLASS,
@@ -110,6 +112,41 @@ def attach_resolved_colors(activities):
     for activity in items:
         activity.resolved_color = resolve_activity_color(activity)
     return items
+
+def sync_event_checks(user, schedule_ids):
+    now = timezone.localtime()
+    today = now.date()
+
+    events = Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+        kind=Activity.Kind.EVENT,
+    )
+
+    for event in events:
+        if event.end_time:
+            dt = datetime.combine(event.date, event.end_time)
+        else:
+            dt = datetime.combine(event.date, time(23, 59))
+
+        dt = timezone.make_aware(dt)
+        is_past = dt < now
+
+        check_exists = ActivityCheck.objects.filter(
+            activity=event,
+            user=user
+        ).exists()
+
+        if is_past and not check_exists:
+            ActivityCheck.objects.create(
+                activity=event,
+                user=user
+            )
+
+        elif not is_past and check_exists:
+            ActivityCheck.objects.filter(
+                activity=event,
+                user=user
+            ).delete()
 
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
@@ -226,7 +263,6 @@ def main_calendar_view(request):
     Inclui atividades do mês, eventos futuros e tarefas pendentes na aba lateral.
     """
     today = date.today()
- 
     active_tab = resolve_main_tab(request)
 
     try:
@@ -247,6 +283,7 @@ def main_calendar_view(request):
         "schedule__participants__user"
     ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
+    sync_event_checks(request.user, schedule_ids)
     
     filter_kinds = request.GET.getlist("kind")
     filter_categories = request.GET.getlist("category")
