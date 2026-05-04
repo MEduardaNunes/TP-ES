@@ -215,13 +215,6 @@
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
                 <div class="list-card__title-with-check">
-                  <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form checkbox-form">
-                    {% csrf_token %}
-                    <label class="custom-checkbox">
-                      <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" {% if event.id in checked_ids %}checked{% endif %} />
-                      <span class="checkbox-box"></span>
-                    </label>
-                  </form>
                   <h3>
                   {% if event.icon_image %}
                     <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
@@ -307,13 +300,6 @@
 				                </div>
 
                         <div class="list-card__title-with-check">
-                          <form method="POST" action="{% url 'schedules:toggle_check' event.schedule.id event.id %}" class="inline-form checkbox-form">
-                            {% csrf_token %}
-                            <label class="custom-checkbox">
-                              <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" {% if event.id in checked_ids %}checked{% endif %} />
-                              <span class="checkbox-box"></span>
-                            </label>
-                          </form>
                           <h3>
                           {% if event.icon_image %}
                             <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />

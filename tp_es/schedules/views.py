@@ -13,6 +13,8 @@ from accounts.models import UserThemePreference
 from .models import Schedule, Participant, Activity, ActivityCheck, DEFAULT_ACTIVITY_TYPE_COLORS
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
+from django.utils import timezone
+
 
 ACTIVITY_TYPE_COLOR_KEYS = [
     Activity.Type.CLASS,
@@ -110,6 +112,34 @@ def attach_resolved_colors(activities):
     for activity in items:
         activity.resolved_color = resolve_activity_color(activity)
     return items
+
+def mark_past_events(user, schedule_ids):
+    """Marca eventos passados como concluídos para o usuário."""
+    now = timezone.localtime()
+    today = now.date()
+
+    past_events = Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+        kind=Activity.Kind.EVENT,
+    ).exclude(
+        checks__user=user
+    ).filter(
+        date__lt=today
+    ) | Activity.objects.filter(
+        schedule_id__in=schedule_ids,
+        kind=Activity.Kind.EVENT,
+        date=today,
+        end_time__lt=now.time(),
+    ).exclude(
+        checks__user=user
+    )
+
+    checks = [
+        ActivityCheck(activity=event, user=user)
+        for event in past_events
+    ]
+    ActivityCheck.objects.bulk_create(checks, ignore_conflicts=True)
+    return len(checks)
 
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
@@ -226,7 +256,6 @@ def main_calendar_view(request):
     Inclui atividades do mês, eventos futuros e tarefas pendentes na aba lateral.
     """
     today = date.today()
- 
     active_tab = resolve_main_tab(request)
 
     try:
@@ -247,6 +276,7 @@ def main_calendar_view(request):
         "schedule__participants__user"
     ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
+    mark_past_events(request.user, schedule_ids)
     
     filter_kinds = request.GET.getlist("kind")
     filter_categories = request.GET.getlist("category")
