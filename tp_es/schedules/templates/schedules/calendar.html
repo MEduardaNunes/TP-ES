@@ -212,6 +212,7 @@
               <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
                 <div class="list-card__top">
                   <span class="list-badge list-badge--activity">Evento</span>
+                  <span class="priority-card__badge">{{ event.get_priority_display }}</span>
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
                 <div class="list-card__title-with-check">
@@ -296,6 +297,7 @@
                     <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
 				                <div class="list-card__top">
                             <span class="list-badge list-badge--activity">Evento</span>
+                            <span class="priority-card__badge">{{ event.get_priority_display }}</span>
 				                    <span class="list-meta">{{ event.schedule.name }}</span>
 				                </div>
 
