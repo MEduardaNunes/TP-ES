@@ -299,21 +299,6 @@
 				                    <span class="list-meta">{{ event.schedule.name }}</span>
 				                </div>
 
-                        <div class="list-card__title-with-check">
-                          <h3>
-                          {% if event.icon_image %}
-                            <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
-                          {% elif event.icon_emoji %}
-                            <span class="activity-icon-emoji">{{ event.icon_emoji }}</span>
-                          {% elif ui_icons.default_activity_icon_image %}
-                            <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
-                          {% elif ui_icons.default_activity_icon_emoji %}
-                            <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
-                          {% endif %}
-                          {{ event.title }}
-                        </h3>
-                        </div>
-
                         <h3 class="completed">
                           {% if event.icon_image %}
                             <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
