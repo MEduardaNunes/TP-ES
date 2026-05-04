@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from datetime import date
+from datetime import date, datetime, time
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse
@@ -13,7 +14,6 @@ from accounts.models import UserThemePreference
 from .models import Schedule, Participant, Activity, ActivityCheck, DEFAULT_ACTIVITY_TYPE_COLORS
 from django.contrib.auth import logout, login
 from django.db.models import Exists, OuterRef
-from django.utils import timezone
 
 
 ACTIVITY_TYPE_COLOR_KEYS = [
@@ -113,33 +113,40 @@ def attach_resolved_colors(activities):
         activity.resolved_color = resolve_activity_color(activity)
     return items
 
-def mark_past_events(user, schedule_ids):
-    """Marca eventos passados como concluídos para o usuário."""
+def sync_event_checks(user, schedule_ids):
     now = timezone.localtime()
     today = now.date()
 
-    past_events = Activity.objects.filter(
+    events = Activity.objects.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
-    ).exclude(
-        checks__user=user
-    ).filter(
-        date__lt=today
-    ) | Activity.objects.filter(
-        schedule_id__in=schedule_ids,
-        kind=Activity.Kind.EVENT,
-        date=today,
-        end_time__lt=now.time(),
-    ).exclude(
-        checks__user=user
     )
 
-    checks = [
-        ActivityCheck(activity=event, user=user)
-        for event in past_events
-    ]
-    ActivityCheck.objects.bulk_create(checks, ignore_conflicts=True)
-    return len(checks)
+    for event in events:
+        if event.end_time:
+            dt = datetime.combine(event.date, event.end_time)
+        else:
+            dt = datetime.combine(event.date, time(23, 59))
+
+        dt = timezone.make_aware(dt)
+        is_past = dt < now
+
+        check_exists = ActivityCheck.objects.filter(
+            activity=event,
+            user=user
+        ).exists()
+
+        if is_past and not check_exists:
+            ActivityCheck.objects.create(
+                activity=event,
+                user=user
+            )
+
+        elif not is_past and check_exists:
+            ActivityCheck.objects.filter(
+                activity=event,
+                user=user
+            ).delete()
 
 def sync_schedule_members(schedule, selected_usernames):
     """Mantém os membros da agenda sincronizados com os nomes enviados pelo formulário."""
@@ -276,7 +283,7 @@ def main_calendar_view(request):
         "schedule__participants__user"
     ).all()
     schedule_ids = participations.values_list("schedule_id", flat=True)
-    mark_past_events(request.user, schedule_ids)
+    sync_event_checks(request.user, schedule_ids)
     
     filter_kinds = request.GET.getlist("kind")
     filter_categories = request.GET.getlist("category")
