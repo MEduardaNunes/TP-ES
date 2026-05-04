@@ -1505,6 +1505,12 @@ body.schedule-page .list-card h3 {
   color: #1e293b;
   font-size: 1.25rem;
   line-height: 1.3;
+
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 body.schedule-page .list-card p {
@@ -2207,11 +2213,23 @@ body.schedule-page .list-card__title-with-check {
 body.schedule-page .list-card__title-with-check h3 {
   margin: 0;
   flex: 1;
+
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 body.schedule-page .list-card__title-with-check h3.completed {
   text-decoration: line-through;
   color: #94a3b8;
+
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 body.schedule-page .custom-checkbox {
