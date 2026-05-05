@@ -104,16 +104,15 @@
   </nav>
 
   <main>
-    <div id="ui-alert" class="ui-alert hidden"></div>
-
-    {% if messages %}
-      {% for message in messages %}
-        <div class="toast {{ message.tags }}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-
+    <div id="toast-container" class="toast-container">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast {{ message.tags }} show">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
 
     <div class="tabs-header">
       <div class="tabs-topbar">
@@ -1340,6 +1339,11 @@
       const activeTab = document.querySelector('.tab-btn.active');
       const contentId = activeTab.getAttribute('content-id');
 
+      if (contentId !== 'agendas' && !window.hasAdminSchedules) {
+        showAlert('Você não é administrador de nenhuma agenda.', 'warning');
+        return;
+      }
+
       if (contentId === 'agendas') {
         openAgendaModal();
       } else if (contentId === 'eventos') {
@@ -1933,63 +1937,64 @@
 
       <h3 class="modal-title">Filtrar atividades</h3>
 
-      <form method="GET">
+      <form method="GET" class="filter-form">
         <input type="hidden" name="mes" value="{{ month }}">
         <input type="hidden" name="ano" value="{{ year }}">
 
         <div class="form-group">
           <label>Tipo</label>
+          <div class="filter-options-group">
+            <label class="filter-option">
+              <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
+              <span>Eventos</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
-            <span>Eventos</span>
-          </label>
-
-          <label class="filter-option">
-            <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
-            <span>Tarefas</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
+              <span>Tarefas</span>
+            </label>
+          </div>
         </div>
-
 
         <div class="form-group">
           <label>Categorias</label>
+          <div class="filter-options-group">
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
+              <span>Aula</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
-            <span>Aula</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
+              <span>Prova</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
-            <span>Prova</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
+              <span>Trabalho</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
-            <span>Trabalho</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
+              <span>Estudo</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
-            <span>Estudo</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
+              <span>Reunião</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
-            <span>Reuni&atilde;o</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
+              <span>Apresentação</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
-            <span>Apresenta&ccedil;&atilde;o</span>
-          </label>
-
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
-            <span>Pessoal</span>
-          </label>
-        </div>  
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
+              <span>Pessoal</span>
+            </label>
+          </div>
+        </div>
 
         <div class="modal-actions">
           <button type="submit" class="btn-primary">Aplicar</button>
@@ -2001,10 +2006,12 @@
 <script>
   function openFilterModal() {
     document.getElementById('filter-modal').classList.remove('hidden');
+    setModalLock(true);
   }
 
   function closeFilterModal() {
     document.getElementById('filter-modal').classList.add('hidden');
+    setModalLock(false);
   }
 </script>
 </body>
