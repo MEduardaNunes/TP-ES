@@ -112,7 +112,7 @@
 
     <section class="container profile-theme">
       <h2>Personalização da Interface</h2>
-      <form method="post" action="{% url 'accounts:update_preferences' %}" enctype="multipart/form-data">
+      <form method="post" action="{% url 'schedules:preferences:update_preferences' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="theme-grid">
@@ -189,7 +189,7 @@
 
         <div class="form-actions">
           
-          <button type="submit" class="button-danger" formaction="{% url 'accounts:reset_preferences' %}" formnovalidate>
+          <button type="submit" class="button-danger" formaction="{% url 'schedules:preferences:reset_preferences' %}" formnovalidate>
             Restaurar padrão do sistema
           </button>
 

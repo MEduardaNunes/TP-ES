@@ -7,12 +7,15 @@ urlpatterns = [
     path('', views.login_page, name='login_page'),
     path('user/', views.user_space, name='user_space'),
     path('settings/', views.settings_page, name='settings_page'),
-    path('user/preferences/', views.update_preferences, name='update_preferences'),
-    path('reset-preferences/', views.reset_preferences, name='reset_preferences'),
     path('sign-up/', views.sign_up, name='sign_up'),
     path('register/', views.register, name='register'),
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
     path('edit-user/', views.edit_user, name='edit_user'),
     path('delete-user/', views.delete_user, name='delete_user'),
+]
+
+preferences_patterns = [
+    path('', views.update_preferences, name='update_preferences'),
+    path('reset/', views.reset_preferences, name='reset_preferences'),
 ]
