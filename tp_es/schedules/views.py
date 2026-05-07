@@ -307,7 +307,8 @@ def main_calendar_view(request):
     user_checks = ActivityCheck.objects.filter(
     activity_id=OuterRef("pk"),
     user=request.user
-)
+    )
+
  
     activities = Activity.objects.filter(
         schedule_id__in=schedule_ids,
@@ -337,7 +338,7 @@ def main_calendar_view(request):
             activities_by_day.setdefault(day, []).append(activity)
  
     # Atividades futuras ou não concluídas para a aba lateral
-    future_events = attach_resolved_colors(Activity.objects.filter(
+    future_events = attach_resolved_colors(activities.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         date__gte=today,
@@ -345,13 +346,13 @@ def main_calendar_view(request):
         checks__user=request.user
     ).select_related("schedule").order_by("date", "start_time"))
 
-    completed_events = attach_resolved_colors(Activity.objects.filter(
+    completed_events = attach_resolved_colors(activities.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.EVENT,
         checks__user=request.user,
     ).select_related("schedule").order_by("date", "start_time"))
  
-    pending_tasks_base = Activity.objects.filter(
+    pending_tasks_base = activities.filter(
         schedule_id__in=schedule_ids,
         kind=Activity.Kind.TASK,
     ).exclude(
@@ -363,7 +364,7 @@ def main_calendar_view(request):
     )
 
     # Matrix shows all unchecked activities (events + tasks) organized by priority
-    all_pending_activities = Activity.objects.filter(
+    all_pending_activities = activities.filter(
         schedule_id__in=schedule_ids,
     ).exclude(
         checks__user=request.user
@@ -389,8 +390,7 @@ def main_calendar_view(request):
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
     
-    completed_tasks = attach_resolved_colors(Activity.objects.filter(
-        schedule_id__in=schedule_ids,
+    completed_tasks = attach_resolved_colors(activities.filter(
         kind=Activity.Kind.TASK,
         checks__user=request.user,
     ).select_related("schedule").order_by("date"))
