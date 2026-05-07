@@ -2431,3 +2431,7 @@ body.schedule-page .filter-option:hover {
   padding-left: 6px;
   padding-right: 6px;
 }
+
+.filter-label {
+  color: #1c2229, !important;
+}

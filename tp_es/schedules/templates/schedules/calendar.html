@@ -1937,7 +1937,7 @@
         <input type="hidden" name="ano" value="{{ year }}">
 
         <div class="form-group">
-          <label>Tipo</label>
+          <p class="filter-label">Tipo</p>
           <div class="filter-options-group">
             <label class="filter-option">
               <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
@@ -1952,7 +1952,7 @@
         </div>
 
         <div class="form-group">
-          <label>Categorias</label>
+          <p class="filter-label">Categorias</p>
           <div class="filter-options-group">
             <label class="filter-option">
               <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
