@@ -104,16 +104,15 @@
   </nav>
 
   <main>
-    <div id="ui-alert" class="ui-alert hidden"></div>
-
-    {% if messages %}
-      {% for message in messages %}
-        <div class="toast {{ message.tags }}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-
+    <div id="toast-container" class="toast-container">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast {{ message.tags }} show">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
 
     <div class="tabs-header">
       <div class="tabs-topbar">
@@ -593,6 +592,7 @@
                       </div>
 
                       <div class="list-card__title-with-check">
+                        {% if task.kind == 'task' %}
                         <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
                           {% csrf_token %}
                           <label class="custom-checkbox">
@@ -600,19 +600,21 @@
                             <span class="checkbox-box"></span>
                           </label>
                         </form>
-                        <h3>
-                        {% if task.icon_image %}
-                          <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
-                        {% elif task.icon_emoji %}
-                          <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
-                        {% elif ui_icons.default_activity_icon_image %}
-                          <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
-                        {% elif ui_icons.default_activity_icon_emoji %}
-                          <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
                         {% endif %}
-                        {{ task.title }}
-                      </h3>
+                        <h3>
+                          {% if task.icon_image %}
+                            <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif task.icon_emoji %}
+                            <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                          {% elif ui_icons.default_activity_icon_image %}
+                            <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif ui_icons.default_activity_icon_emoji %}
+                            <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                          {% endif %}
+                          {{ task.title }}
+                        </h3>
                       </div>
+
                       <div class="priority-card__footer">
                         <p>
                           {{ task.schedule.name }}
@@ -943,12 +945,12 @@
 
           <div id="edit-time-fields" class="form-row">
             <div class="form-group">
-              <label>In&iacute;cio*</label>
+              <label>In&iacute;cio</label>
               <input type="time" name="start_time" id="edit-start-time">
             </div>
 
             <div class="form-group">
-              <label>Fim*</label>
+              <label>Fim</label>
               <input type="time" name="end_time" id="edit-end-time" >
             </div>
           </div>
@@ -1087,10 +1089,6 @@
           <label>Cor</label>
           <div class="color-picker-row">
             <input type="color" name="color" id="schedule-color-input" value="#59e7ec">
-            <div class="color-preview-chip">
-              <span class="schedule-color-dot" id="schedule-color-preview" aria-hidden="true"></span>
-              <span id="schedule-color-value">#59e7ec</span>
-            </div>
           </div>
         </div>
 
@@ -1168,10 +1166,6 @@
           <label>Cor</label>
           <div class="color-picker-row">
             <input type="color" name="color" id="edit-schedule-color-input" value="#59e7ec">
-            <div class="color-preview-chip">
-              <span class="schedule-color-dot" id="edit-schedule-color-preview" aria-hidden="true"></span>
-              <span id="edit-schedule-color-value">#59e7ec</span>
-            </div>
           </div>
         </div>
 
@@ -1339,6 +1333,11 @@
     function openNewModal() {
       const activeTab = document.querySelector('.tab-btn.active');
       const contentId = activeTab.getAttribute('content-id');
+
+      if (contentId !== 'agendas' && !window.hasAdminSchedules) {
+        showAlert('Você não é administrador de nenhuma agenda.', 'warning');
+        return;
+      }
 
       if (contentId === 'agendas') {
         openAgendaModal();
@@ -1933,63 +1932,64 @@
 
       <h3 class="modal-title">Filtrar atividades</h3>
 
-      <form method="GET">
+      <form method="GET" class="filter-form">
         <input type="hidden" name="mes" value="{{ month }}">
         <input type="hidden" name="ano" value="{{ year }}">
 
         <div class="form-group">
-          <label>Tipo</label>
+          <p class="filter-label">Tipo</p>
+          <div class="filter-options-group">
+            <label class="filter-option">
+              <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
+              <span>Eventos</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
-            <span>Eventos</span>
-          </label>
-
-          <label class="filter-option">
-            <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
-            <span>Tarefas</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
+              <span>Tarefas</span>
+            </label>
+          </div>
         </div>
 
-
         <div class="form-group">
-          <label>Categorias</label>
+          <p class="filter-label">Categorias</p>
+          <div class="filter-options-group">
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
+              <span>Aula</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
-            <span>Aula</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
+              <span>Prova</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
-            <span>Prova</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
+              <span>Trabalho</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
-            <span>Trabalho</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
+              <span>Estudo</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
-            <span>Estudo</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
+              <span>Reunião</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
-            <span>Reuni&atilde;o</span>
-          </label>
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
+              <span>Apresentação</span>
+            </label>
 
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
-            <span>Apresenta&ccedil;&atilde;o</span>
-          </label>
-
-          <label class="filter-option">
-            <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
-            <span>Pessoal</span>
-          </label>
-        </div>  
+            <label class="filter-option">
+              <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
+              <span>Pessoal</span>
+            </label>
+          </div>
+        </div>
 
         <div class="modal-actions">
           <button type="submit" class="btn-primary">Aplicar</button>
@@ -2001,10 +2001,12 @@
 <script>
   function openFilterModal() {
     document.getElementById('filter-modal').classList.remove('hidden');
+    setModalLock(true);
   }
 
   function closeFilterModal() {
     document.getElementById('filter-modal').classList.add('hidden');
+    setModalLock(false);
   }
 </script>
 </body>

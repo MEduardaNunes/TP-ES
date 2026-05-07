@@ -329,16 +329,29 @@ function setupDayClick() {
     });
 }
 
-function showAlert(message) {
-    const alertBox = document.getElementById("ui-alert");
-    if (!alertBox) return;
+function createToast(message, type = 'warning') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
 
-    alertBox.textContent = message;
-    alertBox.classList.remove("hidden");
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.textContent = message;
+
+    container.appendChild(toast);
+    window.requestAnimationFrame(() => toast.classList.add('show'));
 
     setTimeout(() => {
-        alertBox.classList.add("hidden");
-    }, 3000);
+        toast.classList.remove('show');
+        toast.addEventListener('transitionend', () => {
+            toast.remove();
+        }, { once: true });
+    }, 3200);
+}
+
+function showAlert(message, type = 'warning') {
+    createToast(message, type);
 }
 
 
