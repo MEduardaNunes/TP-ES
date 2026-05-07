@@ -592,6 +592,7 @@
                       </div>
 
                       <div class="list-card__title-with-check">
+                        {% if task.kind == 'task' %}
                         <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
                           {% csrf_token %}
                           <label class="custom-checkbox">
@@ -599,19 +600,21 @@
                             <span class="checkbox-box"></span>
                           </label>
                         </form>
-                        <h3>
-                        {% if task.icon_image %}
-                          <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
-                        {% elif task.icon_emoji %}
-                          <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
-                        {% elif ui_icons.default_activity_icon_image %}
-                          <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
-                        {% elif ui_icons.default_activity_icon_emoji %}
-                          <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
                         {% endif %}
-                        {{ task.title }}
-                      </h3>
+                        <h3>
+                          {% if task.icon_image %}
+                            <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif task.icon_emoji %}
+                            <span class="activity-icon-emoji">{{ task.icon_emoji }}</span>
+                          {% elif ui_icons.default_activity_icon_image %}
+                            <img src="{{ ui_icons.default_activity_icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
+                          {% elif ui_icons.default_activity_icon_emoji %}
+                            <span class="activity-icon-emoji">{{ ui_icons.default_activity_icon_emoji }}</span>
+                          {% endif %}
+                          {{ task.title }}
+                        </h3>
                       </div>
+
                       <div class="priority-card__footer">
                         <p>
                           {{ task.schedule.name }}
