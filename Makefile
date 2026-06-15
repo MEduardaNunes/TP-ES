@@ -10,3 +10,13 @@ run:
 
 clean: 
 	rm -rf venv
+
+
+.PHONY: run_tests coverage
+
+run_tests:
+	python tp_es/manage.py test accounts
+
+coverage:
+	coverage run --source='.' tp_es/manage.py test accounts
+	coverage report
