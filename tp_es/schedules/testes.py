@@ -46,6 +46,45 @@ class ScheduleViewsTests(TestCase):
             role=Participant.Role.MEMBER,
         )
 
+    def _login_admin(self):
+        self.client.force_login(self.admin_user)
+
+    def _login_member(self):
+        self.client.force_login(self.member_user)
+
+    def _login_external(self):
+        self.client.force_login(self.external_user)
+
+    def _assert_message(self, response, text):
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any(text in str(m) for m in messages), f"expected message containing: {text}")
+
+    # small factory helpers to reduce repetition
+    def _create_schedule(self, **kwargs):
+        data = {
+            "name": "Agenda Helper",
+            "description": "desc",
+            "color": "#abcdef",
+        }
+        data.update(kwargs)
+        return Schedule.objects.create(**data)
+
+    def _create_participant(self, schedule, user, role=Participant.Role.MEMBER):
+        return Participant.objects.create(schedule=schedule, user=user, role=role)
+
+    def _create_activity(self, schedule=None, **kwargs):
+        if schedule is None:
+            schedule = self.schedule
+        data = {
+            "schedule": schedule,
+            "title": "Atividade Helper",
+            "kind": "task",
+            "activity_type": "study",
+            "date": date.today(),
+        }
+        data.update(kwargs)
+        return Activity.objects.create(**data)
+
     # main_calendar_view
 
     def test_main_calendar_view_renders_for_authenticated_user(self):
@@ -62,7 +101,8 @@ class ScheduleViewsTests(TestCase):
             reverse("schedules:main_calendar_view")
         )
 
-        self.assertEqual(response.status_code, 302)
+        login_url = reverse("accounts:login_page")
+        self.assertRedirects(response, login_url + "?next=" + reverse("schedules:main_calendar_view"))
 
     # create_schedule
 
@@ -160,16 +200,11 @@ class ScheduleViewsTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
-
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertTrue(
-            any(
-                "Você não tem permissão para isso." in str(message)
-                for message in messages
-            )
+        self.assertRedirects(
+            response,
+            reverse("schedules:main_calendar_view") + "?tab=calendario",
         )
+        self._assert_message(response, "Você não tem permissão para isso.")
 
         self.schedule.refresh_from_db()
 
@@ -211,16 +246,11 @@ class ScheduleViewsTests(TestCase):
             )
         )
 
-        self.assertEqual(response.status_code, 302)
-
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertTrue(
-            any(
-                "Você não tem permissão para isso." in str(message)
-                for message in messages
-            )
+        self.assertRedirects(
+            response,
+            reverse("schedules:main_calendar_view") + "?tab=calendario",
         )
+        self._assert_message(response, "Você não tem permissão para isso.")
 
         self.assertTrue(
             Schedule.objects.filter(
@@ -243,14 +273,10 @@ class ScheduleViewsTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
-
-        self.assertEqual(
-            response.url,
-            reverse(
-                "schedules:view_schedule",
-                args=[self.schedule.id],
-            ),
+        self.assertRedirects(
+            response,
+            reverse("schedules:view_schedule", args=[self.schedule.id]),
+            fetch_redirect_response=False,
         )
 
         self.assertTrue(
@@ -272,15 +298,7 @@ class ScheduleViewsTests(TestCase):
                 "username": "inexistente",
             },
         )
-
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertTrue(
-            any(
-                "Usuário não encontrado." in str(message)
-                for message in messages
-            )
-        )
+        self._assert_message(response, "Usuário não encontrado.")
 
     def test_add_participant_rejects_duplicate_user(self):
         self.client.force_login(self.admin_user)
@@ -294,15 +312,7 @@ class ScheduleViewsTests(TestCase):
                 "username": "member",
             },
         )
-
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertTrue(
-            any(
-                "Usuário já é participante." in str(message)
-                for message in messages
-            )
-        )
+        self._assert_message(response, "Usuário já é participante.")
 
     # remove_participant
 
@@ -319,14 +329,10 @@ class ScheduleViewsTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
-
-        self.assertEqual(
-            response.url,
-            reverse(
-                "schedules:view_schedule",
-                args=[self.schedule.id],
-            ),
+        self.assertRedirects(
+            response,
+            reverse("schedules:view_schedule", args=[self.schedule.id]),
+            fetch_redirect_response=False,
         )
 
         self.assertFalse(
@@ -349,14 +355,7 @@ class ScheduleViewsTests(TestCase):
             },
         )
 
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertTrue(
-            any(
-                "Não é possível remover um administrador." in str(message)
-                for message in messages
-            )
-        )
+        self._assert_message(response, "Não é possível remover um administrador.")
 
         self.assertTrue(
             Participant.objects.filter(
@@ -399,14 +398,7 @@ class ScheduleViewsTests(TestCase):
             )
         )
 
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertTrue(
-            any(
-                "Administradores não podem sair da agenda" in str(message)
-                for message in messages
-            )
-        )
+        self._assert_message(response, "Administradores não podem sair da agenda")
 
         self.assertTrue(
             Participant.objects.filter(
@@ -420,7 +412,8 @@ class ScheduleViewsTests(TestCase):
             reverse("schedules:validate_participant_username")
         )
 
-        self.assertEqual(response.status_code, 302)
+        login_url = reverse("accounts:login_page")
+        self.assertRedirects(response, login_url + "?next=" + reverse("schedules:validate_participant_username"))
 
     def test_validate_participant_username_rejects_empty_username(self):
         self.client.force_login(self.admin_user)
@@ -847,14 +840,11 @@ class ScheduleViewsTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertTrue(
-            any(
-                "Você não tem permissão para isso." in str(message)
-                for message in messages
-            )
+        self.assertRedirects(
+            response,
+            reverse("schedules:main_calendar_view") + "?tab=calendario",
         )
+        self._assert_message(response, "Você não tem permissão para isso.")
 
     def test_quick_create_activity_rejects_non_participant(self):
         self.client.force_login(self.external_user)
@@ -989,14 +979,11 @@ class ScheduleViewsTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertTrue(
-            any(
-                "Você não tem permissão para isso." in str(message)
-                for message in messages
-            )
+        self.assertRedirects(
+            response,
+            reverse("schedules:main_calendar_view") + "?tab=calendario",
         )
+        self._assert_message(response, "Você não tem permissão para isso.")
 
     def test_delete_activity_deletes_activity(self):
         self.client.force_login(self.admin_user)
@@ -1040,13 +1027,7 @@ class ScheduleViewsTests(TestCase):
             reverse("schedules:main_calendar_view") + "?tab=calendario",
         )
 
-        messages = list(get_messages(response.wsgi_request))
-        self.assertTrue(
-            any(
-                "Atividade não encontrada." in str(message)
-                for message in messages
-            )
-        )
+        self._assert_message(response, "Atividade não encontrada.")
 
     def test_quick_create_activity_get_redirects_to_calendario(self):
         self.client.force_login(self.admin_user)
@@ -1167,8 +1148,8 @@ class ScheduleViewsTests(TestCase):
 
         self.assertTrue(hasattr(activities[0], "resolved_color"))
 
-    def test_toggle_check_marks_and_unmarks_activity(self):
-        self.client.force_login(self.member_user)
+    def test_toggle_check_marks_activity(self):
+        self._login_member()
 
         activity = Activity.objects.create(
             schedule=self.schedule,
@@ -1179,10 +1160,7 @@ class ScheduleViewsTests(TestCase):
         )
 
         response = self.client.post(
-            reverse(
-                "schedules:toggle_check",
-                args=[self.schedule.id, activity.id],
-            )
+            reverse("schedules:toggle_check", args=[self.schedule.id, activity.id])
         )
 
         self.assertRedirects(
@@ -1191,17 +1169,24 @@ class ScheduleViewsTests(TestCase):
         )
 
         self.assertTrue(
-            ActivityCheck.objects.filter(
-                activity=activity,
-                user=self.member_user,
-            ).exists()
+            ActivityCheck.objects.filter(activity=activity, user=self.member_user).exists()
         )
 
+    def test_toggle_check_unmarks_activity(self):
+        self._login_member()
+
+        activity = Activity.objects.create(
+            schedule=self.schedule,
+            title="Tarefa a ser desmarcada",
+            kind="task",
+            activity_type="study",
+            date="2026-06-20",
+        )
+
+        ActivityCheck.objects.create(activity=activity, user=self.member_user)
+
         response = self.client.post(
-            reverse(
-                "schedules:toggle_check",
-                args=[self.schedule.id, activity.id],
-            )
+            reverse("schedules:toggle_check", args=[self.schedule.id, activity.id])
         )
 
         self.assertRedirects(
@@ -1210,10 +1195,7 @@ class ScheduleViewsTests(TestCase):
         )
 
         self.assertFalse(
-            ActivityCheck.objects.filter(
-                activity=activity,
-                user=self.member_user,
-            ).exists()
+            ActivityCheck.objects.filter(activity=activity, user=self.member_user).exists()
         )
 
     def test_toggle_check_rejects_non_participant(self):
