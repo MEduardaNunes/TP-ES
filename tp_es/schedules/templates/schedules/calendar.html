@@ -76,7 +76,7 @@
       <li class="logout-item">
         <form action="{% url 'schedules:logout' %}" method="post" class="logout-form">
           {% csrf_token %}
-          <button type="submit" class="logout-btn">
+          <button type="submit" class="logout-btn" data-cy="btn-logout">
             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
               <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
             </svg>
@@ -117,29 +117,29 @@
     <div class="tabs-header">
       <div class="tabs-topbar">
         <div class="tab-buttons">
-          <button class="tab-btn {% if active_tab == 'calendario' %}active{% endif %}" content-id="calendario">
+          <button class="tab-btn {% if active_tab == 'calendario' %}active{% endif %}" content-id="calendario" data-cy="tab-calendario">
             Calend&aacute;rio
           </button>
 
-          <button class="tab-btn {% if active_tab == 'eventos' %}active{% endif %}" content-id="eventos">
+          <button class="tab-btn {% if active_tab == 'eventos' %}active{% endif %}" content-id="eventos" data-cy="tab-eventos">
             Eventos
           </button>
 
-          <button class="tab-btn {% if active_tab == 'tarefas' %}active{% endif %}" content-id="tarefas">
+          <button class="tab-btn {% if active_tab == 'tarefas' %}active{% endif %}" content-id="tarefas" data-cy="tab-tarefas">
             Tarefas
           </button>
 
-          <button class="tab-btn {% if active_tab == 'matriz' %}active{% endif %}" content-id="matriz">
+          <button class="tab-btn {% if active_tab == 'matriz' %}active{% endif %}" content-id="matriz" data-cy="tab-matriz">
             Matriz
           </button>
 
-          <button class="tab-btn {% if active_tab == 'agendas' %}active{% endif %}" content-id="agendas">
+          <button class="tab-btn {% if active_tab == 'agendas' %}active{% endif %}" content-id="agendas" data-cy="tab-agendas">
             Agendas
           </button>
         </div>
 
         <div class="tab-actions">
-          <button class="action-btn action-btn--primary" id="new-btn">
+          <button class="action-btn action-btn--primary" id="new-btn" data-cy="btn-novo">
             <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px">
               <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
             </svg>
@@ -159,15 +159,15 @@
         <div class="content {% if active_tab == 'calendario' %}show{% endif %}" id="calendario">
           <div class="calendar-header">
             <div class="calendar-left">
-              <h2>{{ month_name }} {{ year }}</h2>
-              <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn">
+              <h2 data-cy="titulo-mes-atual">{{ month_name }} {{ year }}</h2>
+              <a href="?mes={{ prev_month }}&ano={{ prev_year }}" class="calendar-nav-btn" data-cy="btn-mes-anterior">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </a>
 
-              <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn">
+              <a href="?mes={{ next_month }}&ano={{ next_year }}" class="calendar-nav-btn" data-cy="btn-mes-proximo">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="9 18 15 12 9 6"></polyline>
@@ -186,7 +186,7 @@
             <div>S&Aacute;B</div>
           </div>
 
-          <div class="calendar-grid" id="calendar-grid"></div>
+          <div class="calendar-grid" id="calendar-grid" data-cy="grid-calendario"></div>
         </div>
 
         <div class="content {% if active_tab == 'eventos' %}show{% endif %}" id="eventos">
@@ -194,10 +194,10 @@
             <div>
               <h1>Eventos futuros</h1>
               <div class="subtabs">
-               <button type="button" class="subtab-btn active" onclick="showSubtab('eventos-futuros', this)">
+               <button type="button" class="subtab-btn active" onclick="showSubtab('eventos-futuros', this)" data-cy="subtab-eventos-futuros">
                 Futuros
                </button>
-               <button type="button" class="subtab-btn" onclick="showSubtab('eventos-concluidos', this)">
+               <button type="button" class="subtab-btn" onclick="showSubtab('eventos-concluidos', this)" data-cy="subtab-eventos-concluidos">
                Concluí­dos
                </button>
               </div>
@@ -206,16 +206,16 @@
 
 
         <div id="eventos-futuros" class="subtab-content">
-          <div class="events-list">
+          <div class="events-list" data-cy="lista-eventos-futuros">
             {% for event in future_events %}
-              <article class="list-card list-card--activity" style="--activity-color: {{ event.resolved_color }};">
+              <article class="list-card list-card--activity" data-cy="item-evento" style="--activity-color: {{ event.resolved_color }};">
                 <div class="list-card__top">
                   <span class="list-badge list-badge--activity">Evento</span>
                   <span class="priority-card__badge">{{ event.get_priority_display }}</span>
                   <span class="list-meta">{{ event.schedule.name }}</span>
                 </div>
                 <div class="list-card__title-with-check">
-                  <h3>
+                  <h3 data-cy="titulo-evento">
                   {% if event.icon_image %}
                     <img src="{{ event.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
                   {% elif event.icon_emoji %}
@@ -238,6 +238,7 @@
                   <button
                     type="button"
                     class="text-link"
+                    data-cy="btn-deletar-evento"
                     onclick="openActivityDetailsModal(event, {
                       schedule_id: {{ event.schedule.id }},
                       schedule_name: '{{ event.schedule.name|escapejs }}',
@@ -276,7 +277,7 @@
                     </button>
                     <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" class="inline-form">
                       {% csrf_token %}
-                      <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
+                      <button type="submit" class="text-link text-link--danger" data-cy="btn-deletar-evento" onclick="return confirm('Tem certeza que deseja deletar este evento?')">Deletar</button>
                     </form>
                   {% endif %}
                 </div>
@@ -355,7 +356,7 @@
 
 				                <form method="post" action="{% url 'schedules:delete_activity' event.schedule.id event.id %}" class="inline-form">
 				                 {% csrf_token %}
-				                 <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar este evento?')">
+				                 <button type="submit" class="text-link text-link--danger" data-cy="btn-deletar-evento" onclick="return confirm('Tem certeza que deseja deletar este evento?')">
 				                 Deletar
 				              </button>
 				             </form>
@@ -378,11 +379,11 @@
              <h1>Tarefas</h1>
 
             <div class="subtabs">
-             <button type="button" class="subtab-btn active" onclick="showSubtab('tarefas-pendentes', this)">
+             <button type="button" class="subtab-btn active" onclick="showSubtab('tarefas-pendentes', this)" data-cy="subtab-tarefas-pendentes">
                Pendentes
              </button>
 
-            <button type="button" class="subtab-btn" onclick="showSubtab('tarefas-concluidas', this)">
+            <button type="button" class="subtab-btn" onclick="showSubtab('tarefas-concluidas', this)" data-cy="subtab-tarefas-concluidas">
                Concluí­das
             </button>
            </div>
@@ -390,9 +391,9 @@
           </div>
 
 				<div id="tarefas-pendentes" class="subtab-content">
-				  <div class="tasks-list">
+				  <div class="tasks-list" data-cy="lista-tarefas-pendentes">
 				    {% for task in pending_tasks %}
-              <article class="list-card list-card--activity" style="--activity-color: {{ task.resolved_color }};">
+              <article class="list-card list-card--activity" data-cy="item-tarefa" style="--activity-color: {{ task.resolved_color }};">
 				        <div class="list-card__top">
                   <span class="list-badge list-badge--task list-badge--activity">Tarefa</span>
                   <span class="priority-card__badge">{{ task.get_priority_display }}</span>
@@ -403,11 +404,11 @@
 				          <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
 				            {% csrf_token %}
 				            <label class="custom-checkbox">
-				              <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" />
+				              <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" data-cy="checkbox-tarefa" />
 				              <span class="checkbox-box"></span>
 				            </label>
 				          </form>
-  			          <h3>
+  			          <h3 data-cy="titulo-evento">
                     {% if task.icon_image %}
                       <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
                     {% elif task.icon_emoji %}
@@ -768,13 +769,13 @@
 
       <h3 class="modal-title">Nova atividade</h3>
 
-      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}" enctype="multipart/form-data">
+      <form method="POST" id="activity-form" action="{% url 'schedules:quick_create_activity' %}" data-cy="form-nova-atividade" enctype="multipart/form-data">
         {% csrf_token %}
 
         {% if admin_participations %}
           <div class="form-group">
             <label>Agenda*</label>
-              <select name="schedule_id" id="schedule-select" required>
+              <select name="schedule_id" id="schedule-select" required data-cy="select-agenda">
                 {% for p in admin_participations %}
                   <option value="{{ p.schedule.id }}">
                     {{ p.schedule.name }}
@@ -785,13 +786,13 @@
 
           <div class="form-group">
             <label>T&iacute;tulo*</label>
-            <input type="text" name="title" placeholder="Ex: Prova de C&aacute;lculo" required>
+            <input type="text" name="title" placeholder="Ex: Prova de C&aacute;lculo" required data-cy="input-titulo-atividade">
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>Tipo*</label>
-              <select name="kind" id="kind-select">
+              <select name="kind" id="kind-select" data-cy="select-tipo">
                 <option value="event">Evento</option>
                 <option value="task">Tarefa</option>
               </select>
@@ -799,7 +800,7 @@
 
             <div class="form-group">
               <label>Categoria*</label>
-              <select name="activity_type" required>
+              <select name="activity_type" required data-cy="select-categoria">
                 <option value="class">Aula</option>
                 <option value="exam">Prova</option>
                 <option value="assignment">Trabalho</option>
@@ -824,24 +825,24 @@
 
           <div id="date-field" class="form-group">
             <label>Data*</label>
-            <input type="date" name="date" id="date-input" required>
+            <input type="date" name="date" id="date-input" required data-cy="input-date">
           </div>
 
           <div id="time-fields" class="form-row">
             <div class="form-group">
               <label>In&iacute;cio*</label>
-              <input type="time" name="start_time">
+              <input type="time" name="start_time" data-cy="input-start-time">
             </div>
 
             <div class="form-group">
               <label>Fim*</label>
-              <input type="time" name="end_time">
+              <input type="time" name="end_time" data-cy="input-end-time">
             </div>
           </div>
 
           <div id="notes" class="form-group">
             <label>Notas adicionais</label>
-            <textarea name="notes" rows="3" placeholder="Ex: Levar c&aacute;lculo, f&oacute;rmulas e caneta azul para a prova"></textarea>
+            <textarea name="notes" rows="3" placeholder="Ex: Levar c&aacute;lculo, f&oacute;rmulas e caneta azul para a prova" data-cy="input-notas"></textarea>
           </div>
 
           <div class="form-group">
@@ -856,7 +857,7 @@
               Cancelar
             </button>
 
-            <button type="submit" class="btn-primary" {% if not admin_participations %}disabled{% endif %}>
+            <button type="submit" class="btn-primary" {% if not admin_participations %}disabled{% endif %} data-cy="btn-salvar-atividade">
               Salvar
             </button>
           </div>
@@ -884,7 +885,7 @@
 
       <h3 class="modal-title">Editar atividade</h3>
 
-      <form method="POST" id="edit-activity-form" enctype="multipart/form-data">
+      <form method="POST" id="edit-activity-form" enctype="multipart/form-data" data-cy="form-editar-atividade">
         {% csrf_token %}
         
         {% if admin_participations %}
@@ -901,13 +902,13 @@
 
           <div class="form-group">
             <label>T&iacute;tulo*</label>
-            <input type="text" name="title" id="edit-title" placeholder="Ex: Prova de C&aacute;lculo" required>
+            <input type="text" name="title" id="edit-title" placeholder="Ex: Prova de C&aacute;lculo" required data-cy="input-editar-titulo-atividade">
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>Tipo*</label>
-              <select name="kind" id="edit-kind-select">
+              <select name="kind" id="edit-kind-select" data-cy="select-editar-tipo-atividade">
                 <option value="event">Evento</option>
                 <option value="task">Tarefa</option>
               </select>
@@ -915,7 +916,7 @@
 
             <div class="form-group">
               <label>Categoria*</label>
-              <select name="activity_type" id="edit-activity-type" required>
+              <select name="activity_type" id="edit-activity-type" required data-cy="select-editar-categoria-atividade">
                 <option value="class">Aula</option>
                 <option value="exam">Prova</option>
                 <option value="assignment">Trabalho</option>
@@ -940,18 +941,18 @@
 
           <div id="edit-date-field" class="form-group">
             <label>Data*</label>
-            <input type="date" name="date" id="edit-date-input" required>
+            <input type="date" name="date" id="edit-date-input" required data-cy="input-editar-data-atividade">
           </div>
 
           <div id="edit-time-fields" class="form-row">
             <div class="form-group">
               <label>In&iacute;cio</label>
-              <input type="time" name="start_time" id="edit-start-time">
+              <input type="time" name="start_time" id="edit-start-time" data-cy="input-editar-start-time-atividade">
             </div>
 
             <div class="form-group">
               <label>Fim</label>
-              <input type="time" name="end_time" id="edit-end-time" >
+              <input type="time" name="end_time" id="edit-end-time" data-cy="input-editar-end-time-atividade">
             </div>
           </div>
 
@@ -977,7 +978,7 @@
               Cancelar
             </button>
 
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn-primary" data-cy="btn-salvar-edicao-atividade">
               Salvar
             </button>
           </div>
@@ -1210,7 +1211,7 @@
             Cancelar
           </button>
 
-          <button type="submit" class="btn-primary">
+          <button type="submit" class="btn-primary" data-cy="btn-salvar-edicao-agenda">
             Salvar
           </button>
         </div>
@@ -1932,7 +1933,7 @@
 
       <h3 class="modal-title">Filtrar atividades</h3>
 
-      <form method="GET" class="filter-form">
+      <form method="GET" class="filter-form" data-cy="form-filtros">
         <input type="hidden" name="mes" value="{{ month }}">
         <input type="hidden" name="ano" value="{{ year }}">
 
@@ -1940,12 +1941,12 @@
           <p class="filter-label">Tipo</p>
           <div class="filter-options-group">
             <label class="filter-option">
-              <input type="checkbox" name="kind" value="event" {% if "event" in filter_kinds %}checked{% endif %}>
+              <input type="checkbox" name="kind" value="event" data-cy="filtro-evento" {% if "event" in filter_kinds %}checked{% endif %}>
               <span>Eventos</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="kind" value="task" {% if "task" in filter_kinds %}checked{% endif %}>
+              <input type="checkbox" name="kind" value="task" data-cy="filtro-tarefa" {% if "task" in filter_kinds %}checked{% endif %}>
               <span>Tarefas</span>
             </label>
           </div>
@@ -1955,44 +1956,44 @@
           <p class="filter-label">Categorias</p>
           <div class="filter-options-group">
             <label class="filter-option">
-              <input type="checkbox" name="category" value="class" {% if "class" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="class" data-cy="filtro-aula" {% if "class" in filter_categories %}checked{% endif %}>
               <span>Aula</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="category" value="exam" {% if "exam" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="exam" data-cy="filtro-exam" {% if "exam" in filter_categories %}checked{% endif %}>
               <span>Prova</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="category" value="assignment" {% if "assignment" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="assignment" data-cy="filtro-trabalho" {% if "assignment" in filter_categories %}checked{% endif %}>
               <span>Trabalho</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="category" value="study" {% if "study" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="study" data-cy="filtro-estudo" {% if "study" in filter_categories %}checked{% endif %}>
               <span>Estudo</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="category" value="meeting" {% if "meeting" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="meeting" data-cy="filtro-reuniao" {% if "meeting" in filter_categories %}checked{% endif %}>
               <span>Reunião</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="category" value="presentation" {% if "presentation" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="presentation" data-cy="filtro-apresentacao" {% if "presentation" in filter_categories %}checked{% endif %}>
               <span>Apresentação</span>
             </label>
 
             <label class="filter-option">
-              <input type="checkbox" name="category" value="personal" {% if "personal" in filter_categories %}checked{% endif %}>
+              <input type="checkbox" name="category" value="personal" data-cy="filtro-pessoal" {% if "personal" in filter_categories %}checked{% endif %}>
               <span>Pessoal</span>
             </label>
           </div>
         </div>
 
         <div class="modal-actions">
-          <button type="submit" class="btn-primary">Aplicar</button>
+          <button type="submit" class="btn-primary" data-cy="btn-aplicar-filtros">Aplicar</button>
         </div>
       </form>
     </div>
