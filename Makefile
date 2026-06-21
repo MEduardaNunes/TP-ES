@@ -41,8 +41,8 @@ test-venv: venv-requirements
 	$(MANAGE_VENV) test $(TEST_APP)
 
 coverage:
-	$(PYTHON) -m coverage run --source='.' tp_es/manage.py test accounts schedules
-	$(PYTHON) -m coverage report
+	PYTHONPATH=. coverage run --source='.' tp_es/manage.py test accounts schedules
+	coverage report
 
 coverage-venv: venv-requirements
 	$(PYTHON_VENV) -m coverage run --source='.' tp_es/manage.py test accounts schedules
