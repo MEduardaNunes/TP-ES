@@ -1,6 +1,7 @@
 from freezegun import freeze_time
 from django.urls import reverse
 from datetime import date
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from schedules.models import Participant, Schedule
 
@@ -268,3 +269,69 @@ class ScheduleTests(BaseScheduleTestCase):
         response = self.client.post(reverse("schedules:logout"))
         self.assertRedirects(response, reverse("accounts:login_page"))
         self.assertNotIn("_auth_user_id", self.client.session)
+        
+    def test_schedule_invalid_color_hex_raises_validation_error(self):
+        from django.core.exceptions import ValidationError
+        invalid_schedule = Schedule(name="Agenda Errada", color="#INVALID")
+        
+        with self.assertRaises(ValidationError):
+            invalid_schedule.full_clean()
+
+    def test_schedule_default_activity_type_colors_are_copied(self):
+        from schedules.models import DEFAULT_ACTIVITY_TYPE_COLORS
+        new_schedule = Schedule.objects.create(name="Agenda Cores")
+        
+        self.assertEqual(new_schedule.activity_type_colors, DEFAULT_ACTIVITY_TYPE_COLORS)
+
+    def test_schedule_string_representation(self):
+        self.assertEqual(str(self.schedule), "Agenda de Teste")
+
+    def test_participant_unique_together_constraint(self):
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            Participant.objects.create(
+                schedule=self.schedule,
+                user=self.admin_user,
+                role=Participant.Role.MEMBER
+            )
+
+    def test_participant_is_admin_property_true_for_admin_role(self):
+        participant = Participant.objects.get(schedule=self.schedule, user=self.admin_user)
+        self.assertTrue(participant.is_admin)
+
+    def test_participant_is_admin_property_false_for_member_role(self):
+        participant = Participant.objects.get(schedule=self.schedule, user=self.member_user)
+        self.assertFalse(participant.is_admin)
+
+    def test_participant_string_representation(self):
+        participant = Participant.objects.get(schedule=self.schedule, user=self.member_user)
+        expected_str = f"{self.member_user} — {self.schedule} ({participant.get_role_display()})"
+        
+        self.assertEqual(str(participant), expected_str)
+
+    def test_edit_schedule_handles_icon_image_upload(self):
+        self._login_admin()
+        dummy_image = SimpleUploadedFile(
+            name='test_icon.jpg', 
+            content=b'dummy_image_data', 
+            content_type='image/jpeg'
+        )
+        
+        self.client.post(
+            reverse("schedules:edit_schedule", args=[self.schedule.id]),
+            {"name": "Agenda com Icone", "icon_image": dummy_image},
+        )
+        self.schedule.refresh_from_db()
+        self.assertTrue(bool(self.schedule.icon_image))
+
+    def test_edit_schedule_handles_clear_icon_image(self):
+        self._login_admin()
+        self.schedule.icon_image = 'schedule_icons/test.jpg'
+        self.schedule.save()
+        
+        self.client.post(
+            reverse("schedules:edit_schedule", args=[self.schedule.id]),
+            {"name": "Agenda Limpa", "clear_icon_image": "1"},
+        )
+        self.schedule.refresh_from_db()
+        self.assertFalse(bool(self.schedule.icon_image))
