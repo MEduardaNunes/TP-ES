@@ -166,3 +166,23 @@ sequenceDiagram
     
     UI-->>-U: atualiza interface
 ```
+
+## Testes
+### Como executar os testes
+Para executar todos os testes do projeto:
+```bash
+make test-all
+```
+Ou diretamente com Django:
+```bash
+python tp_es/manage.py test accounts schedules
+```
+Para executar testes de um módulo específico:
+```bash
+make test TEST_APP=accounts
+make test TEST_APP=schedules
+```
+### Cobertura de testes
+```bash
+make coverage
+```
