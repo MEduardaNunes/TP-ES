@@ -5,10 +5,13 @@ from django.urls import reverse
 from schedules import views
 from schedules.models import Activity, ActivityCheck
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from .base import BaseScheduleTestCase
 
 @freeze_time("2026-06-21")
 class ActivityTests(BaseScheduleTestCase):
+
     def test_create_activity_allows_admin_user(self):
         self._login_admin()
 
@@ -577,3 +580,27 @@ class ActivityTests(BaseScheduleTestCase):
         self.assertFalse(
             ActivityCheck.objects.filter(activity=future_event, user=self.admin_user).exists()
         )
+
+    def test_activity_check_unique_together_constraint(self):
+        activity = self._create_activity(
+            schedule=self.schedule,
+            title="Tarefa Duplicada",
+            kind="task",
+        )
+        ActivityCheck.objects.create(activity=activity, user=self.member_user)
+
+        # Tentar criar um segundo check para o mesmo usuário 
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            ActivityCheck.objects.create(activity=activity, user=self.member_user)
+    
+    def test_activity_check_string_representation(self):
+        activity = self._create_activity(
+            schedule=self.schedule,
+            title="Tarefa String",
+            kind="task",
+        )
+        check = ActivityCheck.objects.create(activity=activity, user=self.member_user)
+        expected_str = f"{self.member_user} ✔ {activity}"
+        
+        self.assertEqual(str(check), expected_str)  
