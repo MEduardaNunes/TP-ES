@@ -239,3 +239,183 @@ class AccountsViewsTests(TestCase):
         response = self.client.post(reverse("accounts:delete_user"))
 
         self.assertEqual(response.status_code, 302)
+
+    def test_theme_preference_color_validation(self):
+        from django.core.exceptions import ValidationError
+        pref = UserThemePreference(user=self.user, base_clr="invalid")
+        with self.assertRaises(ValidationError):
+            pref.full_clean()
+
+        # Valid color should not raise
+        pref.base_clr = "#FF0000"
+        pref.full_clean()
+
+    def test_settings_page_requires_login(self):
+        response = self.client.get(reverse("accounts:settings_page"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_settings_page_renders_for_authenticated_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("accounts:settings_page"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/settings.html")
+        self.assertIn("preference", response.context)
+
+    def test_update_preferences_requires_post(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("schedules:preferences:update_preferences"))
+        self.assertRedirects(response, reverse("accounts:settings_page"))
+
+    def test_update_preferences_requires_login(self):
+        response = self.client.post(reverse("schedules:preferences:update_preferences"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_update_preferences_success(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("schedules:preferences:update_preferences"),
+            {
+                "base_clr": "#111111",
+                "line_clr": "#222222",
+                "hover_clr": "#333333",
+                "text_clr": "#444444",
+                "accent_clr": "#555555",
+                "secondary_text_clr": "#666666",
+                "container_background_base": "#777777",
+                "secondary_base_clr": "#888888",
+                "sidebar_gradient_start": "#999999",
+                "sidebar_gradient_end": "#aaaaaa",
+                "profile_icon_emoji": "😎",
+                "agenda_icon_emoji": "📅",
+                "default_activity_icon_emoji": "📝",
+            },
+        )
+        self.assertRedirects(response, reverse("accounts:settings_page"))
+        
+        pref = UserThemePreference.objects.get(user=self.user)
+        self.assertEqual(pref.base_clr, "#111111")
+        self.assertEqual(pref.line_clr, "#222222")
+        self.assertEqual(pref.hover_clr, "#333333")
+        self.assertEqual(pref.text_clr, "#444444")
+        self.assertEqual(pref.accent_clr, "#555555")
+        self.assertEqual(pref.secondary_text_clr, "#666666")
+        self.assertEqual(pref.container_background_base, "#777777")
+        self.assertEqual(pref.secondary_base_clr, "#888888")
+        self.assertEqual(pref.sidebar_gradient_start, "#999999")
+        self.assertEqual(pref.sidebar_gradient_end, "#aaaaaa")
+        self.assertEqual(pref.profile_icon_emoji, "😎")
+        self.assertEqual(pref.agenda_icon_emoji, "📅")
+        self.assertEqual(pref.default_activity_icon_emoji, "📝")
+
+    def test_update_preferences_uploads_and_clears_images(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        self.client.force_login(self.user)
+
+        gif_data = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xff\xff\xff\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00'
+            b'\x01\x00\x01\x00\x00\x02\x02\x4c\x01\x00\x3b'
+        )
+        profile_file = SimpleUploadedFile("profile.gif", gif_data, content_type="image/gif")
+        agenda_file = SimpleUploadedFile("agenda.gif", gif_data, content_type="image/gif")
+        activity_file = SimpleUploadedFile("activity.gif", gif_data, content_type="image/gif")
+
+        # Test upload
+        response = self.client.post(
+            reverse("schedules:preferences:update_preferences"),
+            {
+                "profile_icon_image": profile_file,
+                "agenda_icon_image": agenda_file,
+                "default_activity_icon_image": activity_file,
+            },
+        )
+        self.assertRedirects(response, reverse("accounts:settings_page"))
+        
+        pref = UserThemePreference.objects.get(user=self.user)
+        self.assertTrue(pref.profile_icon_image.name.startswith("ui_icons/profile/profile"))
+        self.assertTrue(pref.agenda_icon_image.name.startswith("ui_icons/agenda/agenda"))
+        self.assertTrue(pref.default_activity_icon_image.name.startswith("ui_icons/activity_default/activity"))
+
+        # Test clear
+        response2 = self.client.post(
+            reverse("schedules:preferences:update_preferences"),
+            {
+                "clear_profile_icon_image": "1",
+                "clear_agenda_icon_image": "1",
+                "clear_default_activity_icon_image": "1",
+            },
+        )
+        self.assertRedirects(response2, reverse("accounts:settings_page"))
+        
+        pref.refresh_from_db()
+        self.assertFalse(pref.profile_icon_image)
+        self.assertFalse(pref.agenda_icon_image)
+        self.assertFalse(pref.default_activity_icon_image)
+
+    def test_reset_preferences_requires_post(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("schedules:preferences:reset_preferences"))
+        self.assertRedirects(response, reverse("accounts:settings_page"))
+
+    def test_reset_preferences_requires_login(self):
+        response = self.client.post(reverse("schedules:preferences:reset_preferences"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_reset_preferences_success(self):
+        self.client.force_login(self.user)
+        # First ensure it exists
+        UserThemePreference.objects.get_or_create(user=self.user)
+        self.assertTrue(UserThemePreference.objects.filter(user=self.user).exists())
+
+        response = self.client.post(reverse("schedules:preferences:reset_preferences"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("accounts:settings_page")))
+        self.assertFalse(UserThemePreference.objects.filter(user=self.user).exists())
+
+    def test_reset_preferences_success_if_not_exists(self):
+        self.client.force_login(self.user)
+        # Delete it first
+        UserThemePreference.objects.filter(user=self.user).delete()
+        self.assertFalse(UserThemePreference.objects.filter(user=self.user).exists())
+
+        response = self.client.post(reverse("schedules:preferences:reset_preferences"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("accounts:settings_page")))
+        self.assertFalse(UserThemePreference.objects.filter(user=self.user).exists())
+
+    def test_edit_user_updates_password_successfully(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("accounts:edit_user"),
+            {
+                "username": "tester",
+                "password": "novasenha123",
+                "password_confirm": "novasenha123",
+            },
+        )
+        self.assertRedirects(response, reverse("accounts:user_space"))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("novasenha123"))
+
+    def test_login_user_get_redirects_to_login_page(self):
+        response = self.client.get(reverse("accounts:login"))
+        self.assertRedirects(response, reverse("accounts:login_page"))
+
+    def test_logout_user_get_redirects_to_login_page(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("accounts:logout"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("accounts:login_page")))
+
+    def test_edit_user_get_redirects_to_user_space(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("accounts:edit_user"))
+        self.assertRedirects(response, reverse("accounts:user_space"))
+
+    def test_delete_user_get_redirects_to_user_space(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("accounts:delete_user"))
+        self.assertRedirects(response, reverse("accounts:user_space"))
+
+
+

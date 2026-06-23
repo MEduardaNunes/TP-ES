@@ -94,4 +94,25 @@ class UtilsTests(BaseScheduleTestCase):
             activities[0].resolved_color,
             self.schedule.activity_type_colors["class"],
         )
+
+    def test_normalize_priority_returns_valid_priority(self):
+        self.assertEqual(
+            views.normalize_priority("urgent_important"),
+            Activity.Priority.URGENT_IMPORTANT,
+        )
+
+    def test_resolve_main_tab_with_referer(self):
+        from django.test import RequestFactory
+        factory = RequestFactory()
+        
+        # Test request with referer containing a valid tab
+        request = factory.get("/some-path/")
+        request.META["HTTP_REFERER"] = "http://testserver/calendar/?tab=matriz"
+        self.assertEqual(views.resolve_main_tab(request), "matriz")
+
+        # Test request with referer containing an invalid tab
+        request = factory.get("/some-path/")
+        request.META["HTTP_REFERER"] = "http://testserver/calendar/?tab=invalid_tab"
+        self.assertEqual(views.resolve_main_tab(request), "calendario")
+
         
