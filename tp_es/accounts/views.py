@@ -193,6 +193,7 @@ def reset_preferences(request):
             
     return redirect("accounts:settings_page")
 
+@login_required
 def settings_page(request):
     
     preference, _ = UserThemePreference.objects.get_or_create(user=request.user)
