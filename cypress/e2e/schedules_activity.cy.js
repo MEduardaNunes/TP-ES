@@ -38,7 +38,7 @@ describe('Testes E2E - Domínio de Atividades', () => {
     cy.get('#eventos').contains(eventoNome).should('be.visible');
   });
 
-  it('CT02: Não deve criar evento sem data (Validação Django)', () => {
+  it('CT02: Não deve criar evento sem data', () => {
     const agendaNome = `AgendaSemData-${Date.now()}`;
     const eventoNome = `EventoSemData-${Date.now()}`;
     cy.criarAgendaUI(agendaNome);

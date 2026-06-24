@@ -18,14 +18,24 @@ Cypress.Commands.add('criarAgendaUI', (nome) => {
 })
 
 Cypress.Commands.add('criarAtividadeUI', (agendaNome, titulo, tipo, categoria) => {
-  cy.visit('/schedules/main_calendar_view/?tab=eventos')
+  cy.visit('/schedules/main_calendar_view/')
+  
+  if (tipo === 'event') {
+    cy.switchTab('tab-eventos')
+  } else {
+    cy.switchTab('tab-tarefas')
+  }
+
   cy.get('[data-cy="btn-novo"]').click()
+
   cy.get('[data-cy="form-nova-atividade"]').should('be.visible').within(() => {
     cy.get('[data-cy="select-agenda"]').select(agendaNome)
     cy.get('[data-cy="input-titulo-atividade"]').type(titulo)
     cy.get('[data-cy="select-tipo"]').select(tipo)
     cy.get('[data-cy="select-categoria"]').select(categoria)
-    if (tipo === 'event') cy.get('[data-cy="input-date"]').type('2026-06-30')
+    
+    cy.get('[data-cy="input-date"]').type('2026-06-30')
+    
     cy.get('[data-cy="btn-salvar-atividade"]').click()
   })
 })
