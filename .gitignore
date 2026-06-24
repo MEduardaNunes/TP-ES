@@ -12,6 +12,4 @@ source
 cypress.config.js
 package-lock.json
 package.json
-cypress
-node_modules
 node_modules/
