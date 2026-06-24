@@ -96,4 +96,57 @@ it('CT01: edita nome de agenda e verifica alteração', () => {
     cy.get('[data-cy="container-eventos"]')
       .contains(eventTitle).should('not.exist');
   });
+
+  it('CT03: exclui agenda criada e verifica exclusão correta', () => {
+    const localTimestamp = Date.now(); 
+    const agendaParaEvento = `Agenda CT03 ${localTimestamp}`;
+    const eventTitle = `Evento Cypress CT03 ${localTimestamp}`;
+    const newEventTitle = `Evento CT03 Editado ${localTimestamp}`;
+
+    // Garante que a agenda existe para o evento ser criado e editado
+    cy.criarAgendaUI(agendaParaEvento);
+
+    cy.visit('/schedules/main_calendar_view/');
+    cy.switchTab('tab-eventos');
+
+    cy.get('[data-cy="btn-novo"]').click();
+
+    cy.get('[data-cy="select-agenda"]')
+      .should('not.have.value', '') 
+      .select(agendaParaEvento);
+
+    cy.get('[data-cy="form-nova-atividade"]').within(() => {
+      cy.get('[data-cy="input-titulo-atividade"]').type(eventTitle);
+      cy.get('[data-cy="select-tipo"]').select('event');
+      cy.get('[data-cy="select-categoria"]').select('meeting');
+      cy.get('[data-cy="input-date"]').type('2026-06-30');
+      cy.get('[data-cy="input-start-time"]').type('10:00');
+      cy.get('[data-cy="input-end-time"]').type('11:00');
+      cy.get('[data-cy="btn-salvar-atividade"]').click();
+    });
+
+    cy.contains('Atividade criada com sucesso.').should('be.visible');
+    cy.reload();
+    cy.switchTab('tab-eventos');
+
+    cy.get('[data-cy="container-eventos"]').contains(eventTitle).should('be.visible');
+
+    // Excluir a agenda
+    cy.switchTab('tab-agendas');
+    cy.contains('.list-card--schedule', agendaParaEvento)
+      .find('[data-cy="delete-btn"]')
+      .click();
+
+    cy.window().then((win) => {
+      cy.stub(win, 'confirm').returns(true).as('confirmStub');
+    });
+    
+    // verificar exclusão correta da agenda e eventos associados
+    cy.switchTab('tab-agendas');
+    cy.contains(agendaParaEvento).should('not.exist');
+
+    cy.switchTab('tab-eventos');
+    cy.get('[data-cy="container-eventos"]')
+      .contains(eventTitle).should('not.exist');
+  });
 });

@@ -735,7 +735,7 @@
                     >
                       Editar
                     </button>
-                    <form method="post" action="{% url 'schedules:delete_schedule' participation.schedule.id %}" class="inline-form">
+                    <form method="post" action="{% url 'schedules:delete_schedule' participation.schedule.id %}" class="inline-form" data-cy="delete-btn">
                       {% csrf_token %}
                       <button type="submit" class="text-link text-link--danger" onclick="return confirm('Tem certeza que deseja deletar esta agenda?')">Deletar</button>
                     </form>
