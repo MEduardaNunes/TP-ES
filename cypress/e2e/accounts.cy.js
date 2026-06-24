@@ -2,7 +2,7 @@ describe('Fluxo de conta', () => {
   const username = `cypress_${Date.now()}`;
   const password = 'SenhaCypress123';
 
-  it ('cria conta', () => {
+  it ('CT01: cria conta', () => {
     cy.visit('/sign-up/');
     cy.contains('Cadastrar novo usuário').should('be.visible');
 
@@ -16,7 +16,7 @@ describe('Fluxo de conta', () => {
     cy.contains('Usuário criado com sucesso').should('be.visible');
   });
 
-  it('faz login', () => {
+  it('CT02: faz login', () => {
     cy.visit('')
     cy.get('input[name="username"]').type(username)
     cy.get('input[name="password"]').type(password)
@@ -24,7 +24,7 @@ describe('Fluxo de conta', () => {
     cy.location('pathname', { timeout: 10000 }).should('include', '/schedules/main_calendar_view');
   });
 
-  it('deve confirmar a exclusão da conta', () => {
+  it('CT03: deve confirmar a exclusão da conta', () => {
     cy.login(username, password)
     cy.visit('/edit-user/');
 

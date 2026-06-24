@@ -17,7 +17,7 @@ describe('Fluxo de schedules - Edição', () => {
     cy.login(username, password); // login chamado SÓ aqui, não dentro do it()
   });
 
-  it('cria agenda, verifica existência, edita nome e verifica alteração', () => {
+  it('CT01: edita nome de agenda e verifica alteração', () => {
     cy.criarAgendaUI(scheduleName);
 
     cy.visit('/schedules/main_calendar_view/?tab=agendas');
@@ -40,7 +40,7 @@ describe('Fluxo de schedules - Edição', () => {
     cy.contains(scheduleName).should('not.exist'); // garante que o nome antigo não existe mais
   });
 
-  it('adiciona evento na agenda criada e edita seu título', () => {
+  it('CT02: adiciona evento na agenda criada e edita seu título', () => {
     const eventTitle = `Evento Cypress ${timestamp}`;
     const newEventTitle = `Edit ${eventTitle}`;
 
