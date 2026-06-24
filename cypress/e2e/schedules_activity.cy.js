@@ -1,4 +1,4 @@
-describe('Testes E2E - Domínio de Atividades', () => {
+describe('Fluxo de Atividades', () => {
   const username = 'admin_atividades';
   const password = 'admin123_password';
 
@@ -66,7 +66,6 @@ describe('Testes E2E - Domínio de Atividades', () => {
 
     cy.visit('/schedules/main_calendar_view/');
     
-    // Usa switchTab para garantir que a aba de tarefas está carregada
     cy.switchTab('tab-tarefas');
 
     cy.get('[data-cy="subtab-tarefas-pendentes"]').click();
@@ -74,14 +73,12 @@ describe('Testes E2E - Domínio de Atividades', () => {
     cy.get('[data-cy="lista-tarefas-pendentes"]')
       .contains('[data-cy="item-tarefa"]', tarefaNome)
       .within(() => {
-        // Use the checkbox data-cy to avoid coupling to visual classes
         cy.get('[data-cy="checkbox-tarefa"]').check({ force: true });
       });
 
     cy.contains('Atividade marcada como realizada/estudada.').should('be.visible');
 
     cy.get('[data-cy="subtab-tarefas-concluidas"]').click();
-    // Use data-cy selector for the concluded tasks container
     cy.get('[data-cy="tarefas-concluidas"]').should('be.visible').contains(tarefaNome).should('be.visible');
   });
 });
