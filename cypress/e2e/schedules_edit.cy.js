@@ -90,7 +90,7 @@ it('CT01: edita nome de agenda e verifica alteração', () => {
     cy.reload();
     cy.switchTab('tab-eventos');
 
-    cy.contains(newEventTitle).should('be.visible');
+    cy.get('[data-cy="container-eventos"]').contains(newEventTitle).should('be.visible');
     cy.contains(eventTitle).should('not.exist');
   });
 });

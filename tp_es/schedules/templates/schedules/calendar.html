@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 {% load calendar_tags %}
 
 <!DOCTYPE html>
@@ -259,6 +259,7 @@
                     <button
                       type="button"
                       class="text-link"
+                      data-cy="btn-editar-atividade"
                       onclick="handleEditActivityClick(event, {
                         id: {{ event.id }},
                         schedule_id: {{ event.schedule.id }},
@@ -338,7 +339,7 @@
                         Detalhes
                        </button>
 				             {% if event.schedule.id in admin_schedule_ids %}
-				              <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+				              <button type="button" class="text-link" data-cy="btn-editar-atividade" onclick="handleEditActivityClick(event, {
 				               id: {{ event.id }},
 				               schedule_id: {{ event.schedule.id }},
 				               title: '{{ event.title|escapejs }}',
@@ -442,7 +443,7 @@
                      </button>
 
 				         {% if task.schedule.id in admin_schedule_ids %}
-				           <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+				           <button type="button" class="text-link" data-cy="btn-editar-atividade" onclick="handleEditActivityClick(event, {
 				             id: {{ task.id }},
 				             schedule_id: {{ task.schedule.id }},
 				             title: '{{ task.title|escapejs }}',
@@ -528,7 +529,7 @@
                     </button>
 
 				          {% if task.schedule.id in admin_schedule_ids %}
-				            <button type="button" class="text-link" onclick="handleEditActivityClick(event, {
+				            <button type="button" class="text-link" data-cy="btn-editar-atividade" onclick="handleEditActivityClick(event, {
 				              id: {{ task.id }},
 				              schedule_id: {{ task.schedule.id }},
 				              title: '{{ task.title|escapejs }}',
@@ -573,7 +574,7 @@
 
           <div class="priority-matrix">
             {% for section in priority_sections %}
-              <section class="priority-quadrant">
+              <section class="priority-quadrant" data-cy="quadrante-matriz-{{ section.value }}">
                 <div class="priority-quadrant__header">
                   <div>
                     <span class="priority-quadrant__label">{{ section.label }}</span>
@@ -585,7 +586,7 @@
 
                 <div class="priority-list">
                   {% for task in section.tasks %}
-                    <article class="priority-card" style="--activity-color: {{ task.resolved_color }};">
+                    <article class="priority-card" data-cy="card-prioridade" style="--activity-color: {{ task.resolved_color }};">
                       <div class="list-card__top">
                         <span class="list-badge list-badge--activity">{{ task.get_kind_display }}</span>
                         <span class="list-badge list-badge--task list-badge--activity">{{ task.get_activity_type_display }}</span>
@@ -1871,7 +1872,7 @@
 
     document.getElementById('new-btn').addEventListener('click', openNewModal);
 
-    document.getElementById('kind-select').addEventListener('change', function() {
+    document.getElementById('kind-select')?.addEventListener('change', function() {
       const timeFields = document.getElementById('time-fields');
       if (this.value === 'task') {
         timeFields.style.display = 'none';
@@ -1880,7 +1881,7 @@
       }
     });
 
-    document.getElementById('edit-kind-select').addEventListener('change', function() {
+    document.getElementById('edit-kind-select')?.addEventListener('change', function() {
       const timeFields = document.getElementById('edit-time-fields');
       if (this.value === 'task') {
         timeFields.style.display = 'none';
