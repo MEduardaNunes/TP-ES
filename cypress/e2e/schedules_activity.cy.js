@@ -17,19 +17,13 @@ describe('Testes E2E - Domínio de Atividades', () => {
     const agendaNome = `AgendaEvento-${Date.now()}`;
     const eventoNome = `Evento-${Date.now()}`;
     
-    // 1. Setup
     cy.criarAgendaUI(agendaNome);
 
-    // 2. Ação: Navega explicitamente para a aba de eventos
-    cy.visit('/schedules/main_calendar_view/?tab=eventos');
-
-    // 3. Validação de Visibilidade: Garante que o container da aba está visível antes de clicar
-    // Substitua '#eventos' pelo ID ou data-cy do container da aba que contém o formulário
-    cy.get('[data-cy="tab-eventos"]').should('be.visible'); 
-
+    cy.visit('/schedules/main_calendar_view/');
+    
+    cy.switchTab('tab-eventos');
     cy.get('[data-cy="btn-novo"]').click();
 
-    // 4. Interação
     cy.get('[data-cy="form-nova-atividade"]').should('be.visible').within(() => {
       cy.get('[data-cy="select-agenda"]').select(agendaNome);
       cy.get('[data-cy="input-titulo-atividade"]').type(eventoNome);
@@ -41,7 +35,7 @@ describe('Testes E2E - Domínio de Atividades', () => {
 
     cy.contains('Atividade criada com sucesso.').should('be.visible');
     cy.reload();
-    cy.contains(eventoNome).should('be.visible');
+    cy.get('#eventos').contains(eventoNome).should('be.visible');
   });
 
   it('CT02: Não deve criar evento sem data (Validação Django)', () => {
@@ -70,7 +64,11 @@ describe('Testes E2E - Domínio de Atividades', () => {
     cy.criarAgendaUI(agendaNome);
     cy.criarAtividadeUI(agendaNome, tarefaNome, 'task', 'assignment');
 
-    cy.visit('/schedules/main_calendar_view/?tab=tarefas');
+    cy.visit('/schedules/main_calendar_view/');
+    
+    // Usa switchTab para garantir que a aba de tarefas está carregada
+    cy.switchTab('tab-tarefas');
+
     cy.get('[data-cy="subtab-tarefas-pendentes"]').click();
 
     cy.get('[data-cy="lista-tarefas-pendentes"]')

@@ -29,3 +29,27 @@ Cypress.Commands.add('criarAtividadeUI', (agendaNome, titulo, tipo, categoria) =
     cy.get('[data-cy="btn-salvar-atividade"]').click()
   })
 })
+
+/**
+ * Clica em uma aba e aguarda que ela fique visível.
+ * Resolve o problema de timing quando as abas são carregadas dinamicamente.
+ * 
+ * @param {string} dataCy - O valor do data-cy do botão da aba (ex: 'tab-eventos')
+ * @param {number} timeout - Timeout em ms (default: 5000)
+ * 
+ * @example
+ * cy.switchTab('tab-eventos')
+ * cy.switchTab('tab-tarefas', 6000)
+ */
+Cypress.Commands.add('switchTab', (dataCy, timeout = 6000) => {
+  // Clica no botão da aba
+  cy.get(`[data-cy="${dataCy}"]`).click()
+
+  // Extrai o ID da aba do atributo content-id
+  cy.get(`[data-cy="${dataCy}"]`)
+    .invoke('attr', 'content-id')
+    .then((tabId) => {
+      // Aguarda que a aba tenha a classe 'show' (indicando que está visível)
+      cy.get(`#${tabId}.show`, { timeout }).should('exist')
+    })
+})
