@@ -476,10 +476,10 @@
 				  </div>
 				</div>
 
-          <div id="tarefas-concluidas" class="subtab-content hidden">
-				    <div class="tasks-list">
-				      {% for task in completed_tasks %}
-                <article class="list-card list-card--activity" style="--activity-color: {{ task.resolved_color }};">
+              <div id="tarefas-concluidas" class="subtab-content hidden" data-cy="tarefas-concluidas">
+                <div class="tasks-list" data-cy="lista-tarefas-concluidas">
+                  {% for task in completed_tasks %}
+                <article class="list-card list-card--activity" data-cy="item-tarefa" style="--activity-color: {{ task.resolved_color }};">
 				          <div class="list-card__top">
                     <span class="list-badge list-badge--task list-badge--activity">Tarefa</span>
                     <span class="priority-card__badge">{{ task.get_priority_display }}</span>
@@ -487,13 +487,13 @@
 				          </div>
 
 				          <div class="list-card__title-with-check">
-				            <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
-				              {% csrf_token %}
-				              <label class="custom-checkbox">
-				                <input type="checkbox" class="checkbox-input" onchange="this.form.submit()" checked />
-				                <span class="checkbox-box"></span>
-				              </label>
-				            </form>
+                            <form method="POST" action="{% url 'schedules:toggle_check' task.schedule.id task.id %}" class="inline-form checkbox-form">
+                              {% csrf_token %}
+                              <label class="custom-checkbox">
+                                <input type="checkbox" class="checkbox-input" data-cy="checkbox-tarefa" onchange="this.form.submit()" checked />
+                                <span class="checkbox-box"></span>
+                              </label>
+                            </form>
   			            <h3 class="completed">
                       {% if task.icon_image %}
                         <img src="{{ task.icon_image.url }}" class="activity-icon-image" alt="" onerror="this.style.display='none'" />
@@ -1073,17 +1073,17 @@
 
       <h3 class="modal-title">Nova agenda</h3>
 
-      <form method="POST" id="agenda-form" action="{% url 'schedules:create_schedule' %}" enctype="multipart/form-data">
+      <form method="POST" id="agenda-form" data-cy="form-nova-agenda" action="{% url 'schedules:create_schedule' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
           <label>Nome*</label>
-          <input type="text" name="name" placeholder="Nome da agenda" required>
+          <input type="text" name="name" placeholder="Nome da agenda" required data-cy="input-nome-agenda">
         </div>
 
         <div class="form-group">
           <label>Descri&ccedil;&atilde;o</label>
-          <textarea name="description" placeholder="Descri&ccedil;&atilde;o opcional"></textarea>
+          <textarea name="description" placeholder="Descri&ccedil;&atilde;o opcional" data-cy="input-descricao-agenda"></textarea>
         </div>
 
         <div class="form-group">
@@ -1130,7 +1130,7 @@
             Cancelar
           </button>
 
-          <button type="submit" class="btn-primary">
+          <button type="submit" class="btn-primary" data-cy="btn-salvar-agenda">
             Criar
           </button>
         </div>
