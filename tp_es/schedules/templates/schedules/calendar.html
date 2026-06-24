@@ -730,6 +730,7 @@
                       data-activity-type-color-personal="{{ participation.schedule.activity_type_colors|get_item:'personal' }}"
                       data-schedule-participants-id="schedule-participants-{{ participation.schedule.id }}"
                       onclick="handleEditScheduleClick(event, this)"
+                      data-cy="edit-btn"
                     >
                       Editar
                     </button>
@@ -1155,7 +1156,7 @@
 
         <div class="form-group">
           <label>Nome*</label>
-          <input type="text" name="name" id="edit-agenda-name" placeholder="Nome da agenda" required>
+          <input type="text" name="name" id="edit-agenda-name" placeholder="Nome da agenda" required data-cy="name-schedule-input">
         </div>
 
         <div class="form-group">

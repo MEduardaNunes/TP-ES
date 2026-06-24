@@ -2,7 +2,7 @@ describe('Fluxo de conta', () => {
   const username = `cypress_${Date.now()}`;
   const password = 'SenhaCypress123';
 
-  it('cria conta, faz login e cancela a exclusão', () => {
+  it ('cria conta', () => {
     cy.visit('/sign-up/');
     cy.contains('Cadastrar novo usuário').should('be.visible');
 
@@ -14,32 +14,31 @@ describe('Fluxo de conta', () => {
 
     cy.location('pathname', { timeout: 10000 }).should('eq', '/');
     cy.contains('Usuário criado com sucesso').should('be.visible');
+  });
 
-    cy.get('input[name="username"]').clear().type(username);
-    cy.get('input[name="password"]').type(password);
-    cy.get('form[action*="login"] button[type="submit"]').click();
-
+  it('faz login', () => {
+    cy.visit('')
+    cy.get('input[name="username"]').type(username)
+    cy.get('input[name="password"]').type(password)
+    cy.get('button[type="submit"]').click()
     cy.location('pathname', { timeout: 10000 }).should('include', '/schedules/main_calendar_view');
+  });
 
-    cy.visit('/user/');
-    cy.contains('Espaço do Usuário').should('be.visible');
-    cy.contains(username).should('be.visible');
+  it('deve confirmar a exclusão da conta', () => {
+    cy.login(username, password)
+    cy.visit('/edit-user/');
 
-    let confirmMessage = '';
-    cy.on('window:confirm', (message) => {
-      confirmMessage = message;
-      expect(message).to.contain('Tem certeza que deseja excluir sua conta?');
-      return false;
+    cy.window().then((win) => {
+      cy.stub(win, 'confirm').returns(false).as('confirmStub');
     });
 
-    cy.get('form.delete-form button[type="submit"]').click();
+    cy.get('.button-danger').click();
 
-    cy.then(() => {
-      expect(confirmMessage).to.not.be.empty;
-    });
+    cy.get('@confirmStub').should(
+      'have.been.calledWith',
+      'Tem certeza que deseja excluir sua conta? Essa ação é irreversível.'
+    );
 
-    cy.location('pathname', { timeout: 10000 }).should('eq', '/user/');
-    cy.contains('Espaço do Usuário').should('be.visible');
-    cy.contains(username).should('be.visible');
+    cy.contains('Usuário deletado com sucesso').should('not.exist');
   });
 });
