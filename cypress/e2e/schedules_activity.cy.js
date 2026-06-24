@@ -35,7 +35,7 @@ describe('Fluxo de Atividades', () => {
 
     cy.contains('Atividade criada com sucesso.').should('be.visible');
     cy.reload();
-    cy.get('#eventos').contains(eventoNome).should('be.visible');
+    cy.get('[data-cy="container-eventos"]').contains(eventoNome).should('be.visible');
   });
 
   it('CT02: Não deve criar evento sem data', () => {
@@ -73,7 +73,7 @@ describe('Fluxo de Atividades', () => {
     cy.get('[data-cy="lista-tarefas-pendentes"]')
       .contains('[data-cy="item-tarefa"]', tarefaNome)
       .within(() => {
-        cy.get('[data-cy="checkbox-tarefa"]').check({ force: true });
+        cy.get('[data-cy="checkbox-tarefa"]').parent().click();
       });
 
     cy.contains('Atividade marcada como realizada/estudada.').should('be.visible');
