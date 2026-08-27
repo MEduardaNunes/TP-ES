@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "e2e:chrome": "cypress run --browser chrome"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.1.0",
