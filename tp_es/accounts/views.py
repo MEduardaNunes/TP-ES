@@ -5,12 +5,60 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from .models import UserThemePreference
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 
 def login_page(request):
     if request.user.is_authenticated:
         return redirect("schedules:main_calendar_view")
     return render(request, "accounts/login.html")
 
+@csrf_exempt
+def api_login(request):
+    if request.method != "POST":
+        return JsonResponse(
+            {
+                "message": "Método não permitido"
+            },
+            status=405
+        )
+
+    try:
+        dados = json.loads(request.body)
+        username = dados.get("username")
+        password = dados.get("password")
+
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {
+                "message": "Dados inválidos"
+            },
+            status=400
+        )
+
+    user = authenticate(
+        request,
+        username=username,
+        password=password
+    )
+
+    if user is not None:
+        return JsonResponse(
+            {
+                "message": "Login realizado com sucesso"
+            },
+            status=200
+        )
+
+    return JsonResponse(
+        {
+            "message": "Nome de usuário ou senha incorretos"
+        },
+        status=401
+    )
+    
 @login_required
 def user_space(request):
     preference, _ = UserThemePreference.objects.get_or_create(user=request.user)

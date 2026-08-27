@@ -13,4 +13,11 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     video: true,
   },
+
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "vite",
+    },
+  },
 });
