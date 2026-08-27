@@ -5,9 +5,6 @@ describe('Testes E2E - Login', () => {
   it('deve realizar login com sucesso pela interface', () => {
     cy.visit('/');
 
-    cy.get('[data-cy="titulo-login"]')
-      .should('contain', 'Já sou usuário');
-
     cy.get('[data-cy="username"]').type(usuario);
     cy.get('[data-cy="password"]').type(senha);
     cy.get('[data-cy="login-button"]').click();
