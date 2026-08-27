@@ -21,7 +21,7 @@
 
       {% if messages %}
         {% for message in messages %}
-          <div class="toast {{ message.tags }}">
+          <div class="toast {{ message.tags }}" data-cy="mensagem">
             {{ message }}
           </div>
         {% endfor %}
@@ -29,20 +29,24 @@
 
       <main>
         <section class="panel">
-          <h2>Já sou usuário</h2> 
+          <h2 data-cy="titulo-login">Já sou usuário</h2> 
           <form method="POST" action="{% url 'accounts:login' %}">
             {% csrf_token %}
             <label for="login-name">Nome</label>
-            <input type="text" id="login-name" name="username" placeholder="Seu nome" required />
+            <input data-cy="username" type="text" id="login-name" name="username" placeholder="Seu nome" required />
+            
             <label for="login-password">Senha</label>
-            <input type="password" id="login-password" name="password" placeholder="Senha" required />
-            <button class="button" type="submit">Entrar</button>
+            <input data-cy="password" type="password" id="login-password" name="password" placeholder="Senha" required />
+            
+            <button data-cy="login-button" class="button" type="submit">Entrar</button>
           </form>
         </section>
         
         <div class="center-line">
           <a href="/sign-up/">Criar nova conta</a>
         </div>
+
+        <!--<img src="static/images/cachorro.jpg" width="200" />-->
       </main>
     </div>
   </body>
